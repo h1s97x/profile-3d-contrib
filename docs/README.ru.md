@@ -1,6 +1,16 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+
+> [!IMPORTANT]
+> **Этот репозиторий — поддерживаемый форк.**
+>
+> - Исходный проект: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
+> - Базовая версия: `v0.9.3`
+> - Мейнтейнер форка: `h1s97x`
+> - Лицензия: MIT — авторские права на оригинальную работу остаются за SATO Yoshiyuki (см. [LICENSE](../LICENSE))
+>
+> Это неофициальный форк, не связанный с оригинальным автором и не одобренный им.
 
 <!-- Порядок кодов языков (кроме английского) -->
 [English (en)](../README.md) |
@@ -62,7 +72,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -93,7 +103,7 @@ jobs:
 - `GITHUB_TOKEN` : (обязательно) токен доступа
 - `USERNAME` : (обязательно) целевое имя пользователя (или укажите аргументом).
 - `MAX_REPOS` : (опционально) максимальное количество репозиториев, по умолчанию 100 - начиная с версии 0.2.0
-- `SETTING_JSON` : (опционально) путь к файлу настроек json. См. `sample-settings/*.json` и `src/type.ts` в репозитории `yoshi389111/github-profile-3d-contrib` для подробностей. - начиная с версии 0.6.0
+- `SETTING_JSON` : (опционально) путь к файлу настроек json. См. `sample-settings/*.json` и `src/type.ts` в репозитории `YOUR_GITHUB_USER/YOUR_GITHUB_REPO` для подробностей. - начиная с версии 0.6.0
 - `GITHUB_ENDPOINT` : (опционально) конечная точка Github GraphQL. Например, если вы хотите создать календарь вкладов на основе активности вашей корпоративной GitHub Enterprise, установите эту переменную окружения. Например: `https://github.mycompany.com/api/graphql` - начиная с версии 0.8.0
 - `YEAR` : (опционально) Для календарей прошлых лет укажите год. Это предназначено для использования при запуске инструмента из командной строки. - начиная с версии 0.8.0
 
@@ -165,31 +175,31 @@ on:
 
 Пример: зеленая версия
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
 
 Пример: сезонная версия (Северное полушарие.)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
 
 Пример: сезонная версия (Южное полушарие.)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
 
 Пример: ночная версия
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
 
 Пример: ночная зеленая версия
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
 
 Пример: ночная радужная версия
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
 
 Пример: версия git block
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
 
 ### Шаг 4. Добавьте изображение в README.md
 
@@ -229,3 +239,5 @@ node . USER_NAME
 ## Лицензия
 
 &copy; 2021 SATO Yoshiyuki. Лицензия MIT.
+
+> **Для использования в CNB см. [English README](../README.md#how-to-use-cnb).**

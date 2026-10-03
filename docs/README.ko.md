@@ -1,6 +1,16 @@
 # GitHub 프로필 3D 기여도
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+
+> [!IMPORTANT]
+> **이 저장소는 관리되는 포크입니다.**
+>
+> - 원본 프로젝트: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
+> - 기준 버전: `v0.9.3`
+> - 포크 관리자: `h1s97x`
+> - 라이선스: MIT — 원작 저작권은 SATO Yoshiyuki에게 있습니다([LICENSE](../LICENSE) 참조)
+>
+> 이는 비공식 포크이며, 원저자와의 제휴 또는 승인을 받지 않았습니다.
 
 <!-- 언어 코드 순서(영어 제외) -->
 [English (en)](../README.md) |
@@ -62,7 +72,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -165,31 +175,31 @@ on:
 
 예시: green 버전
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
 
 예시: season 버전 (북반구)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
 
 예시: season 버전 (남반구)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
 
 예시: night view 버전
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
 
 예시: night green 버전
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
 
 예시: night rainbow 버전
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
 
 예시: git block 버전
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
 
 ### 4단계. README.md에 이미지 추가
 
@@ -229,3 +239,5 @@ node . USER_NAME
 ## 라이선스
 
 &copy; 2021 SATO Yoshiyuki. MIT 라이선스 하에 제공됩니다.
+
+> **CNB 사용법은 [English README](../README.md#how-to-use-cnb)를 참고하세요.**

@@ -1,6 +1,16 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+
+> [!IMPORTANT]
+> **本倉庫為維護中的衍生版本(Fork)。**
+>
+> - 上游專案:[yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
+> - 基線版本:`v0.9.3`
+> - 維護者:`h1s97x`
+> - 授權:MIT —— 原作者著作權歸 SATO Yoshiyuki 所有(見 [LICENSE](../LICENSE))
+>
+> 本專案為非官方衍生版本,與原作者無隸屬或背書關係。
 
 <!-- 語言順序（不含英文） -->
 [English (en)](../README.md) |
@@ -62,7 +72,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -165,31 +175,31 @@ on:
 
 範例：綠色版本
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
 
 範例：季節版（北半球）
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
 
 範例：季節版（南半球）
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
 
 範例：夜景版
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
 
 範例：夜綠版
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
 
 範例：夜彩虹版
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
 
 範例：Git Block 版
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
 
 ### 步驟 4. 將圖片加入 README.md
 
@@ -229,3 +239,5 @@ node . USER_NAME
 ## 授權
 
 &copy; 2021 SATO Yoshiyuki. 授權採用 MIT License。
+
+> **CNB 使用方法請參閱[English README](../README.md#how-to-use-cnb)。**

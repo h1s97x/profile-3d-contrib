@@ -1,6 +1,16 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+
+> [!IMPORTANT]
+> **このリポジトリは保守されているフォークです。**
+>
+> - 元プロジェクト: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
+> - ベースバージョン: `v0.9.3`
+> - フォーク保守者: `h1s97x`
+> - ライセンス: MIT — 原作者の著作権は SATO Yoshiyuki に帰属します([LICENSE](../LICENSE) を参照)
+>
+> 本フォークは非公式であり、原作者との提携や承認はされていません。
 
 <!-- 言語コードの順序（英語を除く） -->
 [English (en)](../README.md) |
@@ -58,7 +68,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -90,7 +100,7 @@ jobs:
 - `GITHUB_TOKEN` : (必須) アクセストークン
 - `USERNAME` : (必須) 対象のユーザー名. （あるいは引数で指定する）
 - `MAX_REPOS` : (任意) 最大のリポジトリ数。デフォルトは100 - バージョン 0.2.0 で追加
-- `SETTING_JSON` : (任意) 設定JSONファイルパス。詳細は `yoshi389111/github-profile-3d-contrib` リポジトリの `sample-settings/*.json` や `src/type.ts` を参照してください - バージョン 0.6.0 で追加
+- `SETTING_JSON` : (任意) 設定JSONファイルパス。詳細は `YOUR_GITHUB_USER/YOUR_GITHUB_REPO` リポジトリの `sample-settings/*.json` や `src/type.ts` を参照してください - バージョン 0.6.0 で追加
 - `GITHUB_ENDPOINT` : (任意) Github GraphQL エンドポイント。たとえば、GitHub.comではなく、会社のGitHub Enterpriseのアクティビティに基づいてコントリビュートカレンダーを作成したい場合は、この環境変数を設定します。例： `https://github.mycompany.com/api/graphql` - バージョン 0.8.0 で追加
 - `YEAR` : (任意) 過去のカレンダーを出力する場合、年を指定。特にコマンドラインからツールを実行するときを想定しています。 - バージョン 0.8.0 で追加
 
@@ -162,31 +172,31 @@ on:
 
 例：green バージョン
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
 
 例：season バージョン（北半球）
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
 
 例：season バージョン（南半球）
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
 
 例：night view バージョン
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
 
 例：night green バージョン
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
 
 例：night rainbow バージョン
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
 
 例：git block バージョン
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
 
 ### 手順 4. README.md を追加
 
@@ -226,3 +236,5 @@ node . USER_NAME
 ## License
 
 &copy; 2021 SATO Yoshiyuki. Licensed under the MIT License.
+
+> **CNB での使用については、[English README](../README.md#how-to-use-cnb) を参照してください。**

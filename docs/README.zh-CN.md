@@ -1,6 +1,16 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+
+> [!IMPORTANT]
+> **本仓库为维护中的衍生版本(Fork)。**
+>
+> - 上游项目:[yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
+> - 基线版本:`v0.9.3`
+> - 维护者:`h1s97x`
+> - 许可证:MIT —— 原作者著作权归 SATO Yoshiyuki 所有(见 [LICENSE](../LICENSE))
+>
+> 本项目为非官方衍生版本,与原作者无隶属或背书关系。
 
 <!-- 语言代码顺序（英语除外） -->
 [English (en)](../README.md) |
@@ -62,7 +72,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -165,31 +175,31 @@ on:
 
 示例：绿色版本
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
 
 示例：季节版本（北半球）
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
 
 示例：季节版本（南半球）
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
 
 示例：夜景版本
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
 
 示例：夜间绿色版本
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
 
 示例：夜间彩虹版本
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
 
 示例：git block 版本
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
 
 ### 步骤 4. 将图片添加到 README.md
 
@@ -204,6 +214,106 @@ on:
 ## 如何使用（GitHub Actions）- 高级示例
 
 - [更多信息请参见 EXAMPLES.md](../EXAMPLES.md)
+
+## 如何使用（CNB）
+
+生成器本身与平台无关 —— 它只读取环境变量,不依赖 `@actions/*`。**同一份** `dist/index.js` 在两个平台上都能运行,差别只在于调用方式。
+
+> [!IMPORTANT]
+> **CNB 没有 `uses: owner/repo@ref` 这套机制。** 在 CNB 中,流水线插件是 Docker 镜像,无法像 GitHub Actions 那样引用一个仓库作为 action。因此使用方式正好相反:由你的 CNB 流水线下载 `dist/index.js` 并用 Node 执行。
+>
+> 如果你只用 GitHub Actions,本节可以跳过。
+
+### 第 1 步. 在 CNB 上创建个人资料仓库
+
+创建一个与你的 CNB 账号同名的仓库,并确认你希望统计贡献的 GitHub 账号已设置为你的 GitHub 个人主页。
+
+> [!NOTE]
+> 生成的文件会提交到你的 **CNB** 仓库,但贡献数据始终来自 **GitHub** —— 生成器查询的是 GitHub GraphQL API,因此这里依然需要 `GITHUB_TOKEN`。
+
+### 第 2 步. 准备密钥仓库
+
+CNB 不使用 `${{ secrets.* }}`。密钥保存在专用的[密钥仓库](https://docs.cnb.cool/zh/repo/secret)中,再通过 `imports` 注入。
+
+在密钥仓库中创建 `envs.yml`:
+
+```yaml title="envs.yml（位于密钥仓库中）"
+GITHUB_TOKEN: ghp_xxxxxxxxxxxxxxxxxxxx
+```
+
+### 第 3 步. 添加流水线
+
+在你的个人资料仓库中添加 `.cnb.yml`:
+
+```yaml title=".cnb.yml"
+main:
+  "crontab: 0 18 * * *": # 03:00 JST == 18:00 UTC
+    - name: generate
+      docker:
+        image: node:24
+      imports:
+        - https://cnb.cool/YOUR_CNB_USER/YOUR_SECRET_REPO/-/blob/main/envs.yml
+      stages:
+        - name: fetch
+          jobs:
+            - name: 下载生成器
+              script: |
+                mkdir -p .tool
+                curl -fsSL -o .tool/dist.js \
+                  https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/v1.0.0/dist/index.js
+
+        - name: generate
+          jobs:
+            - name: 运行生成器
+              env:
+                # 对应 GitHub Actions 上下文变量的 CNB 变量。
+                # CNB_REPO_SLUG 形如 "你的账号/你的仓库"，取第一段。
+                USERNAME: ${CNB_REPO_SLUG}
+              script: |
+                node .tool/dist.js "$USERNAME"
+
+        - name: commit
+          jobs:
+            - name: 提交并推送
+              script: |
+                git config user.name "cnb-bot"
+                git config user.email "cnb-bot@users.noreply.cnb.cool"
+                git add -A profile-3d-contrib
+                if git diff --cached --quiet; then
+                  echo "无变化，跳过提交。"
+                else
+                  git commit -m "generated"
+                  git push origin HEAD:$CNB_BRANCH
+                fi
+```
+
+生成器也支持指定设置文件与输出目录:
+
+```sh
+node .tool/dist.js "$USERNAME"        # 目标用户名（或直接设置 USERNAME 环境变量）
+```
+
+### 第 4 步. 与 GitHub Actions 的差异
+
+| 主题 | GitHub Actions | CNB |
+|---|---|---|
+| 引用方式 | `uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@v1.0.0` | 在 `script` 任务中下载 `dist/index.js` |
+| 密钥 | `${{ secrets.GITHUB_TOKEN }}` | 密钥仓库 + `imports` |
+| 仓库上下文 | `${{ github.repository_owner }}` | `${{ CNB_REPO_SLUG }}` |
+| 流水线配置 | `.github/workflows/*.yml` | `.cnb.yml`（Pipeline / Stage / Job 三层） |
+| 定时触发 | `on.schedule.cron` | `"crontab: ..."` 触发键 |
+| 检出代码 | `actions/checkout@v5` | 自动（流水线在你的仓库中运行） |
+
+> [!NOTE]
+> `USERNAME` 必须是你的 **GitHub** 用户名,因为贡献数据来自 GitHub。
+> 只有当你的 CNB 账号名与 GitHub 用户名相同时,`${CNB_REPO_SLUG}` 才正好等于 GitHub 用户名 —— 否则请显式传入 GitHub 用户名。
+
+### 在 CNB 上构建本项目
+
+本仓库中的 `.cnb.yml` 是项目自身的 CI,运行在 CNB 镜像仓库中,用于校验镜像过来的 `dist/` 是否仍与源码一致:
+
+- [CNB 流水线语法](https://docs.cnb.cool/zh/build/grammar)
+- [环境变量与密钥](https://docs.cnb.cool/zh/build/env)
 
 ## 如何使用（本地）
 

@@ -1,6 +1,26 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+
+> [!IMPORTANT]
+> **This repository is a maintained fork.**
+>
+> | | |
+> |---|---|
+> | Upstream | [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib) |
+> | Baseline version | `v0.9.3` |
+> | Fork maintainer | `h1s97x` |
+> | License | MIT (see [LICENSE](./LICENSE)) |
+>
+> This is an unofficial fork. It is not affiliated with or endorsed by the original author.
+> Copyright and authorship of the original work remain with SATO Yoshiyuki — see [LICENSE](./LICENSE).
+>
+> **Upgrading from the upstream project:** replace the `uses:` coordinate with
+> `YOUR_GITHUB_USER/YOUR_GITHUB_REPO@v1.0.0` (or `@latest`). No other configuration changes are required,
+> unless you use `MAX_REPOS` — see the breaking change noted in [CHANGELOG](./CHANGELOG.md).
+
+<!-- Platform picker -->
+**Platform:** [GitHub Actions](#how-to-use-github-actions---basic) | [CNB](#how-to-use-cnb) | [Local](#how-to-use-local)
 
 <!-- Language code order (except English) -->
 English (en) |
@@ -20,11 +40,16 @@ English (en) |
 > This translation was generated with machine translation.
 > It may contain errors or unnatural expressions.
 > Contributions to improve the translation are welcome!
- -->
+-->
 
 ## Overview
 
 This GitHub Action creates a GitHub contribution calendar on a 3D profile image.
+
+The rendering logic is platform-agnostic: it reads only `process.env` and has no dependency on
+`@actions/*` or `@octokit/*`. The very same `dist/index.js` runs on both GitHub Actions and CNB —
+only the invocation contract differs. See [How to use (CNB)](#how-to-use-cnb).
+
 
 ## How to use (GitHub Actions) - Basic
 
@@ -64,7 +89,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -95,7 +120,7 @@ In the sample, only `GITHUB_TOKEN` and `USERNAME` are specified as environment v
 - `GITHUB_TOKEN` : (required) access token
 - `USERNAME` : (required) target username (or specify with an argument).
 - `MAX_REPOS` : (optional) max repositories, default 100 - since ver. 0.2.0
-- `SETTING_JSON` : (optional) settings json file path. See `sample-settings/*.json` and `src/type.ts` in `yoshi389111/github-profile-3d-contrib` repository for details. - since ver. 0.6.0
+- `SETTING_JSON` : (optional) settings json file path. See `sample-settings/*.json` and `src/type.ts` in `YOUR_GITHUB_USER/YOUR_GITHUB_REPO` repository for details. - since ver. 0.6.0
 - `GITHUB_ENDPOINT` : (optional) Github GraphQL endpoint. For example, if you want to create a contribution calendar based on your company's GitHub Enterprise activity instead of GitHub.com, set this environment variable. e.g. `https://github.mycompany.com/api/graphql` - since ver. 0.8.0
 - `YEAR` : (optional) For past calendars, specify the year. This is intended to be specified when running the tool from the command line. - since ver. 0.8.0
 
@@ -167,31 +192,31 @@ You can use these images in your README.md as shown below.
 
 Example: green version
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
 
 Example: season version (Northern Hemisphere.)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
 
 Example: season version (Southern Hemisphere.)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
 
 Example: night view version
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
 
 Example: night green version
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
 
 Example: night rainbow version
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
 
 Example: git block version
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
 
 ### Step 4. Add image to README.md
 
@@ -206,6 +231,117 @@ Example:
 ## How to use (GitHub Actions) - Advanced examples
 
 - [More info in EXAMPLES.md](./EXAMPLES.md)
+
+## How to use (CNB)
+
+The generator itself is platform-agnostic — it reads only environment variables and has no
+dependency on `@actions/*`. The **same** `dist/index.js` runs on both platforms. Only the way you
+invoke it differs.
+
+> [!IMPORTANT]
+> **CNB has no `uses: owner/repo@ref` mechanism.** In CNB, pipeline plugins are Docker images, so a
+> GitHub repository cannot be referenced as an action. The consumption model is inverted: your CNB
+> pipeline downloads `dist/index.js` and runs it with Node.
+>
+> If you only use GitHub Actions, you do not need this section at all.
+
+### Step 1. Create your profile repository on CNB
+
+Create a repository named after your CNB account, and make sure the GitHub account whose
+contributions you want to chart is set as your GitHub profile.
+
+> [!NOTE]
+> The generated content is committed to your **CNB** repository, but the contribution data always
+> comes from **GitHub** — the generator queries the GitHub GraphQL API. `GITHUB_TOKEN` is therefore
+> still required here.
+
+### Step 2. Prepare a secret repository
+
+CNB does not use `${{ secrets.* }}`. Secrets are stored in a dedicated
+[secret repository](https://docs.cnb.cool/zh/repo/secret) and injected via `imports`.
+
+Create a secret repository containing an `envs.yml`:
+
+```yaml title="envs.yml (in your secret repository)"
+GITHUB_TOKEN: ghp_xxxxxxxxxxxxxxxxxxxx
+```
+
+### Step 3. Add the pipeline
+
+Add `.cnb.yml` to your profile repository:
+
+```yaml title=".cnb.yml"
+main:
+  "crontab: 0 18 * * *": # 03:00 JST == 18:00 UTC
+    - name: generate
+      docker:
+        image: node:24
+      imports:
+        - https://cnb.cool/YOUR_CNB_USER/YOUR_SECRET_REPO/-/blob/main/envs.yml
+      stages:
+        - name: fetch
+          jobs:
+            - name: Download the generator
+              script: |
+                mkdir -p .tool
+                curl -fsSL -o .tool/dist.js \
+                  https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/v1.0.0/dist/index.js
+                node .tool/dist.js --version || true
+
+        - name: generate
+          jobs:
+            - name: Run the generator
+              env:
+                # CNB's equivalent of the GitHub Actions context.
+                # CNB_REPO_SLUG looks like "your-name/your-repo"; take the first segment.
+                USERNAME: ${CNB_REPO_SLUG}
+              script: |
+                node .tool/dist.js "$USERNAME"
+
+        - name: commit
+          jobs:
+            - name: Commit and push
+              script: |
+                git config user.name "cnb-bot"
+                git config user.email "cnb-bot@users.noreply.cnb.cool"
+                git add -A profile-3d-contrib
+                if git diff --cached --quiet; then
+                  echo "No changes, skipping commit."
+                else
+                  git commit -m "generated"
+                  git push origin HEAD:$CNB_BRANCH
+                fi
+```
+
+The generator also accepts a settings file and a custom output directory:
+
+```sh
+node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env var)
+```
+
+### Step 4. Differences from GitHub Actions
+
+| Topic | GitHub Actions | CNB |
+|---|---|---|
+| Reference | `uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@v1.0.0` | Download `dist/index.js` in a `script` job |
+| Secrets | `${{ secrets.GITHUB_TOKEN }}` | Secret repository + `imports` |
+| Repo context | `${{ github.repository_owner }}` | `${{ CNB_REPO_SLUG }}` |
+| Pipeline config | `.github/workflows/*.yml` | `.cnb.yml` (Pipeline / Stage / Job) |
+| Schedule | `on.schedule.cron` | `"crontab: ..."` trigger key |
+| Check out code | `actions/checkout@v5` | Automatic (the pipeline runs in your repo) |
+
+> [!NOTE]
+> `USERNAME` must be your **GitHub** username, because the contribution data comes from GitHub.
+> Setting it to `${CNB_REPO_SLUG}` works only when your CNB account name equals your GitHub user
+> name — otherwise pass the GitHub username explicitly.
+
+### Build this project on CNB
+
+The `.cnb.yml` in this repository is the project's own CI. It runs on the CNB mirror and verifies
+that the mirrored `dist/` still matches the source:
+
+- [CNB pipeline syntax](https://docs.cnb.cool/zh/build/grammar)
+- [Environment variables and secrets](https://docs.cnb.cool/zh/build/env)
 
 ## How to use (local)
 
@@ -231,3 +367,7 @@ node . USER_NAME
 ## License
 
 &copy; 2021 SATO Yoshiyuki. Licensed under the MIT License.
+
+The original work is copyright SATO Yoshiyuki and is redistributed under the MIT License.
+Subsequent maintenance and modifications are by the fork maintainer (`h1s97x`).
+The full license text is in [LICENSE](./LICENSE).

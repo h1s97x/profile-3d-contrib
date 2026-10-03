@@ -1,6 +1,16 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+
+> [!IMPORTANT]
+> **Este repositório é um fork mantido.**
+>
+> - Projeto original: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
+> - Versão base: `v0.9.3`
+> - Maintainer do fork: `h1s97x`
+> - Licença: MIT — a autoria original permanece com SATO Yoshiyuki (veja [LICENSE](../LICENSE))
+>
+> Este é um fork não oficial, sem afiliação ou endosso do autor original.
 
 <!-- Ordem do código de idioma (exceto inglês) -->
 [English (en)](../README.md) |
@@ -55,7 +65,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -85,7 +95,7 @@ No exemplo, apenas `GITHUB_TOKEN` e `USERNAME` sestão definidos como variáveis
 - `GITHUB_TOKEN` : (obrigatório) token de acesso
 - `USERNAME` : (obrigatório) nome de usuário alvo (ou especifique como argumento).
 - `MAX_REPOS` : (opcional) número máximo de repositórios, padrão é 100 — desde a versão 0.2.0
-- `SETTING_JSON` : (opcional) caminho para o arquivo JSON de configurações. Veja `sample-settings/*.json` e `src/type.ts` no repositório `yoshi389111/github-profile-3d-contrib` para mais detalhes — desde a versão 0.6.0
+- `SETTING_JSON` : (opcional) caminho para o arquivo JSON de configurações. Veja `sample-settings/*.json` e `src/type.ts` no repositório `YOUR_GITHUB_USER/YOUR_GITHUB_REPO` para mais detalhes — desde a versão 0.6.0
 - `GITHUB_ENDPOINT` : (opcional) endpoint GraphQL do GitHub. Por exemplo, se você quiser criar o calendário de contribuições baseado no GitHub Enterprise da sua empresa em vez do GitHub.com, defina essa variável. Exemplo: `https://github.mycompany.com/api/graphql` — desde a versão 0.8.0
 - `YEAR` : (opcional) para gerar calendários de anos anteriores, especifique o ano. Essa opção é pensada principalmente para quando a ferramenta é executada via linha de comando — desde a versão 0.8.0
 
@@ -153,31 +163,31 @@ Você pode usar essas imagens no seu README.md, como mostrado abaixo:
 
 Exemplo: versão verde
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
 
 Exemplo: versão de estação (Hemisfério Norte.)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
 
 Exemplo: versão de estação (Hemisfério Sul.)
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
 
 Exemplo: versão visão noturna
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
 
 Exemplo: versão verde noturna
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
 
 Exemplo: versão arco-íris noturna
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
 
 Exemplo: versão git block
 
-![svg](https://raw.githubusercontent.com/yoshi389111/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
 
 ### Passo 4. Adicione a imagem ao README.md
 
@@ -217,3 +227,5 @@ node . USER_NAME
 ## Licença
 
 &copy; 2021 SATO Yoshiyuki. Licenciado sob a Licença MIT.
+
+> **Para uso no CNB, veja o [English README](../README.md#how-to-use-cnb).**

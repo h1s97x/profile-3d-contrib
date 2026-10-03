@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **This example is GitHub Actions only.** It relies on `${{ secrets.* }}`,
+> `${{ github.repository_owner }}`, `actions/checkout`, and the
+> `crazy-max/ghaction-github-pages` marketplace action — none of which have equivalents on CNB.
+> If you are on CNB, see the [CNB section in README.md](./README.md#how-to-use-cnb) instead.
+
 ## Advanced example 1: automatic day/night switching + keeping output in other branch
 
 This alternative workflow generates two files, `day.svg` and `night.svg`, and pushes it to `output-3d-contrib` branch, keeping the main repo 'clean' from build artifacts.
@@ -78,7 +84,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
