@@ -3,6 +3,13 @@ name: Build and Commit
 on:
   workflow_dispatch:
 
+# 产物推送必须串行:若两次运行并发,后完成的推送会因非快进而被拒,
+# 或更糟 —— 两个运行各自基于不同 HEAD 构建,产生互相覆盖的 dist 提交。
+# 因此不取消进行中的任务(cancel-in-progress: false),而是排队。
+concurrency:
+  group: build-dist
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,12 +19,18 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-      - run: npm install
+      - run: npm ci
       - run: npm run build
+      - name: Verify dist was actually rebuilt
+        run: |
+          test -s dist/index.js || { echo "::error::构建产物 dist/index.js 缺失。"; exit 1; }
       - run: |
           git config user.name github-actions
           git config user.email github-actions[bot]@users.noreply.github.com
           git add dist/
-          if git commit -m "Update build" ; then
+          if git diff --cached --quiet; then
+            echo "dist/ 与上次构建一致,无需提交。"
+          else
+            git commit -m "Update build"
             git push origin HEAD:main
           fi
