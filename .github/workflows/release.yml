@@ -1,0 +1,72 @@
+name: Verify Release
+
+# ============================================================================
+# 职责边界
+# ============================================================================
+# 本工作流只做「发布前校验」,不创建 tag、不发布 Release、不修改 latest 分支。
+#   tag 与 Release   —— 由维护者在 GitHub 上手工创建
+#   latest 分支更新  —— 由 latest-branch.yml 在 release published 后处理
+#   推送产物到 CNB   —— 由 sync-cnb.yml 在 push 时处理
+#
+# 之所以拆成三个工作流而非一个,是为了让每个环节的失败都能被独立定位:
+#   产物不一致  → 本工作流失败
+#   镜像不同步  → sync-cnb.yml 失败
+#   latest 未更新 → latest-branch.yml 失败
+# ============================================================================
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  verify:
+    name: Verify release artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 1
+
+      - name: Check tag matches package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "release tag : $TAG"
+          echo "package.json: $PKG_VERSION"
+          if [ "v$PKG_VERSION" != "$TAG" ]; then
+            echo "::error::版本号不一致:tag 为 $TAG,但 package.json 为 $PKG_VERSION。"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Verify committed dist matches the released source
+        run: |
+          if ! git diff --exit-code -- dist/; then
+            echo "::error::tag $GITHUB_REF_NAME 对应的 dist/ 与源码不一致。"
+            echo "::error::该 tag 下的产物不可复现,不应发布。请修复后重新打 tag。"
+            exit 1
+          fi
+
+      - name: Verify entry point
+        run: |
+          test -s dist/index.js || { echo "::error::dist/index.js 缺失或为空。"; exit 1; }
+          echo "dist/index.js size: $(du -h dist/index.js | cut -f1)"
+
+      - name: Summarize
+        run: |
+          {
+            echo "### 发布校验通过"
+            echo ""
+            echo "- Tag: \`$GITHUB_REF_NAME\`"
+            echo "- dist/index.js: $(du -h dist/index.js | cut -f1)"
+            echo "- 产物与源码一致: 是"
+          } >> "$GITHUB_STEP_SUMMARY"

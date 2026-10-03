@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# 同一分支的并发运行直接取消,避免多个 PR 提交同时推送时产生竞态。
+# 注意:发版推送由 build.yml 负责,该 job 使用独立的 concurrency 组且不取消进行中的任务。
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================================================
+  # 阻塞性检查:产物与源码一致性
+  # ==========================================================================
+  # 这是本仓库最重要的保护:用户执行的是已提交的 dist/index.js,而非 src/。
+  # 若二者不一致,用户运行的是与仓库源码不同的代码,且不会有任何提示。
+  dist-consistency:
+    name: dist is in sync with src
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      # 刻意不使用 sparse-checkout 排除 dist/:
+      # 那会使工作区中不存在 dist/,导致本判定把「全部文件新增」误判为不一致。
+      # 6.5 MB 的 checkout 成本远小于误判代价。
+      - name: Verify dist matches source
+        run: |
+          if ! git diff --exit-code -- dist/; then
+            echo "::error::dist/ 与源码不一致。请在本地执行 npm run build 并提交 dist/。"
+            echo "::error::如非预期改动,请检查 package-lock.json 与 Node 版本(应使用 24)是否一致。"
+            exit 1
+          fi
+
+      - name: Verify dist entry point is present
+        run: |
+          test -s dist/index.js || { echo "::error::dist/index.js 缺失或为空。"; exit 1; }
+          echo "dist/index.js size: $(du -h dist/index.js | cut -f1)"
+
+  # ==========================================================================
+  # 观察期检查:代码质量
+  # ==========================================================================
+  # 当前设为非阻塞(continue-on-error)。原因是接管前未在干净环境验证过存量代码的
+  # lint / 类型检查 / 测试状态,一次性设为阻塞会导致 CI 长期红灯而无人知晓根因。
+  #
+  # 提升为阻塞的前置条件:在本地跑通以下三条命令,并确认存量失败项已清零。
+  #   npm run lint
+  #   npm run check-types
+  #   npm test
+  quality:
+    name: lint, types and tests (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run check-types
+
+      - name: Test
+        run: npm test
