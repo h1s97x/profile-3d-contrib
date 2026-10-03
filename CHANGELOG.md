@@ -8,6 +8,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-03
+
+First release after the **maintenance handover**. Rendering logic and output format are **identical** to `0.9.3`; this release contains no functional changes.
+
+### Breaking changes
+
+- **The `uses:` coordinate has changed.** This repository is a fork of [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib), which is no longer updated. Existing users must update the reference in their workflow:
+
+  ```diff
+  - uses: yoshi389111/github-profile-3d-contrib@latest
+  + uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@v1.0.0
+  ```
+
+  Apart from that single `uses:` line, **no other configuration changes are required** (environment variables, `SETTING_JSON`, and output paths all stay the same), and the generated output is byte-identical to `0.9.3`.
+
+  `@latest` still resolves, but it now tracks this repository's releases and is no longer synchronized with upstream `@latest`.
+
+### Added
+
+- **CNB platform support.** Added `.cnb.yml` (cloud-native build configuration) and CNB usage documentation. The core logic is platform-agnostic — `src/` depends on neither `@actions/*` nor `@octokit/*` — so the same `dist/index.js` runs on both platforms; only the invocation contract differs.
+- **Automated GitHub → CNB mirroring.** Added `sync-cnb.yml`, which mirrors the source and artifacts to the CNB repository on every `main` push and on tags.
+- **Artifact consistency check (blocking).** Added `ci.yml`, which verifies on pull requests and `main` pushes that `dist/` matches `src/`. Users execute the committed artifact rather than the source, so this is the primary gate against artifact drift.
+- **Release verification workflow.** Added `release.yml`, which validates on release that the tag matches the `package.json` version and that the tagged artifacts are reproducible from source.
+- **`.gitattributes`.** Marks `dist/` as `linguist-generated` and disables diffs for it, preventing unmergeable conflicts when syncing from upstream in the future.
+- Added `repository` / `homepage` / `bugs` fields to `package.json`.
+
+### Changed
+
+- **Project maintenance handover.** The `author` field in `action.yml` and `package.json` is now the new maintainer, `h1s97x`. Based on upstream `v0.9.3`.
+- Copyright and attribution are unchanged. The original work is copyright SATO Yoshiyuki, MIT licensed — see `LICENSE`.
+- `build.yml` now uses `npm ci` instead of `npm install` so the dependency tree strictly matches `package-lock.json`; added `concurrency` to prevent concurrent push races; the commit step is skipped when the build output is unchanged.
+- Updated the `uses:` coordinate in all documentation (English + 10 translations) and added a fork notice to each.
+- The `latest` branch strategy is retained (see Known issues), now with its design rationale and risks documented.
+
+### Security
+
+- `build.yml` and the new workflows all pin `actions/checkout@v5` and `actions/setup-node@v5`.
+- The CNB sync credential is injected from GitHub Secrets and never committed; the CNB repository URL is public information and is written directly in the workflow.
+
+### Known issues (not fixed here)
+
+These all predate `0.9.3`. This release is infrastructure-only and deliberately does not fix them; they are the subject of `docs/spec/02-phase1-correctness.md`.
+
+- **Settings JSON is not validated at runtime.** A typo in the `type` field (e.g. `"norml"`) produces a **fully transparent SVG with exit code 0** — a completely silent failure. Highest impact; recommended first. @see `docs/spec/02-phase1-correctness.md` B1
+- **`MAX_REPOS` does not mean what it says.** It only acts as a pagination stop threshold, not a repository cap — the first page of 100 repositories is never truncated, and the `commitContributionsByRepository` limit is hardcoded to 100. Reported star / fork counts may therefore be **inflated**. @see B3
+- **An empty contribution calendar crashes.** Pointing `YEAR` at a year with no data throws a `TypeError` instead of a helpful message. @see B2
+- **`fileName` in `SETTING_JSON` is not path-validated**, so in principle it can write outside the output directory. @see B4
+- **API errors may leak private repository names.** When GraphQL returns a null `data` with no `errors`, the message includes the full response JSON. @see B5
+
 ## [0.9.3] - 2026-06-15
 
 ### Changed
