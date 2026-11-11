@@ -269,13 +269,25 @@ const addPatternForBitmap = (defs, panelPattern, contributionLevel, panel) => {
         .attr('class', `cont-${panel}-fg-${contributionLevel}`)
         .attr('d', path.toString());
 };
+/** Fallback for a panel that is missing entirely, in calendar units. */
+const PANEL_WIDTH_FALLBACK = 0.9;
+/** Widths read from user JSON may be missing; the validator only warns. */
+const panelWidth = (panel) => panel && typeof panel.width === 'number'
+    ? panel.width
+    : PANEL_WIDTH_FALLBACK;
 const addDefines = (svg, settings) => {
+    var _a, _b;
     if (settings.type === 'bitmap') {
         const defs = svg.append('defs');
         for (const [contribLevel, info] of settings.contribPatterns.entries()) {
+            // `top` is required by the validator; skip a broken entry
+            // instead of throwing so the rest of the calendar still draws.
+            if (!info || !info.top) {
+                continue;
+            }
             addPatternForBitmap(defs, info.top, contribLevel, 'top');
-            addPatternForBitmap(defs, info.left, contribLevel, 'left');
-            addPatternForBitmap(defs, info.right, contribLevel, 'right');
+            addPatternForBitmap(defs, (_a = info.left) !== null && _a !== void 0 ? _a : info.top, contribLevel, 'left');
+            addPatternForBitmap(defs, (_b = info.right) !== null && _b !== void 0 ? _b : info.top, contribLevel, 'right');
         }
     }
 };
@@ -295,6 +307,7 @@ const create3DContrib = (svg, userInfo, x, y, width, height, settings, isForcedA
     const offsetY = height - (weekcount + 7) * dy;
     const group = svg.append('g');
     userInfo.contributionCalendar.forEach((cal) => {
+        var _a, _b, _c, _d, _e;
         const week = Math.floor((toEpochDays(cal.date) - sundayOfFirstWeek) / 7);
         const dayOfWeek = cal.date.getUTCDay(); // sun = 0, mon = 1, ...
         const baseX = offsetX + (week - dayOfWeek) * dx;
@@ -315,7 +328,7 @@ const create3DContrib = (svg, userInfo, x, y, width, height, settings, isForcedA
                 .attr('repeatCount', '1');
         }
         const widthTop = settings.type === 'bitmap'
-            ? Math.max(1, settings.contribPatterns[contribLevel].top.width)
+            ? Math.max(1, panelWidth((_a = settings.contribPatterns[contribLevel]) === null || _a === void 0 ? void 0 : _a.top))
             : dxx;
         const topPanel = bar
             .append('rect')
@@ -338,7 +351,8 @@ const create3DContrib = (svg, userInfo, x, y, width, height, settings, isForcedA
             addBitmapPattern(topPanel, contribLevel, 'top');
         }
         const widthLeft = settings.type === 'bitmap'
-            ? Math.max(1, settings.contribPatterns[contribLevel].left.width)
+            ? Math.max(1, panelWidth((_b = settings.contribPatterns[contribLevel]) === null || _b === void 0 ? void 0 : _b.left) ||
+                panelWidth((_c = settings.contribPatterns[contribLevel]) === null || _c === void 0 ? void 0 : _c.top))
             : dxx;
         const scaleLeft = Math.sqrt(dxx ** 2 + dyy ** 2) / widthLeft;
         const heightLeft = calHeight / scaleLeft;
@@ -371,7 +385,8 @@ const create3DContrib = (svg, userInfo, x, y, width, height, settings, isForcedA
                 .attr('repeatCount', '1');
         }
         const widthRight = settings.type === 'bitmap'
-            ? Math.max(1, settings.contribPatterns[contribLevel].right.width)
+            ? Math.max(1, panelWidth((_d = settings.contribPatterns[contribLevel]) === null || _d === void 0 ? void 0 : _d.right) ||
+                panelWidth((_e = settings.contribPatterns[contribLevel]) === null || _e === void 0 ? void 0 : _e.top))
             : dxx;
         const scaleRight = Math.sqrt(dxx ** 2 + dyy ** 2) / widthRight;
         const heightRight = calHeight / scaleRight;
@@ -444,6 +459,18 @@ const d3 = __importStar(__nccwpck_require__(85871));
 const DARKER_RIGHT = 1;
 const DARKER_LEFT = 0.5;
 const DARKER_TOP = 0;
+/**
+ * Settings come from user JSON, so a color can be missing or a number
+ * even though the types say otherwise. d3.rgb() throws on those, which
+ * would abort the whole render over a cosmetic field; an empty string
+ * instead yields a `fill:` declaration the browser ignores.
+ */
+const safeColor = (value) => typeof value === 'string' ? value : '';
+/**
+ * Side panels inherit the top panel colors; an unusable own value falls
+ * back to the inherited one rather than reaching d3.rgb().
+ */
+const panelColor = (value, fallback) => typeof value === 'string' && value !== '' ? value : fallback;
 const createColors = (settings) => {
     const cssColors = [];
     cssColors.push(`.fill-fg { fill: ${settings.foregroundColor}; }`, `.stroke-fg { stroke: ${settings.foregroundColor}; }`, `.fill-bg { fill: ${settings.backgroundColor}; }`, `.stroke-bg { stroke: ${settings.backgroundColor}; }`);
@@ -500,20 +527,16 @@ const createColors = (settings) => {
     }
     if (settings.type == 'bitmap') {
         settings.contribPatterns.forEach((pattern, i) => {
-            const topBack = pattern.top.backgroundColor;
-            const topFore = pattern.top.foregroundColor;
-            const rightBack = pattern.right.backgroundColor
-                ? pattern.right.backgroundColor
-                : d3.rgb(topBack).darker(DARKER_RIGHT).toString();
-            const rightFore = pattern.right.foregroundColor
-                ? pattern.right.foregroundColor
-                : d3.rgb(topFore).darker(DARKER_RIGHT).toString();
-            const leftBack = pattern.left.backgroundColor
-                ? pattern.left.backgroundColor
-                : d3.rgb(topBack).darker(DARKER_LEFT).toString();
-            const leftFore = pattern.left.foregroundColor
-                ? pattern.left.foregroundColor
-                : d3.rgb(topFore).darker(DARKER_LEFT).toString();
+            var _a, _b, _c, _d, _e, _f;
+            // `top` is required by the validator; treat it as absent here
+            // anyway so a bad file degrades instead of throwing.
+            const safePattern = (pattern !== null && pattern !== void 0 ? pattern : {});
+            const topBack = safeColor((_a = safePattern.top) === null || _a === void 0 ? void 0 : _a.backgroundColor);
+            const topFore = safeColor((_b = safePattern.top) === null || _b === void 0 ? void 0 : _b.foregroundColor);
+            const rightBack = panelColor((_c = safePattern.right) === null || _c === void 0 ? void 0 : _c.backgroundColor, d3.rgb(topBack).darker(DARKER_RIGHT).toString());
+            const rightFore = panelColor((_d = safePattern.right) === null || _d === void 0 ? void 0 : _d.foregroundColor, d3.rgb(topFore).darker(DARKER_RIGHT).toString());
+            const leftBack = panelColor((_e = safePattern.left) === null || _e === void 0 ? void 0 : _e.backgroundColor, d3.rgb(topBack).darker(DARKER_LEFT).toString());
+            const leftFore = panelColor((_f = safePattern.left) === null || _f === void 0 ? void 0 : _f.foregroundColor, d3.rgb(topFore).darker(DARKER_LEFT).toString());
             cssColors.push(`.cont-top-bg-${i} { fill: ${topBack}; }`, `.cont-top-fg-${i} { fill: ${topFore}; }`, `.cont-right-bg-${i} { fill: ${rightBack}; }`, `.cont-right-fg-${i} { fill: ${rightFore}; }`, `.cont-left-bg-${i} { fill: ${leftBack}; }`, `.cont-left-fg-${i} { fill: ${leftFore}; }`);
         });
     }
@@ -1118,7 +1141,7 @@ exports.formatError = formatError;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeFile = exports.sanitizeFileName = exports.OUTPUT_FOLDER = void 0;
+exports.writeFile = exports.sanitizeFileName = exports.isSafeFileName = exports.DEFAULT_FILE_NAME = exports.OUTPUT_FOLDER = void 0;
 const fs_1 = __nccwpck_require__(79896);
 const errors_1 = __nccwpck_require__(75600);
 exports.OUTPUT_FOLDER = './profile-3d-contrib';
@@ -1129,8 +1152,15 @@ exports.OUTPUT_FOLDER = './profile-3d-contrib';
  * must never escape OUTPUT_FOLDER.
  */
 const SAFE_FILE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$/;
+exports.DEFAULT_FILE_NAME = 'profile-customize.svg';
+/**
+ * Same shape rule as `sanitizeFileName`, exposed so the settings reader
+ * can decide *before* rendering whether a user-provided name is usable.
+ */
+const isSafeFileName = (fileName) => SAFE_FILE_NAME.test(fileName) && !fileName.includes('..');
+exports.isSafeFileName = isSafeFileName;
 const sanitizeFileName = (fileName) => {
-    if (!SAFE_FILE_NAME.test(fileName) || fileName.includes('..')) {
+    if (!(0, exports.isSafeFileName)(fileName)) {
         throw new errors_1.AppError(errors_1.ErrorCode.FILENAME_INVALID, `invalid output file name: "${fileName}"`, [
             'use a plain file name such as "profile-customize.svg"',
             'path separators, ".." segments and leading dots are not allowed',
@@ -1365,7 +1395,13 @@ const main = async () => {
             const settingFile = r.readSettingJson(process.env.SETTING_JSON);
             const settingInfos = 'length' in settingFile ? settingFile : [settingFile];
             for (const settingInfo of settingInfos) {
-                const fileName = settingInfo.fileName || 'profile-customize.svg';
+                // The reader already warned about an unusable name, and
+                // writeFile refuses it, so fall back instead of failing an
+                // otherwise valid render.
+                const fileName = settingInfo.fileName &&
+                    f.isSafeFileName(settingInfo.fileName)
+                    ? settingInfo.fileName
+                    : f.DEFAULT_FILE_NAME;
                 f.writeFile(fileName, create.createSvg(userInfo, settingInfo, false));
             }
         }
@@ -1411,6 +1447,7 @@ exports.readSettingJson = void 0;
 const fs_1 = __nccwpck_require__(79896);
 const errors_1 = __nccwpck_require__(75600);
 const settings_validator_1 = __nccwpck_require__(56109);
+const file_writer_1 = __nccwpck_require__(46045);
 const toLineColumn = (content, position) => {
     const before = content.slice(0, position);
     const lines = before.split('\n');
@@ -1433,6 +1470,32 @@ const parseJson = (content, filePath) => {
         throw new errors_1.AppError(errors_1.ErrorCode.SETTINGS_INVALID, `failed to parse settings JSON ${filePath}${where}: ${detail}`, ['check for trailing commas, comments or unquoted keys']);
     }
 };
+/**
+ * `fileName` is the only field that reaches the filesystem, so it is
+ * checked separately: an unsafe name with no fallback would break an
+ * existing config that used to work, hence a warning plus the default.
+ */
+const collectFileNameWarnings = (parsed) => {
+    const entries = Array.isArray(parsed) ? parsed : [parsed];
+    const messages = [];
+    entries.forEach((entry, index) => {
+        if (!entry || typeof entry !== 'object') {
+            return;
+        }
+        const { fileName } = entry;
+        if (fileName === undefined) {
+            return;
+        }
+        const where = Array.isArray(parsed) ? `[${index}].fileName` : 'fileName';
+        if (typeof fileName !== 'string') {
+            messages.push(`${where}: expected a string, got ${typeof fileName}; falling back to the default name`);
+        }
+        else if (!(0, file_writer_1.isSafeFileName)(fileName)) {
+            messages.push(`${where}: "${fileName}" is not a plain file name; falling back to the default name`);
+        }
+    });
+    return messages;
+};
 const readSettingJson = (filePath) => {
     let content;
     try {
@@ -1448,7 +1511,10 @@ const readSettingJson = (filePath) => {
     const { errors, warnings } = (0, settings_validator_1.validateSettingFile)(parsed, content);
     for (const warning of warnings) {
         const where = warning.line ? ` (line ${warning.line})` : '';
-        console.warn(`::warning::settings ${warning.path}${where}: ${warning.message}`);
+        console.warn(`WARNING: settings ${warning.path}${where}: ${warning.message}`);
+    }
+    for (const warning of collectFileNameWarnings(parsed)) {
+        console.warn(`WARNING: ${warning}`);
     }
     if (errors.length > 0) {
         const details = errors
@@ -1478,6 +1544,10 @@ exports.readSettingJson = readSettingJson;
  * - An unknown or missing `type` is a *blocking* error, because the
  *   renderer would otherwise silently produce a fully transparent
  *   SVG (defect B1).
+ * - A combination the renderer cannot draw at all is also blocking:
+ *   no color string makes d3.rgb() throw, a missing bitmap `top`
+ *   panel makes the pattern lookup throw. Anything that merely
+ *   degrades the picture stays a warning.
  * - Every other issue (missing fields, wrong primitive types, odd
  *   color strings, ...) is a *warning* so existing user configs keep
  *   working.
@@ -1664,7 +1734,31 @@ const checkL10n = (value, path, keys, warnings) => {
         }
     }
 };
-const checkContribPatterns = (value, path, warnings) => {
+/**
+ * Panel colors are read with d3.rgb() while building the stylesheet, so
+ * they must be strings. The left/right panels fall back to the top panel,
+ * which is why only `top` owns both colors.
+ */
+const checkPanelColor = (panel, panelPath, key, required, errors) => {
+    const path = `${panelPath}.${key}`;
+    if (!(key in panel)) {
+        if (required) {
+            errors.push({
+                path,
+                message: `missing field "${key}"; the left and right panels derive their color from it`,
+            });
+        }
+        return;
+    }
+    if (typeof panel[key] !== 'string') {
+        errors.push({
+            path,
+            message: `expected a color string but got ${typeof panel[key]}`,
+        });
+        return;
+    }
+};
+const checkContribPatterns = (value, path, errors, warnings) => {
     if (!Array.isArray(value)) {
         warnings.push({
             path,
@@ -1684,14 +1778,25 @@ const checkContribPatterns = (value, path, warnings) => {
             warnings.push({ path: patternPath, message: 'expected an object' });
             return;
         }
+        const top = pattern.top;
+        if (!isObject(top)) {
+            // create-3d-contrib reads contribPatterns[i].top.width for
+            // every week, so a missing top panel is a hard crash.
+            errors.push({
+                path: `${patternPath}.top`,
+                message: 'missing top panel; the 3D calendar needs it',
+            });
+        }
         for (const side of ['top', 'left', 'right']) {
             const panel = pattern[side];
             const panelPath = `${patternPath}.${side}`;
             if (!isObject(panel)) {
-                warnings.push({
-                    path: panelPath,
-                    message: 'expected a panel object',
-                });
+                if (side !== 'top') {
+                    warnings.push({
+                        path: panelPath,
+                        message: 'expected a panel object',
+                    });
+                }
                 continue;
             }
             if (typeof panel.width !== 'number') {
@@ -1706,6 +1811,11 @@ const checkContribPatterns = (value, path, warnings) => {
                     message: 'panel bitmap must be an array',
                 });
             }
+            // Side panels inherit from `top` when their own color is
+            // unusable, so only `top` must carry both colors. A string is
+            // enough; the value itself is never parsed here.
+            checkPanelColor(panel, panelPath, 'backgroundColor', side === 'top', errors);
+            checkPanelColor(panel, panelPath, 'foregroundColor', side === 'top', errors);
         }
     });
 };
@@ -1818,7 +1928,7 @@ const validateOne = (input, basePath, rawText, errors, warnings, depth) => {
             });
         }
         else {
-            checkContribPatterns(input.contribPatterns, pathOf('contribPatterns'), warnings);
+            checkContribPatterns(input.contribPatterns, pathOf('contribPatterns'), errors, warnings);
         }
     }
     // Warnings: optional well-known fields.
@@ -1875,6 +1985,35 @@ const validateOne = (input, basePath, rawText, errors, warnings, depth) => {
         }
     }
 };
+const FALLBACK_SETTINGS_TYPE = 'normal';
+/**
+ * Run the per-object checks for one entry, tolerating an unusable `type`.
+ *
+ * A wrong `type` is still an error, but returning right away would hide
+ * every other problem in the file. Re-run the checks with the widest
+ * field set (`normal`) and keep only the warnings, so a typo in `type`
+ * does not mask a broken bitmap pattern.
+ */
+const validateEntry = (entry, basePath, rawText, errors, warnings) => {
+    validateOne(entry, basePath, rawText, errors, warnings, 0);
+    if (!isObject(entry)) {
+        return;
+    }
+    const typeValue = entry.type;
+    const isUsable = typeof typeValue === 'string' &&
+        exports.KNOWN_TYPES.includes(typeValue);
+    if (isUsable) {
+        return;
+    }
+    const fallbackWarnings = [];
+    validateOne({ ...entry, type: FALLBACK_SETTINGS_TYPE }, basePath, rawText, [], fallbackWarnings, 0);
+    const seen = new Set(warnings.map((w) => `${w.path}\u0000${w.message}`));
+    for (const warning of fallbackWarnings) {
+        if (!seen.has(`${warning.path}\u0000${warning.message}`)) {
+            warnings.push(warning);
+        }
+    }
+};
 /**
  * Validate a parsed settings JSON value (single object or array).
  * `rawText` is optional and only used to locate line numbers.
@@ -1889,10 +2028,10 @@ const validateSettingFile = (input, rawText) => {
                 message: 'settings array is empty',
             });
         }
-        input.forEach((entry, index) => validateOne(entry, `[${index}]`, undefined, errors, warnings, 0));
+        input.forEach((entry, index) => validateEntry(entry, `[${index}]`, undefined, errors, warnings));
     }
     else {
-        validateOne(input, '', rawText, errors, warnings, 0);
+        validateEntry(input, '', rawText, errors, warnings);
     }
     return { errors, warnings };
 };
