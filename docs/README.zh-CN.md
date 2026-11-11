@@ -1,6 +1,6 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 > [!IMPORTANT]
 > **本仓库为维护中的衍生版本(Fork)。**
@@ -72,7 +72,7 @@ jobs:
     name: generate-github-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
+      - uses: h1s97x/github-profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -175,31 +175,31 @@ on:
 
 示例：绿色版本
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-green-animate.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
 
 示例：季节版本（北半球）
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-season-animate.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
 
 示例：季节版本（南半球）
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
 
 示例：夜景版本
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-view.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
 
 示例：夜间绿色版本
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-green.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
 
 示例：夜间彩虹版本
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
 
 示例：git block 版本
 
-![svg](https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/main/docs/demo/profile-gitblock.svg)
+![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 ### 步骤 4. 将图片添加到 README.md
 
@@ -260,7 +260,7 @@ main:
               script: |
                 mkdir -p .tool
                 curl -fsSL -o .tool/dist.js \
-                  https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO/v1.0.0/dist/index.js
+                  https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/v1.0.0/dist/index.js
 
         - name: generate
           jobs:
@@ -297,7 +297,7 @@ node .tool/dist.js "$USERNAME"        # 目标用户名（或直接设置 USERNA
 
 | 主题 | GitHub Actions | CNB |
 |---|---|---|
-| 引用方式 | `uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@v1.0.0` | 在 `script` 任务中下载 `dist/index.js` |
+| 引用方式 | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` | 在 `script` 任务中下载 `dist/index.js` |
 | 密钥 | `${{ secrets.GITHUB_TOKEN }}` | 密钥仓库 + `imports` |
 | 仓库上下文 | `${{ github.repository_owner }}` | `${{ CNB_REPO_SLUG }}` |
 | 流水线配置 | `.github/workflows/*.yml` | `.cnb.yml`（Pipeline / Stage / Job 三层） |

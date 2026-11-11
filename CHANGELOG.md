@@ -18,7 +18,7 @@ First release after the **maintenance handover**. Rendering logic and output for
 
   ```diff
   - uses: yoshi389111/github-profile-3d-contrib@latest
-  + uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@v1.0.0
+  + uses: h1s97x/github-profile-3d-contrib@v1.0.0
   ```
 
   Apart from that single `uses:` line, **no other configuration changes are required** (environment variables, `SETTING_JSON`, and output paths all stay the same), and the generated output is byte-identical to `0.9.3`.

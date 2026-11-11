@@ -12,7 +12,7 @@ name: Sync to CNB
 #   CNB 侧的 .cnb.yml 只负责 CI(构建校验),不承担同步职责。
 #
 # 消费模型的差异(已在 docs/spec/00-takeover.md 记录):
-#   GitHub 用户 → uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@v1
+#   GitHub 用户 → uses: h1s97x/github-profile-3d-contrib@v1
 #   CNB 用户    → 在自己的 .cnb.yml 中下载 dist/index.js 并用 node 执行
 #                 (CNB 无仓库引用型 Action,详见 README 的 CNB 章节)
 # ============================================================================
