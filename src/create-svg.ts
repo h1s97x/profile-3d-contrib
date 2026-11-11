@@ -6,6 +6,7 @@ import * as radar from './create-radar-contrib';
 import * as colors from './create-css-colors';
 import * as util from './utils';
 import * as type from './type';
+import { AppError, ErrorCode } from './errors';
 
 const width = 1280;
 const height = 850;
@@ -22,6 +23,16 @@ export const createSvg = (
     settings: type.Settings,
     isForcedAnimation: boolean,
 ): string => {
+    if (userInfo.contributionCalendar.length === 0) {
+        throw new AppError(
+            ErrorCode.YEAR_EMPTY,
+            'no contribution data for the requested period, cannot render a calendar',
+            [
+                'omit YEAR to use the current year',
+                'the requested year may have no contributions, or its data may have been dropped by the GitHub data retention policy',
+            ],
+        );
+    }
     let svgWidth = width;
     let svgHeight = height;
     if (settings.type === 'pie_lang_only') {
