@@ -20,6 +20,18 @@ export const DEFAULT_FILE_NAME = 'profile-customize.svg';
 export const isSafeFileName = (fileName: string): boolean =>
     SAFE_FILE_NAME.test(fileName) && !fileName.includes('..');
 
+/**
+ * Narrower than `isSafeFileName`: a plain-but-unusual name (an uppercase
+ * suffix, say) is merely warned about, while anything that can leave
+ * OUTPUT_FOLDER — separators, `..` segments, a leading dot — is rejected.
+ */
+export const escapesOutputFolder = (fileName: string): boolean =>
+    !isSafeFileName(fileName) &&
+    (fileName.includes('..') ||
+        fileName.includes('/') ||
+        fileName.includes('\\') ||
+        fileName.startsWith('.'));
+
 export const sanitizeFileName = (fileName: string): string => {
     if (!isSafeFileName(fileName)) {
         throw new AppError(

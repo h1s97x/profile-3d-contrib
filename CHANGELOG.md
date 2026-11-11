@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Settings validator and JSON schema.** Zero-dependency structural validation of `SETTING_JSON` files, plus `schema/settings.schema.json` (draft-07) for IDE autocompletion.
 - **Render output snapshot tests.** 16 SVG snapshots (8 built-in themes × animated/static) guard against accidental output changes.
 - `MAX_REPOS` / `YEAR` environment variables are validated for sane ranges (`MAX_REPOS` must be a positive integer, `YEAR` must be within 2008..current year).
-- Output file names from settings are validated (`E_FILENAME_INVALID` on path traversal attempts). An unsafe `fileName` is reported as a warning and falls back to `profile-customize.svg` instead of aborting the run.
+- Output file names from settings are validated. A `fileName` that can leave the output folder — path separators, `..` segments, a leading dot — fails with `E_FILENAME_INVALID` before anything is rendered. A name that is merely unusual (a space, a non-`.svg` suffix) warns and falls back to `profile-customize.svg`.
 
 ### Changed
 
@@ -72,6 +72,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the file at 100% line coverage: season color arrays, missing rainbow fields, malformed panels,
   `l10n` key sets, empty arrays, `fileName` / `growingAnimation` type checks and the typo fallback
   path are now all exercised.
+
+### Fixed (packaging)
+
+- **Leftover `pnpm.overrides` removed.** `package.json` carried 36 pnpm overrides plus a
+  `transformIgnorePatterns` entry for `node_modules/.pnpm/`, but the repository installs with
+  `npm ci`, which ignores both: the lock file never saw them (it still resolves
+  `@types/d3-scale@3.2.2` and `@types/d3-time-format@3.0.0`) and the ignore pattern could not match a
+  flat `node_modules/`. They are gone; the ignore pattern now keeps only d3 and its ESM-only
+  siblings out of the transform, which is what the tests actually need.
+- **`fileName` semantics made consistent.** `E_FILENAME_INVALID` was unreachable: `index.ts`
+  silently replaced an unsafe name before `writeFile()` ever saw it, so the only guard against path
+  traversal was a warning. The escape check now runs in the settings reader, before rendering, and
+  the fallback covers only names that stay inside the output folder.
 
 ### Fixed (internal)
 

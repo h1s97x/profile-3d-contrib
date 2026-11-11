@@ -1,6 +1,7 @@
 import {
     DEFAULT_FILE_NAME,
     OUTPUT_FOLDER,
+    escapesOutputFolder,
     isSafeFileName,
     sanitizeFileName,
     writeFile,
@@ -64,5 +65,24 @@ describe('isSafeFileName', () => {
 
     it('exposes the default name used as a fallback', () => {
         expect(isSafeFileName(DEFAULT_FILE_NAME)).toBeTruthy();
+    });
+});
+
+describe('escapesOutputFolder', () => {
+    it.each([
+        ['parent traversal', '../evil.svg'],
+        ['nested path', 'sub/dir.svg'],
+        ['windows separator', 'sub\\dir.svg'],
+        ['hidden file', '.hidden.svg'],
+    ])('flags %s', (_label, fileName) => {
+        expect(escapesOutputFolder(fileName)).toBeTruthy();
+    });
+
+    it.each([
+        ['plain name', 'profile-customize.svg'],
+        ['dot in name', 'green.dark.svg'],
+        ['unusual but contained', 'Profile.SVG'],
+    ])('does not flag %s', (_label, fileName) => {
+        expect(escapesOutputFolder(fileName)).toBeFalsy();
     });
 });
