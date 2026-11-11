@@ -37,7 +37,15 @@
     ],
     "testMatch": [
       "**/spec/*\\.(spec|test)\\.(ts|js)"
-    ]
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 90,
+        "branches": 70,
+        "functions": 95,
+        "lines": 90
+      }
+    }
   },
   "keywords": [],
   "author": "h1s97x <Yang1297656998@outlook.com>",

@@ -152,6 +152,7 @@ describe('github-graphql', () => {
                 fail('dummyData1.data is not exist.')
             }
 
+            const infoSpy = jest.spyOn(console, 'info').mockImplementation();
             mock.onPost(client.URL).replyOnce(200, dummyData1);
             const res = await client.fetchData("dummy", "username", 50);
             if (res.data) {
@@ -160,6 +161,7 @@ describe('github-graphql', () => {
             } else {
                 fail('res.data is not exist.')
             }
+            infoSpy.mockRestore();
         } else {
             fail('dummyData.data is not exist.')
         }
