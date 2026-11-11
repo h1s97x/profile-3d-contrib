@@ -5,6 +5,10 @@
  * - An unknown or missing `type` is a *blocking* error, because the
  *   renderer would otherwise silently produce a fully transparent
  *   SVG (defect B1).
+ * - A combination the renderer cannot draw at all is also blocking:
+ *   no color string makes d3.rgb() throw, a missing bitmap `top`
+ *   panel makes the pattern lookup throw. Anything that merely
+ *   degrades the picture stays a warning.
  * - Every other issue (missing fields, wrong primitive types, odd
  *   color strings, ...) is a *warning* so existing user configs keep
  *   working.
@@ -41,7 +45,8 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
  * Accepts hex colors, CSS color names, CSS functions like
  * rgb(255,200,55) and percentages like "20%" (contribLightness).
  */
-const COLORISH = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+(?:\([\d\s.,%]+\))?|\d+(?:\.\d+)?%)$/;
+const COLORISH =
+    /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+(?:\([\d\s.,%]+\))?|\d+(?:\.\d+)?%)$/;
 
 const L10N_KEYS: Record<string, ReadonlyArray<string>> = {
     full: ['commit', 'repo', 'review', 'pullreq', 'issue', 'contrib'],
@@ -231,9 +236,41 @@ const checkL10n = (
     }
 };
 
+/**
+ * Panel colors are read with d3.rgb() while building the stylesheet, so
+ * they must be strings. The left/right panels fall back to the top panel,
+ * which is why only `top` owns both colors.
+ */
+const checkPanelColor = (
+    panel: Record<string, unknown>,
+    panelPath: string,
+    key: 'backgroundColor' | 'foregroundColor',
+    required: boolean,
+    errors: ValidationIssue[],
+): void => {
+    const path = `${panelPath}.${key}`;
+    if (!(key in panel)) {
+        if (required) {
+            errors.push({
+                path,
+                message: `missing field "${key}"; the left and right panels derive their color from it`,
+            });
+        }
+        return;
+    }
+    if (typeof panel[key] !== 'string') {
+        errors.push({
+            path,
+            message: `expected a color string but got ${typeof panel[key]}`,
+        });
+        return;
+    }
+};
+
 const checkContribPatterns = (
     value: unknown,
     path: string,
+    errors: ValidationIssue[],
     warnings: ValidationIssue[],
 ): void => {
     if (!Array.isArray(value)) {
@@ -255,14 +292,25 @@ const checkContribPatterns = (
             warnings.push({ path: patternPath, message: 'expected an object' });
             return;
         }
+        const top = pattern.top;
+        if (!isObject(top)) {
+            // create-3d-contrib reads contribPatterns[i].top.width for
+            // every week, so a missing top panel is a hard crash.
+            errors.push({
+                path: `${patternPath}.top`,
+                message: 'missing top panel; the 3D calendar needs it',
+            });
+        }
         for (const side of ['top', 'left', 'right'] as const) {
             const panel = pattern[side];
             const panelPath = `${patternPath}.${side}`;
             if (!isObject(panel)) {
-                warnings.push({
-                    path: panelPath,
-                    message: 'expected a panel object',
-                });
+                if (side !== 'top') {
+                    warnings.push({
+                        path: panelPath,
+                        message: 'expected a panel object',
+                    });
+                }
                 continue;
             }
             if (typeof panel.width !== 'number') {
@@ -277,6 +325,23 @@ const checkContribPatterns = (
                     message: 'panel bitmap must be an array',
                 });
             }
+            // Side panels inherit from `top` when their own color is
+            // unusable, so only `top` must carry both colors. A string is
+            // enough; the value itself is never parsed here.
+            checkPanelColor(
+                panel,
+                panelPath,
+                'backgroundColor',
+                side === 'top',
+                errors,
+            );
+            checkPanelColor(
+                panel,
+                panelPath,
+                'foregroundColor',
+                side === 'top',
+                errors,
+            );
         }
     });
 };
@@ -342,7 +407,11 @@ const validateOne = (
                 message: 'missing field "contribColors" for type "normal"',
             });
         } else {
-            checkColorArray(input.contribColors, pathOf('contribColors'), warnings);
+            checkColorArray(
+                input.contribColors,
+                pathOf('contribColors'),
+                warnings,
+            );
         }
     }
     if (settingsType === 'season') {
@@ -404,6 +473,7 @@ const validateOne = (
             checkContribPatterns(
                 input.contribPatterns,
                 pathOf('contribPatterns'),
+                errors,
                 warnings,
             );
         }
@@ -475,6 +545,51 @@ const validateOne = (
     }
 };
 
+const FALLBACK_SETTINGS_TYPE: KnownType = 'normal';
+
+/**
+ * Run the per-object checks for one entry, tolerating an unusable `type`.
+ *
+ * A wrong `type` is still an error, but returning right away would hide
+ * every other problem in the file. Re-run the checks with the widest
+ * field set (`normal`) and keep only the warnings, so a typo in `type`
+ * does not mask a broken bitmap pattern.
+ */
+const validateEntry = (
+    entry: unknown,
+    basePath: string,
+    rawText: string | undefined,
+    errors: ValidationIssue[],
+    warnings: ValidationIssue[],
+): void => {
+    validateOne(entry, basePath, rawText, errors, warnings, 0);
+    if (!isObject(entry)) {
+        return;
+    }
+    const typeValue = entry.type;
+    const isUsable =
+        typeof typeValue === 'string' &&
+        (KNOWN_TYPES as ReadonlyArray<string>).includes(typeValue);
+    if (isUsable) {
+        return;
+    }
+    const fallbackWarnings: ValidationIssue[] = [];
+    validateOne(
+        { ...entry, type: FALLBACK_SETTINGS_TYPE },
+        basePath,
+        rawText,
+        [],
+        fallbackWarnings,
+        0,
+    );
+    const seen = new Set(warnings.map((w) => `${w.path}\u0000${w.message}`));
+    for (const warning of fallbackWarnings) {
+        if (!seen.has(`${warning.path}\u0000${warning.message}`)) {
+            warnings.push(warning);
+        }
+    }
+};
+
 /**
  * Validate a parsed settings JSON value (single object or array).
  * `rawText` is optional and only used to locate line numbers.
@@ -494,17 +609,10 @@ export const validateSettingFile = (
             });
         }
         input.forEach((entry, index) =>
-            validateOne(
-                entry,
-                `[${index}]`,
-                undefined,
-                errors,
-                warnings,
-                0,
-            ),
+            validateEntry(entry, `[${index}]`, undefined, errors, warnings),
         );
     } else {
-        validateOne(input, '', rawText, errors, warnings, 0);
+        validateEntry(input, '', rawText, errors, warnings);
     }
 
     return { errors, warnings };

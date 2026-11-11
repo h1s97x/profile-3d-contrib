@@ -5,6 +5,33 @@ const DARKER_RIGHT = 1;
 const DARKER_LEFT = 0.5;
 const DARKER_TOP = 0;
 
+/**
+ * Settings come from user JSON, so a color can be missing or a number
+ * even though the types say otherwise. d3.rgb() throws on those, which
+ * would abort the whole render over a cosmetic field; an empty string
+ * instead yields a `fill:` declaration the browser ignores.
+ */
+const safeColor = (value: unknown): string =>
+    typeof value === 'string' ? value : '';
+
+/**
+ * Side panels inherit the top panel colors; an unusable own value falls
+ * back to the inherited one rather than reaching d3.rgb().
+ */
+const panelColor = (value: unknown, fallback: string): string =>
+    typeof value === 'string' && value !== '' ? value : fallback;
+
+/**
+ * create-3d-contrib indexes contribPatterns[level].top, so a missing
+ * panel cannot be drawn at all. PanelColorPatch keeps this function
+ * total without widening the public types.
+ */
+type PanelColorPatch = {
+    top?: { backgroundColor?: unknown; foregroundColor?: unknown };
+    left?: { backgroundColor?: unknown; foregroundColor?: unknown };
+    right?: { backgroundColor?: unknown; foregroundColor?: unknown };
+};
+
 const createColors = (settings: type.Settings): string => {
     const cssColors: string[] = [];
 
@@ -106,20 +133,27 @@ const createColors = (settings: type.Settings): string => {
 
     if (settings.type == 'bitmap') {
         settings.contribPatterns.forEach((pattern, i) => {
-            const topBack = pattern.top.backgroundColor;
-            const topFore = pattern.top.foregroundColor;
-            const rightBack = pattern.right.backgroundColor
-                ? pattern.right.backgroundColor
-                : d3.rgb(topBack).darker(DARKER_RIGHT).toString();
-            const rightFore = pattern.right.foregroundColor
-                ? pattern.right.foregroundColor
-                : d3.rgb(topFore).darker(DARKER_RIGHT).toString();
-            const leftBack = pattern.left.backgroundColor
-                ? pattern.left.backgroundColor
-                : d3.rgb(topBack).darker(DARKER_LEFT).toString();
-            const leftFore = pattern.left.foregroundColor
-                ? pattern.left.foregroundColor
-                : d3.rgb(topFore).darker(DARKER_LEFT).toString();
+            // `top` is required by the validator; treat it as absent here
+            // anyway so a bad file degrades instead of throwing.
+            const safePattern = (pattern ?? {}) as PanelColorPatch;
+            const topBack = safeColor(safePattern.top?.backgroundColor);
+            const topFore = safeColor(safePattern.top?.foregroundColor);
+            const rightBack = panelColor(
+                safePattern.right?.backgroundColor,
+                d3.rgb(topBack).darker(DARKER_RIGHT).toString(),
+            );
+            const rightFore = panelColor(
+                safePattern.right?.foregroundColor,
+                d3.rgb(topFore).darker(DARKER_RIGHT).toString(),
+            );
+            const leftBack = panelColor(
+                safePattern.left?.backgroundColor,
+                d3.rgb(topBack).darker(DARKER_LEFT).toString(),
+            );
+            const leftFore = panelColor(
+                safePattern.left?.foregroundColor,
+                d3.rgb(topFore).darker(DARKER_LEFT).toString(),
+            );
             cssColors.push(
                 `.cont-top-bg-${i} { fill: ${topBack}; }`,
                 `.cont-top-fg-${i} { fill: ${topFore}; }`,

@@ -1,7 +1,7 @@
 import * as aggregate from '../src/aggregate-user-info'
 import * as client from '../src/github-graphql';
 import * as type from '../src/type';
-import { AppError, ErrorCode } from '../src/errors';
+import { AppError, ErrorCode, formatError } from '../src/errors';
 import { dummyData } from './dummy-data';
 
 describe('github-graphql', () => {
@@ -104,8 +104,13 @@ describe('github-graphql', () => {
         expect(() => aggregate.aggregateUserInfo(response)).toThrow(
             AppError,
         );
-        expect(() => aggregate.aggregateUserInfo(response)).not.toThrow(
-            'my-secret-repo',
-        );
+        // The thrown message must not echo the response payload; assert on
+        // the serialized error instead of the return value, which is void.
+        try {
+            aggregate.aggregateUserInfo(response);
+            fail('expected aggregateUserInfo to throw');
+        } catch (error) {
+            expect(formatError(error)).not.toContain('my-secret-repo');
+        }
     });
 });

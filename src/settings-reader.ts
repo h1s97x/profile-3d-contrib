@@ -2,6 +2,11 @@ import { readFileSync } from 'fs';
 import * as type from './type';
 import { AppError, ErrorCode } from './errors';
 import { validateSettingFile } from './settings-validator';
+import {
+    escapesOutputFolder,
+    isSafeFileName,
+    sanitizeFileName,
+} from './file-writer';
 
 const toLineColumn = (
     content: string,
@@ -9,7 +14,10 @@ const toLineColumn = (
 ): { line: number; column: number } => {
     const before = content.slice(0, position);
     const lines = before.split('\n');
-    return { line: lines.length, column: before.length - before.lastIndexOf('\n') };
+    return {
+        line: lines.length,
+        column: before.length - before.lastIndexOf('\n'),
+    };
 };
 
 const parseJson = (content: string, filePath: string): unknown => {
@@ -37,6 +45,51 @@ const parseJson = (content: string, filePath: string): unknown => {
     }
 };
 
+/**
+ * `fileName` is the only field that reaches the filesystem, so it is
+ * checked *before* any rendering: silently writing elsewhere is worse
+ * than failing. A name that merely looks odd is left to
+ * `collectFileNameWarnings`; one that can leave the output folder — path
+ * separators, `..`, a leading dot — is blocking.
+ */
+const ensureSafeFileNames = (parsed: unknown): void => {
+    const entries = Array.isArray(parsed) ? parsed : [parsed];
+    entries.forEach((entry) => {
+        if (!entry || typeof entry !== 'object') {
+            return;
+        }
+        const { fileName } = entry as { fileName?: unknown };
+        if (typeof fileName !== 'string') {
+            return;
+        }
+        if (!escapesOutputFolder(fileName)) {
+            return;
+        }
+        sanitizeFileName(fileName);
+    });
+};
+
+/** Non-blocking notice for a `fileName` that is dropped in favour of the default. */
+const collectFileNameWarnings = (parsed: unknown): string[] => {
+    const entries = Array.isArray(parsed) ? parsed : [parsed];
+    const messages: string[] = [];
+    entries.forEach((entry, index) => {
+        if (!entry || typeof entry !== 'object') {
+            return;
+        }
+        const { fileName } = entry as { fileName?: unknown };
+        if (typeof fileName === 'string' && !isSafeFileName(fileName)) {
+            const where = Array.isArray(parsed)
+                ? `[${index}].fileName`
+                : 'fileName';
+            messages.push(
+                `${where}: "${fileName}" is not a plain file name; using the default name`,
+            );
+        }
+    });
+    return messages;
+};
+
 export const readSettingJson = (filePath: string): type.SettingFile => {
     let content: string;
     try {
@@ -58,8 +111,13 @@ export const readSettingJson = (filePath: string): type.SettingFile => {
     for (const warning of warnings) {
         const where = warning.line ? ` (line ${warning.line})` : '';
         console.warn(
-            `::warning::settings ${warning.path}${where}: ${warning.message}`,
+            `WARNING: settings ${warning.path}${where}: ${warning.message}`,
         );
+    }
+    // Path traversal is blocking; an unusual-but-contained name only warns.
+    ensureSafeFileNames(parsed);
+    for (const warning of collectFileNameWarnings(parsed)) {
+        console.warn(`WARNING: ${warning}`);
     }
     if (errors.length > 0) {
         const details = errors

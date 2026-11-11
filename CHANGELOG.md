@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Behavior changes (bug fixes)
 
 - **`MAX_REPOS` is now a real cap.** The repository pagination previously overshot the limit by up to 99 entries (whole 100-repository pages were appended), inflating total fork/star counts. The merged repository list is now truncated to `MAX_REPOS` and an info message is logged when truncation happens. If you set `MAX_REPOS`, your fork/star totals may **decrease** to the correct value.
-- **Invalid settings `type` now fails fast.** A typo such as `"type": "norml"` previously produced a fully transparent SVG without any message. The action now exits with code 1 and prints `E_SETTINGS_INVALID` including the line number and the list of valid types. Other settings issues (missing fields, odd values) only emit `::warning::` messages and do not block execution.
+- **Invalid settings `type` now fails fast.** A typo such as `"type": "norml"` previously produced a fully transparent SVG without any message. The action now exits with code 1 and prints `E_SETTINGS_INVALID` including the line number and the list of valid types. Other settings issues (missing fields, odd values) only emit `WARNING:` messages and do not block execution.
 - **Empty contribution years fail fast.** Requesting a year without contribution data (or a year dropped by GitHub's data retention) previously crashed with an obscure `TypeError` inside d3. The action now exits with code 1 and prints `E_YEAR_EMPTY` with actionable hints.
 
 ### Added
@@ -22,13 +22,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Settings validator and JSON schema.** Zero-dependency structural validation of `SETTING_JSON` files, plus `schema/settings.schema.json` (draft-07) for IDE autocompletion.
 - **Render output snapshot tests.** 16 SVG snapshots (8 built-in themes × animated/static) guard against accidental output changes.
 - `MAX_REPOS` / `YEAR` environment variables are validated for sane ranges (`MAX_REPOS` must be a positive integer, `YEAR` must be within 2008..current year).
-- Output file names from settings are validated (`E_FILENAME_INVALID` on path traversal attempts).
+- Output file names from settings are validated. A `fileName` that can leave the output folder — path separators, `..` segments, a leading dot — fails with `E_FILENAME_INVALID` before anything is rendered. A name that is merely unusual (a space, a non-`.svg` suffix) warns and falls back to `profile-customize.svg`.
+
+### Security
+
+- Bumped `axios` from `1.18.1` to `1.20.0` to address CVE-2026-101905, where a polluted `Object.prototype.createConnection` in the Node HTTP adapter could redirect requests (and leak headers, bodies and credentials) to an attacker-controlled endpoint.
 
 ### Changed
 
 - **API error output no longer dumps raw responses.** GraphQL failures previously serialized the whole response into logs, which could leak private repository names. Only server-provided error messages are printed now.
 - The GraphQL `errors` field type was corrected from a fixed one-element tuple to an array (type-level only).
 - `commitContributionsByRepository` now honors `MAX_REPOS` (capped at GitHub's maximum of 100).
+
+### Fixed
+
+- **`dist/` rebuilt from the current `src/`.** The artifact had not been regenerated since
+  `init from source`, so it no longer matched the phase-0/phase-1 source changes and the new
+  `dist-consistency` gate failed on the very pull request that introduced it. A fresh build now
+  leaves all 16 render snapshots byte-identical.
+- **`::error::` / `::warning::` annotations dropped from output.** Those annotations are a GitHub
+  Actions feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Both
+  `.cnb.yml` and the settings warnings now use plain `ERROR:` / `WARNING:` prefixes.
+
+- **A settings file that the renderer cannot draw is rejected up front.** Until now the validator
+  only warned about a bitmap `contribPatterns` entry without a `top` panel, and the renderer then
+  threw `Cannot read properties of undefined` on the first week. A missing `top` panel and a
+  non-string panel color are now blocking (`E_SETTINGS_INVALID`) with the offending JSON path, and
+  the renderer degrades instead of crashing if such a file still reaches it.
+- **A typo in `type` no longer hides every other problem.** Validation still stops at the wrong
+  `type`, but the remaining fields are re-checked against the `normal` field set, so block-worthy
+  issues such as a broken bitmap pattern are reported in the same run.
+
+### Fixed (documentation and metadata)
+
+- **`package-lock.json` version realigned with `package.json`.** The lock file still carried
+  `0.9.3` while `package.json` was already `1.0.0`. `release.yml` only compares the tag against
+  `package.json` and CI only runs `npm ci`, so nothing caught the mismatch.
+- **Takeover checklist no longer contradicts the code.** `docs/spec/00-takeover.md` claimed the
+  handover shipped without touching `src/` and that every `YOUR_GITHUB_*` placeholder was replaced;
+  both were stale. The placeholder section now distinguishes coordinates that are already updated
+  from the CNB secret-repository examples that must stay placeholders, and the dead `sed` one-liner
+  (it also rewrote planned examples in the spec docs) is gone.
+- **`docs/spec/03-phase2-architecture.md` acceptance check fixed.** The self-check
+  `git grep -c 'yoshi389111/github-profile-3d-contrib'` could never pass, because the eleven README
+  fork notices must keep the upstream link. It is now path-filtered and states the one allowed hit.
+- **Phase 0 status updated.** `docs/spec/01-phase0-safety-net.md` still said the render snapshots and
+  the `spec/` type check were pending; both shipped.
+- **Planned examples use the real coordinate.** `docs/spec/04-phase3-config-api.md` and
+  `docs/spec/06-phase5-advanced.md` described this repository's own future CLI and packaging but
+  referred to `YOUR_GITHUB_USER`; they now say `h1s97x/...`.
+
+### Fixed (tests)
+
+- **`settings-validator.ts` branch coverage.** 81.36% → 99.37% statements and 97.61% branches, with
+  the file at 100% line coverage: season color arrays, missing rainbow fields, malformed panels,
+  `l10n` key sets, empty arrays, `fileName` / `growingAnimation` type checks and the typo fallback
+  path are now all exercised.
+
+### Fixed (packaging)
+
+- **Leftover `pnpm.overrides` removed.** `package.json` carried 36 pnpm overrides plus a
+  `transformIgnorePatterns` entry for `node_modules/.pnpm/`, but the repository installs with
+  `npm ci`, which ignores both: the lock file never saw them (it still resolves
+  `@types/d3-scale@3.2.2` and `@types/d3-time-format@3.0.0`) and the ignore pattern could not match a
+  flat `node_modules/`. They are gone; the ignore pattern now keeps only d3 and its ESM-only
+  siblings out of the transform, which is what the tests actually need.
+- **`fileName` semantics made consistent.** `E_FILENAME_INVALID` was unreachable: `index.ts`
+  silently replaced an unsafe name before `writeFile()` ever saw it, so the only guard against path
+  traversal was a warning. The escape check now runs in the settings reader, before rendering, and
+  the fallback covers only names that stay inside the output folder.
 
 ### Fixed (internal)
 
@@ -38,7 +100,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-10-03
 
-First release after the **maintenance handover**. Rendering logic and output format are **identical** to `0.9.3`; this release contains no functional changes.
+First release after the **maintenance handover**. `src/` was byte-for-byte untouched in the
+handover commit `a2c5e2a`, so the generated output is identical to `0.9.3`; this release contains
+no runtime code changes.
+
+> Functional fixes landed afterwards on the same unreleased line (see `[Unreleased]`):
+> `src/` has since changed and `dist/index.js` grew from 190,611 to 191,885 lines. The 16 render
+> snapshots are still byte-identical, so existing users' images are unaffected, but the code is no
+> longer 「unchanged since 0.9.3」.
 
 ### Breaking changes
 
@@ -74,6 +143,17 @@ First release after the **maintenance handover**. Rendering logic and output for
 
 - `build.yml` and the new workflows all pin `actions/checkout@v5` and `actions/setup-node@v5`.
 - The CNB sync credential is injected from GitHub Secrets and never committed; the CNB repository URL is public information and is written directly in the workflow.
+
+### Fixed
+
+- **`dist/` is rebuilt from the current `src/`.** The artifact was last generated at commit
+  `init from source` and never regenerated after the phase-0/phase-1 source changes, so
+  `src/` and `dist/` had drifted apart and the new `dist-consistency` gate failed on the very
+  pull request that introduced it. Verified afterwards that a fresh build leaves all 16 render
+  snapshots byte-identical.
+- **`::error::` / `::warning::` annotations dropped from output.** Those annotations are a GitHub
+  Actions feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Both
+  `.cnb.yml` and the settings warnings now use plain `ERROR:` / `WARNING:` prefixes.
 
 ### Known issues (not fixed here)
 

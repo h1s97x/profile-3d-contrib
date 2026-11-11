@@ -143,7 +143,7 @@ github-profile-3d-contrib —— 生成 3D 贡献日历 SVG
   node dist/index.js octocat --theme gitblock,night-green
   node dist/index.js octocat --year 2024 --out-dir ./out --dry-run
 
-更多信息见 https://github.com/YOUR_GITHUB_USER/YOUR_GITHUB_REPO
+更多信息见 https://github.com/h1s97x/github-profile-3d-contrib
 ```
 
 ### 3.2 主题名与 `settings.type` 的映射
@@ -170,7 +170,7 @@ github-profile-3d-contrib —— 生成 3D 贡献日历 SVG
 # action.yml(计划内容)
 name: GitHub-Profile-3D-Contrib
 description: Generate profile 3D Contributions
-author: YOUR_GITHUB_USER
+author: h1s97x
 
 inputs:
   username:
@@ -212,12 +212,12 @@ branding:
 
 ### 4.1 向后兼容:env 全部保留
 
-> 坐标变更(`yoshi389111/...` → `YOUR_GITHUB_USER/YOUR_GITHUB_REPO`)已在 `1.0.0` 完成,
+> 坐标变更(`yoshi389111/...` → `h1s97x/...`)已在 `1.0.0` 完成,
 > 本节只讨论 `env:` 与 `with:` 的写法差异。
 
 ```yaml
 # 旧写法,必须继续可用(计划内容)
-- uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
+- uses: h1s97x/github-profile-3d-contrib@latest
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     USERNAME: ${{ github.repository_owner }}
@@ -225,7 +225,7 @@ branding:
 
 ```yaml
 # 新写法(计划内容)
-- uses: YOUR_GITHUB_USER/YOUR_GITHUB_REPO@latest
+- uses: h1s97x/github-profile-3d-contrib@latest
   with:
     username: ${{ github.repository_owner }}
   env:

@@ -94,7 +94,7 @@
 **建议方案**:
 
 - PNG 导出**不作为默认能力**,而是**可选开关**(`--format png`),且依赖以**可选依赖**方式声明
-- 或**独立发布**一个 `@YOUR_GITHUB_USER/github-profile-3d-contrib-png` 包,主包保持轻量
+- 或**独立发布**一个 `@h1s97x/github-profile-3d-contrib-png` 包,主包保持轻量
 
 **结论**:倾向第二种。**若走第一种,需在阶段 4 完成后重新评估体积预算**。
 

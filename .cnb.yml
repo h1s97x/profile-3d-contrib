@@ -37,14 +37,14 @@ main:
               # 此时 CNB 用户从镜像拉到的产物就是错的,必须阻断。
               script: |
                 if ! git diff --exit-code -- dist/; then
-                  echo "::error::dist/ 与源码不一致,CNB 镜像产物已过期。"
-                  echo "::error::请检查 sync-cnb 工作流是否成功执行。"
+                  echo "ERROR: dist/ 与源码不一致,CNB 镜像产物已过期。"
+                  echo "ERROR: 请检查 sync-cnb 工作流是否成功执行。"
                   exit 1
                 fi
 
             - name: Ensure entry point exists
               script: |
-                test -s dist/index.js || { echo "::error::dist/index.js 缺失或为空。"; exit 1; }
+                test -s dist/index.js || { echo "ERROR: dist/index.js 缺失或为空。"; exit 1; }
                 echo "dist/index.js size: $(du -h dist/index.js | cut -f1)"
 
   pull_request:
@@ -67,6 +67,6 @@ main:
             - name: Ensure dist matches source
               script: |
                 if ! git diff --exit-code -- dist/; then
-                  echo "::error::dist/ 与源码不一致。"
+                  echo "ERROR: dist/ 与源码不一致。"
                   exit 1
                 fi

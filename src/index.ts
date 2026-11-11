@@ -25,7 +25,9 @@ export const main = async (): Promise<void> => {
             throw new AppError(
                 ErrorCode.MAX_REPOS_INVALID,
                 `MAX_REPOS must be a positive integer: "${process.env.MAX_REPOS ?? ''}"`,
-                ['set MAX_REPOS to 1 or more, or leave it unset for the default of 100'],
+                [
+                    'set MAX_REPOS to 1 or more, or leave it unset for the default of 100',
+                ],
             );
         }
         const year = process.env.YEAR ? Number(process.env.YEAR) : null;
@@ -54,8 +56,14 @@ export const main = async (): Promise<void> => {
             const settingInfos =
                 'length' in settingFile ? settingFile : [settingFile];
             for (const settingInfo of settingInfos) {
+                // The reader already warned about an unusable name, and
+                // rejected the ones that could escape the output folder, so
+                // a fallback here never widens the security boundary.
                 const fileName =
-                    settingInfo.fileName || 'profile-customize.svg';
+                    typeof settingInfo.fileName === 'string' &&
+                    f.isSafeFileName(settingInfo.fileName)
+                        ? settingInfo.fileName
+                        : f.DEFAULT_FILE_NAME;
                 f.writeFile(
                     fileName,
                     create.createSvg(userInfo, settingInfo, false),

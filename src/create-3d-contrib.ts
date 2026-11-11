@@ -149,6 +149,15 @@ const addPatternForBitmap = (
         .attr('d', path.toString());
 };
 
+/** Fallback for a panel that is missing entirely, in calendar units. */
+const PANEL_WIDTH_FALLBACK = 0.9;
+
+/** Widths read from user JSON may be missing; the validator only warns. */
+const panelWidth = (panel: type.PanelPattern | undefined): number =>
+    panel && typeof panel.width === 'number'
+        ? panel.width
+        : PANEL_WIDTH_FALLBACK;
+
 export const addDefines = (
     svg: d3.Selection<SVGSVGElement, unknown, null, unknown>,
     settings: type.Settings,
@@ -156,9 +165,24 @@ export const addDefines = (
     if (settings.type === 'bitmap') {
         const defs = svg.append('defs');
         for (const [contribLevel, info] of settings.contribPatterns.entries()) {
+            // `top` is required by the validator; skip a broken entry
+            // instead of throwing so the rest of the calendar still draws.
+            if (!info || !info.top) {
+                continue;
+            }
             addPatternForBitmap(defs, info.top, contribLevel, 'top');
-            addPatternForBitmap(defs, info.left, contribLevel, 'left');
-            addPatternForBitmap(defs, info.right, contribLevel, 'right');
+            addPatternForBitmap(
+                defs,
+                info.left ?? info.top,
+                contribLevel,
+                'left',
+            );
+            addPatternForBitmap(
+                defs,
+                info.right ?? info.top,
+                contribLevel,
+                'right',
+            );
         }
     }
 };
@@ -232,7 +256,10 @@ export const create3DContrib = (
 
         const widthTop =
             settings.type === 'bitmap'
-                ? Math.max(1, settings.contribPatterns[contribLevel].top.width)
+                ? Math.max(
+                      1,
+                      panelWidth(settings.contribPatterns[contribLevel]?.top),
+                  )
                 : dxx;
         const topPanel = bar
             .append('rect')
@@ -262,7 +289,15 @@ export const create3DContrib = (
 
         const widthLeft =
             settings.type === 'bitmap'
-                ? Math.max(1, settings.contribPatterns[contribLevel].left.width)
+                ? Math.max(
+                      1,
+                      panelWidth(
+                          settings.contribPatterns[contribLevel]?.left,
+                      ) ||
+                          panelWidth(
+                              settings.contribPatterns[contribLevel]?.top,
+                          ),
+                  )
                 : dxx;
         const scaleLeft = Math.sqrt(dxx ** 2 + dyy ** 2) / widthLeft;
         const heightLeft = calHeight / scaleLeft;
@@ -305,7 +340,12 @@ export const create3DContrib = (
             settings.type === 'bitmap'
                 ? Math.max(
                       1,
-                      settings.contribPatterns[contribLevel].right.width,
+                      panelWidth(
+                          settings.contribPatterns[contribLevel]?.right,
+                      ) ||
+                          panelWidth(
+                              settings.contribPatterns[contribLevel]?.top,
+                          ),
                   )
                 : dxx;
         const scaleRight = Math.sqrt(dxx ** 2 + dyy ** 2) / widthRight;

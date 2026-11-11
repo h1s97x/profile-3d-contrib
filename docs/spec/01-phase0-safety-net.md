@@ -3,7 +3,7 @@
 | 元信息 | 值 |
 |---|---|
 | 优先级 | P0 |
-| 分类 | **接管已部分完成** —— CI 闸门与 `dist/` 保护已随 `1.0.0` 落地;渲染层快照测试与 `spec/` 类型检查仍待补齐 |
+| 分类 | **已完成** —— CI 闸门、`dist/` 保护、渲染层 16 份 SVG 快照、`spec/` 类型检查、覆盖率门槛均已落地并通过 CI |
 | 工期 | 1~2 周 |
 | 目标版本 | **不发版** |
 | 前置条件 | 无 |
@@ -13,13 +13,13 @@
 
 **在动架构之前,先让「坏改动」无法合入。**
 
-阶段 2 的核心硬约束是「重构不改变 SVG 字节输出」。这条约束目前**无法验证**,因为:渲染层没有任何测试(`create-svg.ts` / `create-3d-contrib.ts` / `create-css-colors.ts` / `create-pie-language.ts` / `create-radar-contrib.ts` 全部 0 覆盖),且 CI 在 PR 上完全不执行任何检查。因此阶段 0 的唯一产出就是**判定门禁本身**。
+阶段 2 的核心硬约束是「重构不改变 SVG 字节输出」。接管之初这条约束**无法验证**:渲染层没有任何测试(`create-svg.ts` / `create-3d-contrib.ts` / `create-css-colors.ts` / `create-pie-language.ts` / `create-radar-contrib.ts` 全部 0 覆盖),且 CI 在 PR 上完全不执行任何检查。因此阶段 0 的唯一产出就是**判定门禁本身** —— 现已就位,阶段 2 可以按「快照不变」推进。
 
 ## 二、前置动作
 
-> **当前环境 `node_modules` 未安装。** 实测执行 `npx jest` 会报 `Module ts-jest in the transform option was not found`。
->
-> 阶段 0 的第一个动作必须是 `npm ci`,之后才有一切可执行。
+> 仓库不提交 `node_modules`。本地首次执行或换环境后,第一个动作必须是 `npm ci`,
+> 否则 `npx jest` 会报 `Module ts-jest in the transform option was not found`。
+> CI 侧已由 `ci.yml` / `.cnb.yml` 覆盖这一步。
 
 ## 三、范围
 

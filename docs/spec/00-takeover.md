@@ -13,29 +13,38 @@
 本文档是**接管的权威记录**:记录已执行的改动、关键决策及其依据、以及未完成事项的交接说明。
 后续演进阶段见 [README](./README.md) 的阶段路线图。
 
-> **本次接管未修改 `src/` 任何运行时代码。** 1749 行源码与 8 个内置主题 JSON 保持原样,
-> 因此 `1.0.0` 的产物与 `0.9.3` **字节一致**,存量用户升级后图片不会重绘。
+> **接管首次提交(`a2c5e2a`)未修改 `src/` 任何运行时代码**,1749 行源码与 8 个内置主题 JSON
+> 保持原样,产物与 `0.9.3` 字节一致。
+>
+> **现状(阶段 1 之后)**:`src/` 已改动 9 个文件(`settings-validator.ts` 新增、缺陷 B1~B6 修复),
+> `dist/index.js` 由 190,611 行增至 191,885 行。**16 份 SVG 快照字节未变**,即存量用户升级后
+> 图片不会重绘;B1~B6 修复前「渲染逻辑零改动」的表述已不再适用于 `1.0.0` 起的代码状态。
 
 ---
 
 ## 一、待替换占位符
 
-以下占位符需在正式发布前全局替换:
+面向用户的 `uses:` 坐标已在 `1.0.0` 落实为 `h1s97x/...`。以下占位符**按文件区分处理**,
+不得一次性全局替换:
 
-| 占位符 | 出现位置 | 目标值 |
+| 占位符 | 位置 | 处理 |
 |---|---|---|
-| `YOUR_GITHUB_USER` | `package.json`(3 处)、11 份 README、`.github/workflows/sync-cnb.yml` | GitHub 用户名 |
-| `YOUR_GITHUB_REPO` | 同上 | GitHub 仓库名 |
-| `YOUR_CNB_USER` / `YOUR_SECRET_REPO` | `README.md`、`docs/README.zh-CN.md` 的 CNB 示例 | 仅示例,可保留或替换为读者可理解的占位 |
+| `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `package.json`(3 处:repository / homepage / bugs)、11 份 README 与 `EXAMPLES.md` 的 `uses:`、`.github/workflows/sync-cnb.yml` 注释 | **已替换**为 `h1s97x/github-profile-3d-contrib` |
+| `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `docs/spec/04-phase3-config-api.md`、`docs/spec/06-phase5-advanced.md` 中已规划但未实现的内容 | **已替换**为真实坐标 —— 这些文档描述的就是本仓库未来的样子,留占位符等于让人以为发布前还要再改一遍 |
+| `YOUR_CNB_USER` / `YOUR_SECRET_REPO` | `README.md`、`docs/README.zh-CN.md` 的 CNB 密钥仓库 `imports` 示例 | **保留**,是给读者填自己的值 |
 
-替换命令:
+检查命令(`.github/workflows/` 里的 `uses:` 写的是 `./`,不引用本仓库坐标,所以能直接 grep):
 
 ```sh
-grep -rln 'YOUR_GITHUB_USER\|YOUR_GITHUB_REPO' . --exclude-dir=.git
-# 确认清单无误后执行
-grep -rl 'YOUR_GITHUB_USER\|YOUR_GITHUB_REPO' . --exclude-dir=.git \
-  | xargs sed -i 's|YOUR_GITHUB_USER/YOUR_GITHUB_REPO|<user>/<repo>|g'
+# 运行时/发布面不应再出现占位符,期望输出 clean
+grep -rn 'YOUR_GITHUB' action.yml package.json .github/ || echo 'clean'
+# 全仓只剩 README 密钥仓库示例里的两个 CNB 占位符,期望 2
+grep -rn 'YOUR_CNB_USER\|YOUR_SECRET_REPO' --include='*.md' . | grep -v docs/spec/ | wc -l
 ```
+
+> 早期版本的替换命令写成 `sed 's|YOUR_GITHUB_USER/YOUR_GITHUB_REPO|<user>/<repo>|g'`,
+> 会连带改掉 `docs/spec` 里计划内容的示例,把「计划文档」变成「既成事实」,已废弃。
+> 后续改动请按文件逐个确认,不要用全局 sed。
 
 ---
 
@@ -292,11 +301,17 @@ CNB 仓库地址是公开信息,直接写入工作流;凭据绝不进仓库。
 
 ## 六、验证清单
 
-- [ ] `git grep -c 'yoshi389111/github-profile-3d-contrib'` 仅在衍生声明块中出现(指向上游的说明)
+- [ ] `git grep -n 'yoshi389111/github-profile-3d-contrib' -- ':!dist'` 的命中项只剩:11 份 README 的衍生声明、
+      `README.md` 上游链接行、`CHANGELOG.md` 的 `Breaking changes` 与本文档、`src/create-3d-contrib.ts` 的
+      上游 issue 引用;`docs/spec/03` 的验收项见下一行
+- [ ] 自查脚本 `git grep -c 'yoshi389111/github-profile-3d-contrib'` 在**指定文件**上返回 0,
+      而全仓 grep 只返回上面那批(见 [阶段 2 验收](./03-phase2-architecture.md#十验收标准))
 - [ ] `git diff --stat HEAD~1 -- src/ spec/ sample-settings/ tsconfig.json .eslintrc.js` 输出为空
+      (仅适用于首次接管提交;阶段 1 起 `src/` 与 `spec/` 有意改动,改用「16 份快照字节未变」验收)
 - [ ] `LICENSE` 未被修改
 - [ ] `dist/` 仍被 git 追踪(`git ls-files dist/` 返回 3 个文件)
 - [ ] `npm ci && npm run build` 后 `git diff --exit-code -- dist/` 通过
-- [ ] 全部 `YOUR_GITHUB_*` 占位符已替换
+- [x] 面向用户的 `YOUR_GITHUB_*` 占位符已替换;`docs/spec` 计划内容中的占位符**按第一节豁免**
+- [ ] `package-lock.json` 的 `version` 与 `package.json` 一致(由 CI `release.yml` 与 `quality` 检查)
 - [ ] 11 份 README 的衍生声明块渲染正常(引用块与后续内容之间有空行)
 - [ ] `.cnb.yml` 与 `ci.yml` 的产物一致性判定逻辑等价

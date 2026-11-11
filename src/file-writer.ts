@@ -11,8 +11,29 @@ export const OUTPUT_FOLDER = './profile-3d-contrib';
  */
 const SAFE_FILE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$/;
 
+export const DEFAULT_FILE_NAME = 'profile-customize.svg';
+
+/**
+ * Same shape rule as `sanitizeFileName`, exposed so the settings reader
+ * can decide *before* rendering whether a user-provided name is usable.
+ */
+export const isSafeFileName = (fileName: string): boolean =>
+    SAFE_FILE_NAME.test(fileName) && !fileName.includes('..');
+
+/**
+ * Narrower than `isSafeFileName`: a plain-but-unusual name (an uppercase
+ * suffix, say) is merely warned about, while anything that can leave
+ * OUTPUT_FOLDER — separators, `..` segments, a leading dot — is rejected.
+ */
+export const escapesOutputFolder = (fileName: string): boolean =>
+    !isSafeFileName(fileName) &&
+    (fileName.includes('..') ||
+        fileName.includes('/') ||
+        fileName.includes('\\') ||
+        fileName.startsWith('.'));
+
 export const sanitizeFileName = (fileName: string): string => {
-    if (!SAFE_FILE_NAME.test(fileName) || fileName.includes('..')) {
+    if (!isSafeFileName(fileName)) {
         throw new AppError(
             ErrorCode.FILENAME_INVALID,
             `invalid output file name: "${fileName}"`,

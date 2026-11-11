@@ -359,6 +359,21 @@ export const renderSvg = (req: RenderRequest): string => {
 - [ ] `action.yml` 无需修改,`dist/` 构建通过 CI 一致性校验
 - [ ] 产出的 SVG **在语义与视觉上** 与 `docs/demo/` 下 10 个 demo 一致(人工比对)
 
+### 上游坐标自查
+
+本阶段会大面积重写渲染层,顺手确认没有把上游坐标抄进新代码:
+
+```sh
+# 非 Markdown 且非产物的文件里,唯一允许的命中是 src/create-3d-contrib.ts 顶部的上游 issue 引用
+git grep -n 'yoshi389111/github-profile-3d-contrib' -- ':!dist' ':!*.md'
+# 期望:只有 src/create-3d-contrib.ts 一行(ref. https://github.com/.../issues/27)
+```
+
+Markdown 里的衍生声明与 `CHANGELOG.md` 的迁移说明属于预期命中,不参与该判断。
+
+> 早期版本这里写的是 `git grep -c 'yoshi389111/github-profile-3d-contrib'`,不带路径过滤,
+> 而 11 份 README 的衍生声明本来就该保留上游链接,按那条标准**永远无法通过**,已修正。
+
 ## 十一、回滚方案
 
 本阶段风险最高,回滚须精细:
