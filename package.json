@@ -10,14 +10,14 @@
     "clean": "rimraf --glob \"dist/*\"",
     "tsc": "tsc",
     "build": "npm-run-all clean tsc && ncc build dist0/index.js --license licenses.txt",
-    "check-types": "tsc --noEmit",
-    "eslint": "eslint src/**/*.ts",
-    "eslint:fix": "eslint src/**/*.ts --fix",
+    "check-types": "tsc --noEmit && tsc --noEmit -p tsconfig.spec.json",
+    "eslint": "eslint src/**/*.ts spec/**/*.ts",
+    "eslint:fix": "eslint src/**/*.ts spec/**/*.ts --fix",
     "format": "prettier --write 'src/**/*.{js,ts,json}'",
     "lint": "npm-run-all eslint check-types",
     "lint:fix": "npm-run-all eslint:fix check-types format",
-    "test": "jest",
-    "test:coverage": "jest --collect-coverage"
+    "test": "TZ=UTC jest",
+    "test:coverage": "TZ=UTC jest --collect-coverage"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -28,12 +28,15 @@
       "^.+\\.(ts|js)$": [
         "ts-jest",
         {
-          "tsconfig": "tsconfig.json"
+          "tsconfig": "tsconfig.jest.json"
         }
       ]
     },
+    "transformIgnorePatterns": [
+      "node_modules/\\.pnpm/(?!(d3|internmap|delaunator|robust-predicates))"
+    ],
     "testMatch": [
-      "**/spec/*.(spec|test).(ts|js)"
+      "**/spec/*\\.(spec|test)\\.(ts|js)"
     ]
   },
   "keywords": [],
