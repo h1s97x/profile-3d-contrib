@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **CNB as a first-class data source.** Set `PLATFORM=cnb` (or simply provide `CNB_TOKEN`) to build the calendar from [CNB](https://cnb.cool) instead of GitHub. Data comes from the CNB OpenAPI (`GET /users/{username}/calendar`, `GET /users/{username}/repos`); the renderer, the themes, the settings system and the snapshot baselines are untouched. Contribution levels are derived with the same quartile rule GitHub uses, and the language pie is aggregated from each repository's primary language. See "How to use (CNB)" in the README.
+- `PLATFORM`, `CNB_TOKEN` and `CNB_API_ENDPOINT` environment variables. An unknown `PLATFORM` value fails fast with `E_PLATFORM_INVALID`, and CNB API errors surface the server `errmsg` alongside the HTTP status.
 - **Structured error codes.** All user-facing failures carry a stable `E_*` code and hints. Exit code convention: `1` = configuration/input error, `2` = remote API error.
 - **Settings validator and JSON schema.** Zero-dependency structural validation of `SETTING_JSON` files, plus `schema/settings.schema.json` (draft-07) for IDE autocompletion.
 - **Render output snapshot tests.** 16 SVG snapshots (8 built-in themes × animated/static) guard against accidental output changes.

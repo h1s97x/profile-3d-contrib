@@ -117,12 +117,15 @@ This will add the workflow to your repository.
 
 In the sample, only `GITHUB_TOKEN` and `USERNAME` are specified as environment variables, but you can specify the following environment variables:
 
-- `GITHUB_TOKEN` : (required) access token
+- `GITHUB_TOKEN` : (required for GitHub data) access token
 - `USERNAME` : (required) target username (or specify with an argument).
 - `MAX_REPOS` : (optional) max repositories, default 100 - since ver. 0.2.0
 - `SETTING_JSON` : (optional) settings json file path. See `sample-settings/*.json` and `src/type.ts` in `h1s97x/github-profile-3d-contrib` repository for details. - since ver. 0.6.0
 - `GITHUB_ENDPOINT` : (optional) Github GraphQL endpoint. For example, if you want to create a contribution calendar based on your company's GitHub Enterprise activity instead of GitHub.com, set this environment variable. e.g. `https://github.mycompany.com/api/graphql` - since ver. 0.8.0
 - `YEAR` : (optional) For past calendars, specify the year. This is intended to be specified when running the tool from the command line. - since ver. 0.8.0
+- `PLATFORM` : (optional) `github` (default) or `cnb` — selects the contribution data source. When unset, a present `CNB_TOKEN` means `cnb`, otherwise `github`. Any other value fails with `E_PLATFORM_INVALID`. - since ver. 1.1.0
+- `CNB_TOKEN` : (required for CNB data) CNB access token with the `account-engage:r` (read) scope. CNB pipelines inject it automatically. - since ver. 1.1.0
+- `CNB_API_ENDPOINT` : (optional) CNB OpenAPI endpoint, default `https://api.cnb.cool`. Also injected by CNB pipelines. - since ver. 1.1.0
 
 #### About `GITHUB_TOKEN`
 
@@ -245,22 +248,43 @@ invoke it differs.
 >
 > If you only use GitHub Actions, you do not need this section at all.
 
+### Choose the data source
+
+Contribution data can come from **GitHub** (the historical behaviour) or from **CNB itself**:
+
+| | GitHub data | CNB data |
+|---|---|---|
+| Set `PLATFORM` | `github` (default) | `cnb` |
+| Token | `GITHUB_TOKEN` | `CNB_TOKEN` (injected automatically in CNB pipelines) |
+| `USERNAME` | GitHub username | CNB username |
+| Calendar | GraphQL contribution calendar | `GET /users/{username}/calendar` |
+| Language pie | per-language commit contributions | primary language of each repository (every repository weighs 1) |
+| Reviews axis | pull request reviews | `valid_cr_count` |
+
+`PLATFORM` is optional: when it is unset, the generator picks CNB if `CNB_TOKEN` is present and
+GitHub otherwise. Set it explicitly when both tokens exist.
+
+The CNB calendar API reports raw daily activity counts, so the 0–4 colour levels are derived with the
+same **quartile** rule GitHub uses, and the language pie degrades to repository shares because CNB
+does not expose a per-language contribution breakdown. The renderer, the themes and the settings
+system are identical for both sources.
+
 ### Step 1. Create your profile repository on CNB
 
-Create a repository named after your CNB account, and make sure the GitHub account whose
-contributions you want to chart is set as your GitHub profile.
+Create a repository named after your CNB account.
 
 > [!NOTE]
-> The generated content is committed to your **CNB** repository, but the contribution data always
-> comes from **GitHub** — the generator queries the GitHub GraphQL API. `GITHUB_TOKEN` is therefore
-> still required here.
+> With `PLATFORM: cnb` both the data and the generated files live on CNB — no GitHub account is
+> involved. Keep the default GitHub mode if you want to chart GitHub contributions instead; then make
+> sure the GitHub account you want to chart is set as your GitHub profile.
 
 ### Step 2. Prepare a secret repository
 
 CNB does not use `${{ secrets.* }}`. Secrets are stored in a dedicated
 [secret repository](https://docs.cnb.cool/zh/repo/secret) and injected via `imports`.
 
-Create a secret repository containing an `envs.yml`:
+With `PLATFORM: cnb` **no secret is required** — CNB pipelines inject `CNB_TOKEN` automatically.
+For GitHub data, create a secret repository containing an `envs.yml`:
 
 ```yaml title="envs.yml (in your secret repository)"
 GITHUB_TOKEN: ghp_xxxxxxxxxxxxxxxxxxxx
@@ -276,6 +300,8 @@ main:
     - name: generate
       docker:
         image: node:24
+      # Only needed for GitHub data. With PLATFORM: cnb the pipeline
+      # already has CNB_TOKEN, so this import can be dropped.
       imports:
         - https://cnb.cool/YOUR_CNB_USER/YOUR_SECRET_REPO/-/blob/main/envs.yml
       stages:
@@ -284,18 +310,20 @@ main:
             - name: Download the generator
               script: |
                 mkdir -p .tool
+                # Pin a release tag in production, e.g. .../-/git/raw/v1.0.0/dist/index.js
                 curl -fsSL -o .tool/dist.js \
-                  https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/v1.0.0/dist/index.js
-                node .tool/dist.js --version || true
+                  https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/dist/index.js
+                test -s .tool/dist.js
 
         - name: generate
           jobs:
             - name: Run the generator
               env:
-                # CNB's equivalent of the GitHub Actions context.
-                # CNB_REPO_SLUG looks like "your-name/your-repo"; take the first segment.
-                USERNAME: ${CNB_REPO_SLUG}
+                PLATFORM: cnb # drop this line to chart GitHub contributions
               script: |
+                # CNB_REPO_SLUG looks like "your-name/your-repo"; for a
+                # profile repository the first segment is your account name.
+                USERNAME="${CNB_REPO_SLUG%%/*}"
                 node .tool/dist.js "$USERNAME"
 
         - name: commit
@@ -324,16 +352,17 @@ node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env
 | Topic | GitHub Actions | CNB |
 |---|---|---|
 | Reference | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` | Download `dist/index.js` in a `script` job |
-| Secrets | `${{ secrets.GITHUB_TOKEN }}` | Secret repository + `imports` |
-| Repo context | `${{ github.repository_owner }}` | `${{ CNB_REPO_SLUG }}` |
+| Data source | GitHub API | GitHub API, or the CNB API with `PLATFORM: cnb` |
+| Secrets | `${{ secrets.GITHUB_TOKEN }}` | Secret repository + `imports`; `PLATFORM: cnb` needs none |
+| Repo context | `${{ github.repository_owner }}` | `${CNB_REPO_SLUG%%/*}` |
 | Pipeline config | `.github/workflows/*.yml` | `.cnb.yml` (Pipeline / Stage / Job) |
 | Schedule | `on.schedule.cron` | `"crontab: ..."` trigger key |
 | Check out code | `actions/checkout@v5` | Automatic (the pipeline runs in your repo) |
 
 > [!NOTE]
-> `USERNAME` must be your **GitHub** username, because the contribution data comes from GitHub.
-> Setting it to `${CNB_REPO_SLUG}` works only when your CNB account name equals your GitHub user
-> name — otherwise pass the GitHub username explicitly.
+> `USERNAME` must name the account on the platform selected by `PLATFORM`. CNB account names and
+> GitHub usernames are usually different, so with the default GitHub data source pass the GitHub
+> username explicitly (or keep a CNB account whose name matches it).
 
 ### Build this project on CNB
 
@@ -349,6 +378,14 @@ Set the `GITHUB_TOKEN` environment variable to your personal access token.
 
 ```sh
 export GITHUB_TOKEN=XXXXXXXXXXXXXXXXXXXXX
+```
+
+To chart CNB contributions instead, select the CNB data source (this needs a CNB token with the
+`account-engage:r` scope):
+
+```sh
+export PLATFORM=cnb
+export CNB_TOKEN=XXXXXXXXXXXXXXXXXXXXX
 ```
 
 Run the following command, replacing `USER_NAME` with your GitHub username or the target username.
