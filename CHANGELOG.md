@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Behavior changes (bug fixes)
 
 - **`MAX_REPOS` is now a real cap.** The repository pagination previously overshot the limit by up to 99 entries (whole 100-repository pages were appended), inflating total fork/star counts. The merged repository list is now truncated to `MAX_REPOS` and an info message is logged when truncation happens. If you set `MAX_REPOS`, your fork/star totals may **decrease** to the correct value.
-- **Invalid settings `type` now fails fast.** A typo such as `"type": "norml"` previously produced a fully transparent SVG without any message. The action now exits with code 1 and prints `E_SETTINGS_INVALID` including the line number and the list of valid types. Other settings issues (missing fields, odd values) only emit `::warning::` messages and do not block execution.
+- **Invalid settings `type` now fails fast.** A typo such as `"type": "norml"` previously produced a fully transparent SVG without any message. The action now exits with code 1 and prints `E_SETTINGS_INVALID` including the line number and the list of valid types. Other settings issues (missing fields, odd values) only emit `WARNING:` messages and do not block execution.
 - **Empty contribution years fail fast.** Requesting a year without contribution data (or a year dropped by GitHub's data retention) previously crashed with an obscure `TypeError` inside d3. The action now exits with code 1 and prints `E_YEAR_EMPTY` with actionable hints.
 
 ### Added
