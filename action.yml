@@ -2,7 +2,7 @@ name: GitHub-Profile-3D-Contrib
 description: Generate profile 3D Contributions
 author: h1s97x <Yang1297656998@outlook.com>
 
-# 注意:本仓库由新维护者接管,原作者与版权归属见 LICENSE 与 README 顶部说明。
+# 注意:本仓库在 CNB 独立维护,原作者与版权归属见 LICENSE 与 README 顶部说明。
 # 刻意不添加 inputs —— 配置项改造属长期演进阶段(见 docs/spec/04-phase3-config-api.md)。
 # 刻意不添加 post 钩子 —— 无对应的 dist/cleanup.js,添加会导致 Action 运行失败。
 runs:

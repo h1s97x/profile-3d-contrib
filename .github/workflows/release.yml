@@ -4,13 +4,14 @@ name: Verify Release
 # 职责边界
 # ============================================================================
 # 本工作流只做「发布前校验」,不创建 tag、不发布 Release、不修改 latest 分支。
-#   tag 与 Release   —— 由维护者在 GitHub 上手工创建
+# 注:主仓已在 CNB;本工作流及其余 .github/workflows/* 只作用于 GitHub 侧分发仓库。
+#   tag 与 Release   —— 由维护者在 GitHub 分发仓库上手工创建
 #   latest 分支更新  —— 由 latest-branch.yml 在 release published 后处理
-#   推送产物到 CNB   —— 由 sync-cnb.yml 在 push 时处理
+#   主仓产物一致性  —— 由主仓(CNB)的 .cnb.yml 在 push 时校验
 #
-# 之所以拆成三个工作流而非一个,是为了让每个环节的失败都能被独立定位:
-#   产物不一致  → 本工作流失败
-#   镜像不同步  → sync-cnb.yml 失败
+# 之所以拆成独立环节,是为了让每个环节的失败都能被独立定位:
+#   产物不一致   → 本工作流失败
+#   主仓产物过期 → .cnb.yml 的 verify-dist 失败
 #   latest 未更新 → latest-branch.yml 失败
 # ============================================================================
 

@@ -212,7 +212,8 @@ branding:
 
 ### 4.1 向后兼容:env 全部保留
 
-> 坐标变更(`yoshi389111/...` → `h1s97x/...`)已在 `1.0.0` 完成,
+> 坐标变更(`yoshi389111/...` → `h1s97x/...`)已在 `1.0.0` 完成;
+> 主仓现为 CNB(`h1s97x/plugins/profile-3d-contrib`),GitHub 侧仓库仅用于兼容存量 `uses:` 引用。
 > 本节只讨论 `env:` 与 `with:` 的写法差异。
 
 ```yaml

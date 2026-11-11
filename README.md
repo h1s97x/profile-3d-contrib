@@ -3,21 +3,18 @@
 ![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 > [!IMPORTANT]
-> **This repository is a maintained fork.**
+> **This repository is independently maintained on CNB.**
 >
 > | | |
 > |---|---|
-> | Upstream | [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib) |
-> | Baseline version | `v0.9.3` |
-> | Fork maintainer | `h1s97x` |
+> | Canonical repository | [h1s97x/plugins/profile-3d-contrib](https://cnb.cool/h1s97x/plugins/profile-3d-contrib) |
+> | Original work | [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib), `v0.9.3` |
+> | Maintainer | `h1s97x` |
 > | License | MIT (see [LICENSE](./LICENSE)) |
 >
-> This is an unofficial fork. It is not affiliated with or endorsed by the original author.
-> Copyright and authorship of the original work remain with SATO Yoshiyuki — see [LICENSE](./LICENSE).
->
-> **Upgrading from the upstream project:** replace the `uses:` coordinate with
-> `h1s97x/github-profile-3d-contrib@v1.0.0` (or `@latest`). No other configuration changes are required,
-> unless you use `MAX_REPOS` — see the breaking change noted in [CHANGELOG](./CHANGELOG.md).
+> This project is derived from the original work and is not affiliated with or endorsed by the
+> original author. Copyright of the original work remains with SATO Yoshiyuki — see [LICENSE](./LICENSE).
+> Development is independent of the upstream project: no upstream synchronization is performed.
 
 <!-- Platform picker -->
 **Platform:** [GitHub Actions](#how-to-use-github-actions---basic) | [CNB](#how-to-use-cnb) | [Local](#how-to-use-local)
@@ -366,8 +363,8 @@ node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env
 
 ### Build this project on CNB
 
-The `.cnb.yml` in this repository is the project's own CI. It runs on the CNB mirror and verifies
-that the mirrored `dist/` still matches the source:
+The `.cnb.yml` in this repository is the project's own CI. It runs on the CNB primary repository and
+verifies that the committed `dist/` still matches the source:
 
 - [CNB pipeline syntax](https://docs.cnb.cool/zh/build/grammar)
 - [Environment variables and secrets](https://docs.cnb.cool/zh/build/env)
@@ -406,5 +403,5 @@ node . USER_NAME
 &copy; 2021 SATO Yoshiyuki. Licensed under the MIT License.
 
 The original work is copyright SATO Yoshiyuki and is redistributed under the MIT License.
-Subsequent maintenance and modifications are by the fork maintainer (`h1s97x`).
+Subsequent maintenance and modifications are by the current maintainer (`h1s97x`).
 The full license text is in [LICENSE](./LICENSE).

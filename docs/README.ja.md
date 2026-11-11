@@ -3,14 +3,15 @@
 ![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 > [!IMPORTANT]
-> **このリポジトリは保守されているフォークです。**
+> **このリポジトリは CNB 上で独立して保守されています。**
 >
-> - 元プロジェクト: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
-> - ベースバージョン: `v0.9.3`
-> - フォーク保守者: `h1s97x`
+> - 正規リポジトリ: [h1s97x/plugins/profile-3d-contrib](https://cnb.cool/h1s97x/plugins/profile-3d-contrib)
+> - 元作品: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib), `v0.9.3`
+> - 保守者: `h1s97x`
 > - ライセンス: MIT — 原作者の著作権は SATO Yoshiyuki に帰属します([LICENSE](../LICENSE) を参照)
 >
-> 本フォークは非公式であり、原作者との提携や承認はされていません。
+> 本プロジェクトは元作品から派生したものであり、原作者との提携や承認はされていません。
+> 開発は元プロジェクトから独立しており、元プロジェクトとの同期は行いません。
 
 <!-- 言語コードの順序（英語を除く） -->
 [English (en)](../README.md) |

@@ -3,14 +3,14 @@
 ![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 > [!IMPORTANT]
-> **本仓库为维护中的衍生版本(Fork)。**
+> **本仓库在 CNB 独立维护。**
 >
-> - 上游项目:[yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
-> - 基线版本:`v0.9.3`
+> - 主仓:[h1s97x/plugins/profile-3d-contrib](https://cnb.cool/h1s97x/plugins/profile-3d-contrib)
+> - 原始作品:[yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib),`v0.9.3`
 > - 维护者:`h1s97x`
 > - 许可证:MIT —— 原作者著作权归 SATO Yoshiyuki 所有(见 [LICENSE](../LICENSE))
 >
-> 本项目为非官方衍生版本,与原作者无隶属或背书关系。
+> 本项目衍生自原始作品,与原作者无隶属或背书关系。开发独立于原项目,不再与其同步。
 
 <!-- 语言代码顺序（英语除外） -->
 [English (en)](../README.md) |
@@ -310,7 +310,7 @@ node .tool/dist.js "$USERNAME"        # 目标用户名（或直接设置 USERNA
 
 ### 在 CNB 上构建本项目
 
-本仓库中的 `.cnb.yml` 是项目自身的 CI,运行在 CNB 镜像仓库中,用于校验镜像过来的 `dist/` 是否仍与源码一致:
+本仓库中的 `.cnb.yml` 是项目自身的 CI,直接在 CNB 主仓运行,用于校验已提交的 `dist/` 是否仍与源码一致:
 
 - [CNB 流水线语法](https://docs.cnb.cool/zh/build/grammar)
 - [环境变量与密钥](https://docs.cnb.cool/zh/build/env)

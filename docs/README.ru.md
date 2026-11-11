@@ -3,14 +3,15 @@
 ![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 > [!IMPORTANT]
-> **Этот репозиторий — поддерживаемый форк.**
+> **Этот репозиторий поддерживается независимо на CNB.**
 >
-> - Исходный проект: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
-> - Базовая версия: `v0.9.3`
-> - Мейнтейнер форка: `h1s97x`
+> - Основной репозиторий: [h1s97x/plugins/profile-3d-contrib](https://cnb.cool/h1s97x/plugins/profile-3d-contrib)
+> - Оригинальная работа: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib), `v0.9.3`
+> - Сопровождающий: `h1s97x`
 > - Лицензия: MIT — авторские права на оригинальную работу остаются за SATO Yoshiyuki (см. [LICENSE](../LICENSE))
 >
-> Это неофициальный форк, не связанный с оригинальным автором и не одобренный им.
+> Этот проект является производным от оригинальной работы и не связан с её автором и не одобрен им.
+> Разработка ведётся независимо от исходного проекта; синхронизация с ним не выполняется.
 
 <!-- Порядок кодов языков (кроме английского) -->
 [English (en)](../README.md) |

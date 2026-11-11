@@ -3,14 +3,15 @@
 ![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 > [!IMPORTANT]
-> **이 저장소는 관리되는 포크입니다.**
+> **이 저장소는 CNB에서 독립적으로 관리됩니다.**
 >
-> - 원본 프로젝트: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
-> - 기준 버전: `v0.9.3`
-> - 포크 관리자: `h1s97x`
+> - 기준 저장소: [h1s97x/plugins/profile-3d-contrib](https://cnb.cool/h1s97x/plugins/profile-3d-contrib)
+> - 원본 저작물: [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib), `v0.9.3`
+> - 관리자: `h1s97x`
 > - 라이선스: MIT — 원작 저작권은 SATO Yoshiyuki에게 있습니다([LICENSE](../LICENSE) 참조)
 >
-> 이는 비공식 포크이며, 원저자와의 제휴 또는 승인을 받지 않았습니다.
+> 이 프로젝트는 원본 저작물에서 파생되었으며, 원저자와 제휴하거나 승인을 받지 않았습니다.
+> 개발은 원본 프로젝트와 독립적으로 진행되며, 원본 프로젝트와 동기화하지 않습니다.
 
 <!-- 언어 코드 순서(영어 제외) -->
 [English (en)](../README.md) |

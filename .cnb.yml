@@ -1,11 +1,12 @@
 # ============================================================================
-# CNB 侧云原生构建配置
+# CNB 主仓云原生构建配置
 # ============================================================================
-# 定位:CI 职责(构建校验),**不承担 GitHub → CNB 的同步**。
-#   同步由 GitHub 侧的 .github/workflows/sync-cnb.yml 主动推送完成,
-#   原因见该文件顶部说明(CNB 插件模型为 Docker 镜像,无仓库引用型 Action)。
+# 定位:本仓库(cnb.cool/h1s97x/plugins/profile-3d-contrib)是唯一源(source of truth),
+#   本文件在主仓上直接执行 CI 校验,不存在任何镜像同步链路。
+#   GitHub 侧仓库若仍存在,仅用于兼容存量 uses: 引用,不再向本仓推送。
 #
-# 本文件随源码一同从 GitHub 镜像过来,保证两个平台的校验逻辑一致。
+# 原 .github/workflows/sync-cnb.yml(GitHub → CNB 强推全量历史)已删除:
+#   主仓切到 CNB 后,该链路会让 GitHub 侧的一次 push 覆盖本仓 main 分支。
 #
 # 语法参考:
 #   Pipeline/Stage/Job 三层结构 —— https://docs.cnb.cool/zh/build/grammar
@@ -32,13 +33,12 @@ main:
         - name: verify-dist
           jobs:
             - name: Ensure dist matches source
-              # 与 GitHub 侧 ci.yml 的 dist-consistency 检查等效。
-              # 镜像仓库的 dist/ 若与源码不一致,说明同步过程出了问题,
-              # 此时 CNB 用户从镜像拉到的产物就是错的,必须阻断。
+              # 主仓的 dist/ 若与源码不一致,用户下载到的产物就是错的,必须阻断。
+              # 与 .github/workflows/ci.yml 的 dist-consistency 检查等效。
               script: |
                 if ! git diff --exit-code -- dist/; then
-                  echo "ERROR: dist/ 与源码不一致,CNB 镜像产物已过期。"
-                  echo "ERROR: 请检查 sync-cnb 工作流是否成功执行。"
+                  echo "ERROR: dist/ 与源码不一致。"
+                  echo "ERROR: 请在本地执行 npm ci && npm run build 后重新提交 dist/。"
                   exit 1
                 fi
 

@@ -3,14 +3,14 @@
 ![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
 
 > [!IMPORTANT]
-> **本倉庫為維護中的衍生版本(Fork)。**
+> **本倉庫在 CNB 獨立維護。**
 >
-> - 上游專案:[yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib)
-> - 基線版本:`v0.9.3`
+> - 主倉:[h1s97x/plugins/profile-3d-contrib](https://cnb.cool/h1s97x/plugins/profile-3d-contrib)
+> - 原始作品:[yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib),`v0.9.3`
 > - 維護者:`h1s97x`
 > - 授權:MIT —— 原作者著作權歸 SATO Yoshiyuki 所有(見 [LICENSE](../LICENSE))
 >
-> 本專案為非官方衍生版本,與原作者無隸屬或背書關係。
+> 本專案衍生自原始作品,與原作者無隸屬或背書關係。開發獨立於原專案,不再與其同步。
 
 <!-- 語言順序（不含英文） -->
 [English (en)](../README.md) |

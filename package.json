@@ -52,11 +52,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/h1s97x/github-profile-3d-contrib.git"
+    "url": "https://cnb.cool/h1s97x/plugins/profile-3d-contrib.git"
   },
-  "homepage": "https://github.com/h1s97x/github-profile-3d-contrib#readme",
+  "homepage": "https://cnb.cool/h1s97x/plugins/profile-3d-contrib",
   "bugs": {
-    "url": "https://github.com/h1s97x/github-profile-3d-contrib/issues"
+    "url": "https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/issues"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",

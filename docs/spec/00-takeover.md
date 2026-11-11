@@ -2,9 +2,10 @@
 
 | 元信息 | 值 |
 |---|---|
-| 状态 | **已执行** |
+| 状态 | **已执行(历史档案)** |
 | 执行日期 | 2026-10-03 |
-| 上游项目 | [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib) |
+| 主仓 | [h1s97x/plugins/profile-3d-contrib](https://cnb.cool/h1s97x/plugins/profile-3d-contrib)(CNB) |
+| 原始作品 | [yoshi389111/github-profile-3d-contrib](https://github.com/yoshi389111/github-profile-3d-contrib) |
 | 基线版本 | `v0.9.3` |
 | 本次发布版本 | `1.0.0` |
 | 维护者 | `h1s97x` |
@@ -12,6 +13,11 @@
 
 本文档是**接管的权威记录**:记录已执行的改动、关键决策及其依据、以及未完成事项的交接说明。
 后续演进阶段见 [README](./README.md) 的阶段路线图。
+
+> **档案状态(2026-11-12)**:主仓已切到 CNB,项目独立维护,不再与上游同步。
+> 第二、四、五章中「GitHub 为源 / CNB 为镜像」「向上游提交 PR」「从上游同步」等决策均为接管
+> 当时的历史记录,**现已废止**,以第零章为准。保留原文是为了不抹掉决策依据;
+> 署名与许可相关表述始终有效。
 
 > **接管首次提交(`a2c5e2a`)未修改 `src/` 任何运行时代码**,1749 行源码与 8 个内置主题 JSON
 > 保持原样,产物与 `0.9.3` 字节一致。
@@ -22,6 +28,57 @@
 
 ---
 
+## 零、独立化后的修订(2026-11-12)
+
+### 0.1 平台与身份
+
+| 项 | 结论 |
+|---|---|
+| 主仓(source of truth) | `cnb.cool/h1s97x/plugins/profile-3d-contrib`,CI 直接在该仓库执行(见 [`.cnb.yml`](../../.cnb.yml)) |
+| GitHub 侧仓库 | 仅作为存量 `uses: h1s97x/github-profile-3d-contrib@...` 引用的分发端点,不再是源 |
+| 同步链路 | `.github/workflows/sync-cnb.yml` 已删除。它以 `PLUGIN_FORCE: "true"` 向 CNB 强推全量历史;主仓切到 CNB 后,GitHub 侧一次 push 即可覆盖本仓 `main`,必须移除 |
+| 仓库坐标 | `package.json` 的 `repository` / `homepage` / `bugs` 指向 CNB 主仓 |
+| 身份表述 | 11 份 README 顶部改为「独立维护 / 来源与致谢」,保留原作者署名、基线版本与 MIT 声明 |
+| `LICENSE` | **未改动** —— MIT 要求原版权声明与许可文本随附,见 0.2 核验记录 |
+
+第二章的「GitHub 为源,CNB 为自动镜像」、第四章 4.2 的「向上游提交 PR」、
+第五章 5.2 / 5.4 的同步与凭据说明均随之废止;这些段落保留为历史决策记录,不再是当前架构依据。
+
+### 0.2 原始作品与历史归档
+
+本仓库**未保留上游的 git 历史**:首个提交 `0ade128 init from source (without history)`
+(2026-10-03)是从上游 `v0.9.3` 源码快照建立的独立仓库,截至 2026-11-11 共 43 个提交。
+MIT 只要求随附版权声明与许可文本,并未要求保留提交历史,因此该做法不构成许可违规;
+代价是无法用 `git blame` / `bisect` 追溯上游遗留缺陷,也无法 `cherry-pick` 上游修复 ——
+本项目已永久分叉,后者不再需要。
+
+为让来源可核验,记录以下证据(核验日期 2026-11-12):
+
+| 项 | 值 |
+|---|---|
+| 上游仓库 | `https://github.com/yoshi389111/github-profile-3d-contrib` |
+| 基线 tag | `v0.9.3` |
+| tag 对应 commit | `7d95e7d4cdc028dd1e1cbd957d65f35efb12ae39`(`git ls-remote --tags` 核验;轻量 tag,无 `^{}` 解引用) |
+| 本仓首个提交 | `0ade128`(`init from source (without history)`,2026-10-03) |
+| 本仓 `LICENSE` | sha256 `caa1ef089455b8d6bc7c03eded3b513868a530e04930f57f2e9cd93f3edef1c6` |
+| 上游 `v0.9.3` 的 `LICENSE` | sha256 与上一致(取自 `raw.githubusercontent.com/.../v0.9.3/LICENSE`),即本仓 `LICENSE` 与基线逐字节相同 |
+| 第三方依赖许可 | `dist/licenses.txt` 由 `ncc` 生成,随产物保留,不得删除 |
+
+若需要一份可验证的上游历史归档(例如合规审计),不必重写本仓已有的 43 个提交:
+
+```sh
+git clone --mirror https://github.com/yoshi389111/github-profile-3d-contrib.git upstream-mirror.git
+git -C upstream-mirror.git bundle create ../upstream-v0.9.3.bundle --all
+sha256sum upstream-v0.9.3.bundle
+```
+
+归档产物**不进入本仓库**(上游含多版本 `dist/`,体积大),存放在私有仓库、Release 附件或离线介质,
+并把存放位置与文件哈希补记到本表。也可选用 `git fetch` 把上游历史导入孤立分支
+`upstream-archive`,让 `git log` 连得起来;这会引入大量历史,仅在确实需要时再做。
+**不要**为补历史而重写或强推现有提交:已有 CI、tag、`latest` 分支与发布流程依赖它们。
+
+---
+
 ## 一、待替换占位符
 
 面向用户的 `uses:` 坐标已在 `1.0.0` 落实为 `h1s97x/...`。以下占位符**按文件区分处理**,
@@ -29,7 +86,7 @@
 
 | 占位符 | 位置 | 处理 |
 |---|---|---|
-| `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `package.json`(3 处:repository / homepage / bugs)、11 份 README 与 `EXAMPLES.md` 的 `uses:`、`.github/workflows/sync-cnb.yml` 注释 | **已替换**为 `h1s97x/github-profile-3d-contrib` |
+| `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `package.json`(3 处:repository / homepage / bugs)、11 份 README 与 `EXAMPLES.md` 的 `uses:`、`.github/workflows/sync-cnb.yml` 注释(该文件已删除,见 0.1;坐标现指向 CNB 主仓) | **已替换**为 `h1s97x/github-profile-3d-contrib`(GitHub 侧分发坐标保留) |
 | `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `docs/spec/04-phase3-config-api.md`、`docs/spec/06-phase5-advanced.md` 中已规划但未实现的内容 | **已替换**为真实坐标 —— 这些文档描述的就是本仓库未来的样子,留占位符等于让人以为发布前还要再改一遍 |
 | `YOUR_CNB_USER` / `YOUR_SECRET_REPO` | `README.md`、`docs/README.zh-CN.md` 的 CNB 密钥仓库 `imports` 示例 | **保留**,是给读者填自己的值 |
 
@@ -50,7 +107,10 @@ grep -rn 'YOUR_CNB_USER\|YOUR_SECRET_REPO' --include='*.md' . | grep -v docs/spe
 
 ## 二、双平台架构决策
 
-### 2.1 结论:一个仓库,GitHub 为源,CNB 为自动镜像
+### 2.1 结论(历史决策,已废止):一个仓库,GitHub 为源,CNB 为自动镜像
+
+> 2026-11-12 起以 CNB 为主仓,本节与 2.2 的同步方案不再适用,见 0.1。
+> 保留原文仅作决策依据记录。
 
 **为什么不用两个仓库:**
 
@@ -61,7 +121,9 @@ grep -rn 'YOUR_CNB_USER\|YOUR_SECRET_REPO' --include='*.md' . | grep -v docs/spe
 | 单人维护成本 | 仓库数翻倍意味着发版、版本号、CHANGELOG、依赖安全更新全部翻倍 |
 | 真实成本在文档 | 平台专有语法(`secrets.GITHUB_TOKEN` 49 处、`github.repository_owner` 25 处、`actions/checkout` 16 处)与仓库数量无关 |
 
-### 2.2 同步方向的修正(重要)
+### 2.2 同步方向的修正(历史记录,已废止)
+
+> 该链路已随 `.github/workflows/sync-cnb.yml` 一并删除,见 0.1。
 
 最初设想「在 `.cnb.yml` 中用 git-sync 从 GitHub 拉取」。**经查证官方文档后此方案已废弃**:
 
@@ -69,7 +131,7 @@ grep -rn 'YOUR_CNB_USER\|YOUR_SECRET_REPO' --include='*.md' . | grep -v docs/spe
 `uses: docker://tencentcom/git-sync` 运行;CNB 侧只能使用 `sync_mode: pull` 配合
 `crontab` **定时拉取**(存在最长 24 小时延迟)。
 
-因此最终方案:
+因此接管当时的最终方案(现已废止,见 0.1):
 
 ```
 GitHub(源)
@@ -110,7 +172,7 @@ node dist.js <GITHUB_USERNAME>
 
 **若后续确需更名**,切换步骤:
 
-1. 在 GitHub 上重命名仓库(GitHub 会自动重定向旧地址)
+1. 在主仓(CNB)上重命名仓库,并同步处理 GitHub 侧分发仓库
 2. 更新 `package.json` 的 `name` / `repository` / `homepage` / `bugs`
 3. 全局替换 11 份 README 与 `action.yml` 中的 `uses:` 坐标
 4. **保留旧仓库不删除**,以免既有引用立即失效
@@ -128,14 +190,14 @@ node dist.js <GITHUB_USERNAME>
 | `.gitattributes` | NEW | `dist/** linguist-generated=true` + `dist/** -diff` |
 | `.github/workflows/ci.yml` | NEW | `dist-consistency`(阻塞)+ `quality`(观察期)两个 job |
 | `.github/workflows/release.yml` | NEW | 发布校验:tag 与版本号一致 + 产物可复现 |
-| `.github/workflows/sync-cnb.yml` | NEW | GitHub → CNB 自动镜像 |
-| `.cnb.yml` | NEW | CNB 侧 CI:构建并校验镜像产物一致性 |
+| `.github/workflows/sync-cnb.yml` | NEW → **已删除** | 接管时建立 GitHub → CNB 自动镜像;主仓切到 CNB 后移除,见 0.1 |
+| `.cnb.yml` | NEW | CNB 侧 CI:构建并校验产物一致性(现直接在主仓执行) |
 | `.github/workflows/build.yml` | MODIFY | `npm install` → `npm ci`;新增 `concurrency`;无变化时跳过提交 |
 | `.github/workflows/latest-branch.yml` | MODIFY | 仅补充设计决策与风险记录,逻辑未变 |
 
 **关于 `.gitattributes` 的两个属性:**
 
-- `-diff` —— 未来同步上游时,若双方都改过 `src/`,`dist/index.js` 必然冲突且无法手动合并。
+- `-diff` —— 若两个分支都改过 `src/`,`dist/index.js` 必然冲突且无法手动合并。
   标记后冲突时只显示「二进制文件有差异」,避免 6.5 MB 文本涌入终端。
   **正确做法:先合 `src/`,再本地 `npm run build` 重新生成,永不手动合并。**
 - `linguist-generated` —— 让 GitHub 语言统计不把 6.5 MB 打包产物计入。
@@ -221,26 +283,12 @@ node dist.js <GITHUB_USERNAME>
 | B4 | `fileName` 未做路径校验 | 加固缺口 | P0 |
 | B6 | 重复属性、冗余 `mkdirSync`、数值无范围校验、`testMatch` 正则未转义 | 代码质量 | P2 |
 
-### 4.2 向上游提交 PR 的建议
+### 4.2 向上游提交 PR 的建议(已废止)
 
-**B1 值得单独向上游提 PR。** 理由:
-
-- 上游作者态度开放 —— CHANGELOG 显示已合并多个外部贡献(`#148` @K-H-A-L-I-D、`#129` @SoulBreathe、
-  `#154`、`#136`、`#131`、`#132`、`#135`、`#126`、`#119`、`#116`)
-- B1 是完全静默的失败,属于上游难以自行发现的缺陷类型
-- 修复不涉及架构变更,PR 体积小、可审查
-
-PR 描述应包含:
-
-1. 复现步骤:构造 `"type": "norml"` 的 settings JSON,运行后检查产物是否全透明且退出码为 0
-2. 根因分析:`settings-reader.ts` 的 `JSON.parse(...) as type.Settings` 是纯类型断言;
-   未命中的 `settings.type` 判定导致既不生成柱子的 class,也不生成对应 CSS 规则
-3. 影响面:`create-svg.ts:27,30`、`create-3d-contrib.ts:253-261,283-291,329-337`、
-   `create-css-colors.ts:42,55,107,134`
-4. 建议方案:引入 JSON Schema 校验,或至少校验 `type` 字段的枚举值
-
-**注意**:不要把架构重构一并提上去。阶段 2 会删除 5 个文件并重命名大部分模块,
-上游几乎不可能接受,这属于分叉内容。
+> 这是接管当时的判断,**2026-11-12 起不再执行**:项目已独立维护、不再与上游同步,
+> 且本仓未保留上游 git 历史(PR 必须以对方历史为基线)。B1 等遗留缺陷已在本仓
+> `CHANGELOG.md` 的 `[Unreleased]` 中自行修复,阶段 2 的架构重构属永久分叉内容,更不能回流。
+> 原 PR 描述模板仍可从 git 历史查到,此处不再复述。
 
 ### 4.3 长期演进阶段
 
@@ -276,14 +324,14 @@ git push origin latest --force
 
 **取消该策略的条件**:先在 README 中通知用户迁移至 semver tag,再移除本工作流。
 
-### 5.2 同步依赖强制推送
+### 5.2 同步依赖强制推送(已废止)
 
-`sync-cnb.yml` 使用 `PLUGIN_FORCE: "true"`。原因:`latest` 分支由 `latest-branch.yml` 强制推送更新,
-若镜像侧不 force,会因非快进而拒绝,导致两个平台状态漂移。
+> `sync-cnb.yml` 已删除,`PLUGIN_FORCE` 相关说明随之失效,见 0.1。
+> 5.1 中 `latest` 分支的强推风险与平台镜像无关,仍然有效。
 
 ### 5.3 `dist/` 冲突的正确处理
 
-若未来从上游同步代码时 `dist/index.js` 冲突:
+若合并分支时 `dist/index.js` 冲突:
 
 1. **不要**尝试手动合并
 2. 接受 `src/` 的合并结果
@@ -292,26 +340,29 @@ git push origin latest --force
 
 `.gitattributes` 中的 `-diff` 会让冲突提示简化为「二进制文件有差异」,这是预期行为。
 
-### 5.4 CNB 凭据
+### 5.4 CNB 凭据(已废止)
 
-`sync-cnb.yml` 需要 GitHub 仓库 Secret `CNB_TOKEN`(CNB 访问令牌,写入权限)。
-CNB 仓库地址是公开信息,直接写入工作流;凭据绝不进仓库。
+> 原 `sync-cnb.yml` 需要 GitHub 仓库 Secret `CNB_TOKEN` 才能向 CNB 推送。
+> 主仓已切到 CNB,该工作流与该项凭据均不再需要;「凭据绝不进仓库」的原则仍然有效。
 
 ---
 
 ## 六、验证清单
 
-- [ ] `git grep -n 'yoshi389111/github-profile-3d-contrib' -- ':!dist'` 的命中项只剩:11 份 README 的衍生声明、
-      `README.md` 上游链接行、`CHANGELOG.md` 的 `Breaking changes` 与本文档、`src/create-3d-contrib.ts` 的
+- [ ] `git grep -n 'yoshi389111/github-profile-3d-contrib' -- ':!dist'` 的命中项只剩:11 份 README 的来源声明、
+      `CHANGELOG.md` 的 `Breaking changes` 与本文档、`src/create-3d-contrib.ts` 的
       上游 issue 引用;`docs/spec/03` 的验收项见下一行
 - [ ] 自查脚本 `git grep -c 'yoshi389111/github-profile-3d-contrib'` 在**指定文件**上返回 0,
       而全仓 grep 只返回上面那批(见 [阶段 2 验收](./03-phase2-architecture.md#十验收标准))
 - [ ] `git diff --stat HEAD~1 -- src/ spec/ sample-settings/ tsconfig.json .eslintrc.js` 输出为空
       (仅适用于首次接管提交;阶段 1 起 `src/` 与 `spec/` 有意改动,改用「16 份快照字节未变」验收)
-- [ ] `LICENSE` 未被修改
+- [ ] `LICENSE` 未被修改(sha256 核验见 0.2)
+- [ ] `dist/licenses.txt` 随产物保留,未被删除
 - [ ] `dist/` 仍被 git 追踪(`git ls-files dist/` 返回 3 个文件)
 - [ ] `npm ci && npm run build` 后 `git diff --exit-code -- dist/` 通过
 - [x] 面向用户的 `YOUR_GITHUB_*` 占位符已替换;`docs/spec` 计划内容中的占位符**按第一节豁免**
 - [ ] `package-lock.json` 的 `version` 与 `package.json` 一致(由 CI `release.yml` 与 `quality` 检查)
-- [ ] 11 份 README 的衍生声明块渲染正常(引用块与后续内容之间有空行)
+- [ ] 11 份 README 的来源声明块渲染正常(引用块与后续内容之间有空行)
 - [ ] `.cnb.yml` 与 `ci.yml` 的产物一致性判定逻辑等价
+- [ ] `package.json` 的 `repository` / `homepage` / `bugs` 均指向 CNB 主仓,仓库内不再存在
+      GitHub → CNB 的同步工作流

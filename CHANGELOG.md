@@ -30,6 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **CNB is now the canonical repository.** `package.json` repository/homepage/bugs now point to
+  `cnb.cool/h1s97x/plugins/profile-3d-contrib`, and the README notices describe an independently
+  maintained project instead of an upstream-tracking fork. The original author's MIT attribution is
+  unchanged. The GitHub repository remains only as a distribution endpoint for existing `uses:` references.
+- **The GitHub → CNB mirror workflow was removed.** `.github/workflows/sync-cnb.yml` force-pushed the
+  full history into what is now the primary repository; keeping it would let a GitHub-side push
+  overwrite the CNB `main` branch. `.cnb.yml` now verifies the build directly on the primary repository.
+- **Takeover record and spec docs updated.** Decisions about upstream PRs and upstream synchronization
+  are marked as superseded, the origin/provenance of the `v0.9.3` source snapshot is recorded, and the
+  acceptance checks still describe the expected upstream-reference hits.
 - **API error output no longer dumps raw responses.** GraphQL failures previously serialized the whole response into logs, which could leak private repository names. Only server-provided error messages are printed now.
 - The GraphQL `errors` field type was corrected from a fixed one-element tuple to an array (type-level only).
 - `commitContributionsByRepository` now honors `MAX_REPOS` (capped at GitHub's maximum of 100).
