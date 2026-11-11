@@ -1141,7 +1141,7 @@ exports.formatError = formatError;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeFile = exports.sanitizeFileName = exports.isSafeFileName = exports.DEFAULT_FILE_NAME = exports.OUTPUT_FOLDER = void 0;
+exports.writeFile = exports.sanitizeFileName = exports.escapesOutputFolder = exports.isSafeFileName = exports.DEFAULT_FILE_NAME = exports.OUTPUT_FOLDER = void 0;
 const fs_1 = __nccwpck_require__(79896);
 const errors_1 = __nccwpck_require__(75600);
 exports.OUTPUT_FOLDER = './profile-3d-contrib';
@@ -1159,6 +1159,17 @@ exports.DEFAULT_FILE_NAME = 'profile-customize.svg';
  */
 const isSafeFileName = (fileName) => SAFE_FILE_NAME.test(fileName) && !fileName.includes('..');
 exports.isSafeFileName = isSafeFileName;
+/**
+ * Narrower than `isSafeFileName`: a plain-but-unusual name (an uppercase
+ * suffix, say) is merely warned about, while anything that can leave
+ * OUTPUT_FOLDER — separators, `..` segments, a leading dot — is rejected.
+ */
+const escapesOutputFolder = (fileName) => !(0, exports.isSafeFileName)(fileName) &&
+    (fileName.includes('..') ||
+        fileName.includes('/') ||
+        fileName.includes('\\') ||
+        fileName.startsWith('.'));
+exports.escapesOutputFolder = escapesOutputFolder;
 const sanitizeFileName = (fileName) => {
     if (!(0, exports.isSafeFileName)(fileName)) {
         throw new errors_1.AppError(errors_1.ErrorCode.FILENAME_INVALID, `invalid output file name: "${fileName}"`, [
@@ -1380,7 +1391,9 @@ const main = async () => {
             ? Number(process.env.MAX_REPOS)
             : 100;
         if (!Number.isInteger(maxRepos) || maxRepos < 1) {
-            throw new errors_1.AppError(errors_1.ErrorCode.MAX_REPOS_INVALID, `MAX_REPOS must be a positive integer: "${(_a = process.env.MAX_REPOS) !== null && _a !== void 0 ? _a : ''}"`, ['set MAX_REPOS to 1 or more, or leave it unset for the default of 100']);
+            throw new errors_1.AppError(errors_1.ErrorCode.MAX_REPOS_INVALID, `MAX_REPOS must be a positive integer: "${(_a = process.env.MAX_REPOS) !== null && _a !== void 0 ? _a : ''}"`, [
+                'set MAX_REPOS to 1 or more, or leave it unset for the default of 100',
+            ]);
         }
         const year = process.env.YEAR ? Number(process.env.YEAR) : null;
         if (year !== null &&
@@ -1396,9 +1409,9 @@ const main = async () => {
             const settingInfos = 'length' in settingFile ? settingFile : [settingFile];
             for (const settingInfo of settingInfos) {
                 // The reader already warned about an unusable name, and
-                // writeFile refuses it, so fall back instead of failing an
-                // otherwise valid render.
-                const fileName = settingInfo.fileName &&
+                // rejected the ones that could escape the output folder, so
+                // a fallback here never widens the security boundary.
+                const fileName = typeof settingInfo.fileName === 'string' &&
                     f.isSafeFileName(settingInfo.fileName)
                     ? settingInfo.fileName
                     : f.DEFAULT_FILE_NAME;
@@ -1451,7 +1464,10 @@ const file_writer_1 = __nccwpck_require__(46045);
 const toLineColumn = (content, position) => {
     const before = content.slice(0, position);
     const lines = before.split('\n');
-    return { line: lines.length, column: before.length - before.lastIndexOf('\n') };
+    return {
+        line: lines.length,
+        column: before.length - before.lastIndexOf('\n'),
+    };
 };
 const parseJson = (content, filePath) => {
     try {
@@ -1472,9 +1488,28 @@ const parseJson = (content, filePath) => {
 };
 /**
  * `fileName` is the only field that reaches the filesystem, so it is
- * checked separately: an unsafe name with no fallback would break an
- * existing config that used to work, hence a warning plus the default.
+ * checked *before* any rendering: silently writing elsewhere is worse
+ * than failing. A name that merely looks odd is left to
+ * `collectFileNameWarnings`; one that can leave the output folder — path
+ * separators, `..`, a leading dot — is blocking.
  */
+const ensureSafeFileNames = (parsed) => {
+    const entries = Array.isArray(parsed) ? parsed : [parsed];
+    entries.forEach((entry) => {
+        if (!entry || typeof entry !== 'object') {
+            return;
+        }
+        const { fileName } = entry;
+        if (typeof fileName !== 'string') {
+            return;
+        }
+        if (!(0, file_writer_1.escapesOutputFolder)(fileName)) {
+            return;
+        }
+        (0, file_writer_1.sanitizeFileName)(fileName);
+    });
+};
+/** Non-blocking notice for a `fileName` that is dropped in favour of the default. */
 const collectFileNameWarnings = (parsed) => {
     const entries = Array.isArray(parsed) ? parsed : [parsed];
     const messages = [];
@@ -1483,15 +1518,11 @@ const collectFileNameWarnings = (parsed) => {
             return;
         }
         const { fileName } = entry;
-        if (fileName === undefined) {
-            return;
-        }
-        const where = Array.isArray(parsed) ? `[${index}].fileName` : 'fileName';
-        if (typeof fileName !== 'string') {
-            messages.push(`${where}: expected a string, got ${typeof fileName}; falling back to the default name`);
-        }
-        else if (!(0, file_writer_1.isSafeFileName)(fileName)) {
-            messages.push(`${where}: "${fileName}" is not a plain file name; falling back to the default name`);
+        if (typeof fileName === 'string' && !(0, file_writer_1.isSafeFileName)(fileName)) {
+            const where = Array.isArray(parsed)
+                ? `[${index}].fileName`
+                : 'fileName';
+            messages.push(`${where}: "${fileName}" is not a plain file name; using the default name`);
         }
     });
     return messages;
@@ -1513,6 +1544,8 @@ const readSettingJson = (filePath) => {
         const where = warning.line ? ` (line ${warning.line})` : '';
         console.warn(`WARNING: settings ${warning.path}${where}: ${warning.message}`);
     }
+    // Path traversal is blocking; an unusual-but-contained name only warns.
+    ensureSafeFileNames(parsed);
     for (const warning of collectFileNameWarnings(parsed)) {
         console.warn(`WARNING: ${warning}`);
     }
