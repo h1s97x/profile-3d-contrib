@@ -4,35 +4,42 @@ import * as create from './create-svg';
 import * as f from './file-writer';
 import * as r from './settings-reader';
 import * as client from './github-graphql';
+import { AppError, ErrorCode, formatError } from './errors';
 
 export const main = async (): Promise<void> => {
     try {
         const token = process.env.GITHUB_TOKEN;
         if (!token) {
-            console.error('GITHUB_TOKEN is empty');
-            process.exitCode = 1;
-            return;
+            throw new AppError(
+                ErrorCode.TOKEN_MISSING,
+                'GITHUB_TOKEN is empty',
+                ['set a personal access token as the GITHUB_TOKEN secret'],
+            );
         }
         const userName =
             3 <= process.argv.length ? process.argv[2] : process.env.USERNAME;
         if (!userName) {
-            console.error('USERNAME is empty');
-            process.exitCode = 1;
-            return;
+            throw new AppError(
+                ErrorCode.USERNAME_MISSING,
+                'USERNAME is empty',
+                ['pass the user name as an argument or set USERNAME'],
+            );
         }
         const maxRepos = process.env.MAX_REPOS
             ? Number(process.env.MAX_REPOS)
             : 100;
         if (Number.isNaN(maxRepos)) {
-            console.error('MAX_REPOS is NaN');
-            process.exitCode = 1;
-            return;
+            throw new AppError(
+                ErrorCode.MAX_REPOS_INVALID,
+                `MAX_REPOS is not a number: "${process.env.MAX_REPOS ?? ''}"`,
+            );
         }
         const year = process.env.YEAR ? Number(process.env.YEAR) : null;
         if (Number.isNaN(year)) {
-            console.error('YEAR is NaN');
-            process.exitCode = 1;
-            return;
+            throw new AppError(
+                ErrorCode.YEAR_INVALID,
+                `YEAR is not a number: "${process.env.YEAR ?? ''}"`,
+            );
         }
 
         const response = await client.fetchData(
@@ -110,8 +117,8 @@ export const main = async (): Promise<void> => {
             );
         }
     } catch (error) {
-        console.error(error);
-        process.exitCode = 1;
+        console.error(formatError(error));
+        process.exitCode = error instanceof AppError ? error.exitCode : 1;
     }
 };
 
