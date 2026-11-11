@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Settings validator and JSON schema.** Zero-dependency structural validation of `SETTING_JSON` files, plus `schema/settings.schema.json` (draft-07) for IDE autocompletion.
 - **Render output snapshot tests.** 16 SVG snapshots (8 built-in themes × animated/static) guard against accidental output changes.
 - `MAX_REPOS` / `YEAR` environment variables are validated for sane ranges (`MAX_REPOS` must be a positive integer, `YEAR` must be within 2008..current year).
-- Output file names from settings are validated (`E_FILENAME_INVALID` on path traversal attempts).
+- Output file names from settings are validated (`E_FILENAME_INVALID` on path traversal attempts). An unsafe `fileName` is reported as a warning and falls back to `profile-customize.svg` instead of aborting the run.
 
 ### Changed
 
@@ -34,8 +34,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `init from source`, so it no longer matched the phase-0/phase-1 source changes and the new
   `dist-consistency` gate failed on the very pull request that introduced it. A fresh build now
   leaves all 16 render snapshots byte-identical.
-- **`::error::` annotations removed from `.cnb.yml`.** Those annotations are a GitHub Actions
-  feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Plain text now.
+- **`::error::` / `::warning::` annotations dropped from output.** Those annotations are a GitHub
+  Actions feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Both
+  `.cnb.yml` and the settings warnings now use plain `ERROR:` / `WARNING:` prefixes.
+
+- **A settings file that the renderer cannot draw is rejected up front.** Until now the validator
+  only warned about a bitmap `contribPatterns` entry without a `top` panel, and the renderer then
+  threw `Cannot read properties of undefined` on the first week. A missing `top` panel and a
+  non-string panel color are now blocking (`E_SETTINGS_INVALID`) with the offending JSON path, and
+  the renderer degrades instead of crashing if such a file still reaches it.
+- **A typo in `type` no longer hides every other problem.** Validation still stops at the wrong
+  `type`, but the remaining fields are re-checked against the `normal` field set, so block-worthy
+  issues such as a broken bitmap pattern are reported in the same run.
 
 ### Fixed (internal)
 
@@ -89,8 +99,9 @@ First release after the **maintenance handover**. Rendering logic and output for
   `src/` and `dist/` had drifted apart and the new `dist-consistency` gate failed on the very
   pull request that introduced it. Verified afterwards that a fresh build leaves all 16 render
   snapshots byte-identical.
-- **`::error::` annotations removed from `.cnb.yml`.** Those annotations are a GitHub Actions
-  feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Plain text now.
+- **`::error::` / `::warning::` annotations dropped from output.** Those annotations are a GitHub
+  Actions feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Both
+  `.cnb.yml` and the settings warnings now use plain `ERROR:` / `WARNING:` prefixes.
 
 ### Known issues (not fixed here)
 

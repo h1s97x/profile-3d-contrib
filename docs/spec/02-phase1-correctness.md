@@ -159,6 +159,30 @@ export class AppError extends Error {
 }
 ```
 
+### 4.1.1 实现偏差:校验器也承担「不可渲染」拦截
+
+原计划把校验器定为「仅告警不阻断」,只有未知 `type` 例外。实际实现多了两类**阻塞性**错误,
+原因是它们不是画得丑,而是**画不出来**:
+
+| 条件 | 计划行为 | 实际行为 | 依据 |
+|---|---|---|---|
+| `contribPatterns[i]` 缺 `top` 面板 | warning | **error** | `create-3d-contrib.ts` 每周读 `contribPatterns[level].top.width`,缺失即 `TypeError` 崩溃 |
+| `contribPatterns[i].top.backgroundColor` / `foregroundColor` 缺失或非字符串 | 未检查 | **error** | `create-css-colors.ts` 对这两个值调 `d3.rgb()`,缺失时 `undefined` 直接抛错(左侧/右侧面板本就由 top 派生,故只校验 top) |
+
+同时补充两点非阻塞行为:
+
+- 渲染层与 `writeFile` 做兜底:面板缺失、宽度缺失、颜色非字符串时降级绘制而不是抛异常,
+  保证「校验器漏了」也不会让整张图报废。
+- `fileName` 保持 `E_FILENAME_INVALID` 的**硬失败**(路径穿越不能被回落吞掉),
+  但 `settings-reader` 会在渲染前先 `WARNING` 告警,`index.ts` 在写入时回落到
+  `profile-customize.svg`。安全边界不变,存量配置不再从一个警告变成一次失败。
+
+另:未知 `type` 报错后仍会用 `normal` 的字段集把余下字段复查一遍,只保留 warning,
+避免一个 `type` 拼写把「bitmap 缺 top」这类阻塞问题挡住。
+
+与上一条一并说明:计划里「其它设置问题只发 warning」这句话,现在应理解为
+「**不会导致渲染失败的**其它问题只发 warning」。
+
 ### 4.2 设置校验器(零依赖)
 
 ```typescript
