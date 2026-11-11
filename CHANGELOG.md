@@ -28,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The GraphQL `errors` field type was corrected from a fixed one-element tuple to an array (type-level only).
 - `commitContributionsByRepository` now honors `MAX_REPOS` (capped at GitHub's maximum of 100).
 
+### Fixed
+
+- **`dist/` rebuilt from the current `src/`.** The artifact had not been regenerated since
+  `init from source`, so it no longer matched the phase-0/phase-1 source changes and the new
+  `dist-consistency` gate failed on the very pull request that introduced it. A fresh build now
+  leaves all 16 render snapshots byte-identical.
+- **`::error::` annotations removed from `.cnb.yml`.** Those annotations are a GitHub Actions
+  feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Plain text now.
+
 ### Fixed (internal)
 
 - **Build pipeline.** `tsconfig.json` `rootDir` is now `./src` so `npm run build` works again (upstream commit `e733579c` had broken the `dist0/index.js` path). `npm run clean` also removes `dist0`.
@@ -72,6 +81,16 @@ First release after the **maintenance handover**. Rendering logic and output for
 
 - `build.yml` and the new workflows all pin `actions/checkout@v5` and `actions/setup-node@v5`.
 - The CNB sync credential is injected from GitHub Secrets and never committed; the CNB repository URL is public information and is written directly in the workflow.
+
+### Fixed
+
+- **`dist/` is rebuilt from the current `src/`.** The artifact was last generated at commit
+  `init from source` and never regenerated after the phase-0/phase-1 source changes, so
+  `src/` and `dist/` had drifted apart and the new `dist-consistency` gate failed on the very
+  pull request that introduced it. Verified afterwards that a fresh build leaves all 16 render
+  snapshots byte-identical.
+- **`::error::` annotations removed from `.cnb.yml`.** Those annotations are a GitHub Actions
+  feature; the CNB pipeline printed them verbatim, which reads like a syntax error. Plain text now.
 
 ### Known issues (not fixed here)
 
