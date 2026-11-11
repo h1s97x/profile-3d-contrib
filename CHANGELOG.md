@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MAX_REPOS` / `YEAR` environment variables are validated for sane ranges (`MAX_REPOS` must be a positive integer, `YEAR` must be within 2008..current year).
 - Output file names from settings are validated. A `fileName` that can leave the output folder — path separators, `..` segments, a leading dot — fails with `E_FILENAME_INVALID` before anything is rendered. A name that is merely unusual (a space, a non-`.svg` suffix) warns and falls back to `profile-customize.svg`.
 
+### Security
+
+- Bumped `axios` from `1.18.1` to `1.20.0` to address CVE-2026-101905, where a polluted `Object.prototype.createConnection` in the Node HTTP adapter could redirect requests (and leak headers, bodies and credentials) to an attacker-controlled endpoint.
+
 ### Changed
 
 - **API error output no longer dumps raw responses.** GraphQL failures previously serialized the whole response into logs, which could leak private repository names. Only server-provided error messages are printed now.
