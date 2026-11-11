@@ -17,6 +17,7 @@ export const ErrorCode = {
     GITHUB_AUTH: 'E_GITHUB_AUTH',
     GITHUB_RATE_LIMIT: 'E_GITHUB_RATE_LIMIT',
     GITHUB_NETWORK: 'E_GITHUB_NETWORK',
+    API_BAD_RESPONSE: 'E_API_BAD_RESPONSE',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -33,6 +34,7 @@ const EXIT_CODE_BY_ERROR: Readonly<Record<ErrorCode, number>> = {
     E_GITHUB_AUTH: 2,
     E_GITHUB_RATE_LIMIT: 2,
     E_GITHUB_NETWORK: 2,
+    E_API_BAD_RESPONSE: 2,
 };
 
 export class AppError extends Error {

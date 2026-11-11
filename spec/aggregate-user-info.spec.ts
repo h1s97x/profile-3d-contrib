@@ -1,5 +1,7 @@
 import * as aggregate from '../src/aggregate-user-info'
+import * as client from '../src/github-graphql';
 import * as type from '../src/type';
+import { AppError, ErrorCode } from '../src/errors';
 import { dummyData } from './dummy-data';
 
 describe('github-graphql', () => {
@@ -70,5 +72,40 @@ describe('github-graphql', () => {
         expect(userInfo.totalRepositoryContributions).toEqual(6);
         expect(userInfo.totalForkCount).toEqual(0);
         expect(userInfo.totalStargazerCount).toEqual(6);
+    });
+
+    it('throws a sanitized error on GraphQL errors without data', () => {
+        const response: client.ResponseType = {
+            errors: [
+                { message: "Could not resolve to a User with the login of 'secret-user'." },
+                { message: 'Some secondary error.' },
+            ],
+        };
+        expect(() => aggregate.aggregateUserInfo(response)).toThrow(
+            "GitHub GraphQL error: Could not resolve to a User with the login of 'secret-user'.; Some secondary error.",
+        );
+        try {
+            aggregate.aggregateUserInfo(response);
+            fail('expected aggregateUserInfo to throw');
+        } catch (error) {
+            expect(error).toBeInstanceOf(AppError);
+            expect((error as AppError).code).toEqual(
+                ErrorCode.API_BAD_RESPONSE,
+            );
+            expect((error as AppError).exitCode).toEqual(2);
+        }
+    });
+
+    it('does not dump the raw response when data is missing', () => {
+        const response = {
+            data: undefined,
+            extensions: { privateRepoName: 'my-secret-repo' },
+        } as unknown as client.ResponseType;
+        expect(() => aggregate.aggregateUserInfo(response)).toThrow(
+            AppError,
+        );
+        expect(() => aggregate.aggregateUserInfo(response)).not.toThrow(
+            'my-secret-repo',
+        );
     });
 });

@@ -1,5 +1,6 @@
 import * as client from './github-graphql';
 import * as type from './type';
+import { AppError, ErrorCode } from './errors';
 
 const OTHER_COLOR = '#444444';
 
@@ -33,9 +34,20 @@ export const aggregateUserInfo = (
 ): type.UserInfo => {
     if (!response.data) {
         if (response.errors && response.errors.length) {
-            throw new Error(response.errors[0].message);
+            const messages = response.errors
+                .map((error) => error.message)
+                .join('; ');
+            throw new AppError(
+                ErrorCode.API_BAD_RESPONSE,
+                `GitHub GraphQL error: ${messages}`,
+                ['verify USERNAME and GITHUB_TOKEN'],
+            );
         } else {
-            throw new Error('JSON\n' + JSON.stringify(response, null, 2));
+            throw new AppError(
+                ErrorCode.API_BAD_RESPONSE,
+                'GitHub GraphQL returned no data and no error details',
+                ['check network connectivity to the GitHub API endpoint'],
+            );
         }
     }
 
