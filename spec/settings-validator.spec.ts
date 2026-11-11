@@ -1,7 +1,4 @@
-import {
-    findKeyLine,
-    validateSettingFile,
-} from '../src/settings-validator';
+import { findKeyLine, validateSettingFile } from '../src/settings-validator';
 import { readFileSync } from 'fs';
 
 const validNormal = {
@@ -26,6 +23,35 @@ const validRainbow = {
     contribLightness: ['20%', '30%', '35%', '40%', '50%'],
     duration: '10s',
     hueRatio: -7,
+};
+
+const validTopPanel = {
+    width: 7,
+    bitmap: [0x7f],
+    backgroundColor: '#161b22',
+    foregroundColor: '#39d353',
+};
+
+const validPattern = {
+    top: validTopPanel,
+    left: { width: 7, bitmap: [0x7f] },
+    right: { width: 7, bitmap: [0x7f] },
+};
+
+const validBitmap = {
+    type: 'bitmap',
+    backgroundColor: '#000000',
+    foregroundColor: '#ffffff',
+    strongColor: '#ffffff',
+    weakColor: '#aaaaaa',
+    radarColor: '#ffffff',
+    contribPatterns: [
+        validPattern,
+        validPattern,
+        validPattern,
+        validPattern,
+        validPattern,
+    ],
 };
 
 describe('settings-validator', () => {
@@ -119,14 +145,11 @@ describe('settings-validator', () => {
     });
 
     it('warns on malformed bitmap contribPatterns', () => {
+        const top: Record<string, unknown> = { ...validTopPanel, width: 7 };
+        delete top.bitmap;
         const result = validateSettingFile({
-            type: 'bitmap',
-            backgroundColor: '#000000',
-            foregroundColor: '#ffffff',
-            strongColor: '#ffffff',
-            weakColor: '#aaaaaa',
-            radarColor: '#ffffff',
-            contribPatterns: [{ top: { width: 7 } }],
+            ...validBitmap,
+            contribPatterns: [{ top }],
         });
         expect(result.errors).toEqual([]);
         expect(
@@ -141,6 +164,51 @@ describe('settings-validator', () => {
             result.warnings.some(
                 (w) => w.path === 'contribPatterns[0].top.bitmap',
             ),
+        ).toBeTruthy();
+    });
+
+    it('accepts a full bitmap settings object without noise', () => {
+        const result = validateSettingFile(validBitmap);
+        expect(result.errors).toEqual([]);
+        expect(result.warnings).toEqual([]);
+    });
+
+    it('blocks a bitmap pattern without a top panel instead of crashing', () => {
+        const contribPatterns = [{ left: { width: 7, bitmap: [0x7f] } }];
+        const result = validateSettingFile({ ...validBitmap, contribPatterns });
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].path).toEqual('contribPatterns[0].top');
+    });
+
+    it('blocks non-string top panel colors that d3.rgb() would reject', () => {
+        const contribPatterns = [
+            { top: { ...validTopPanel, backgroundColor: 0x161b22 } },
+        ];
+        const result = validateSettingFile({ ...validBitmap, contribPatterns });
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].path).toEqual(
+            'contribPatterns[0].top.backgroundColor',
+        );
+    });
+
+    it('blocks a bitmap pattern whose top panel is not an object', () => {
+        const contribPatterns = [{ top: 'nope' }];
+        const result = validateSettingFile({ ...validBitmap, contribPatterns });
+        expect(
+            result.errors.some((e) => e.path === 'contribPatterns[0].top'),
+        ).toBeTruthy();
+    });
+
+    it('keeps checking fields when the type is a typo', () => {
+        const result = validateSettingFile({
+            type: 'bitmapm',
+            contribPatterns: [{ left: { width: 7 } }],
+        });
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].path).toEqual('type');
+        expect(result.warnings.some((w) => w.path === 'bitmap2')).toBeFalsy();
+        expect(
+            result.warnings.some((w) => w.message.includes('unknown field')),
         ).toBeTruthy();
     });
 
