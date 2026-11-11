@@ -2,12 +2,13 @@
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 25181:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.aggregateUserInfo = void 0;
+const errors_1 = __nccwpck_require__(53834);
 const OTHER_COLOR = '#444444';
 const toNumberContributionLevel = (level) => {
     switch (level) {
@@ -37,10 +38,13 @@ const compare = (num1, num2) => {
 const aggregateUserInfo = (response) => {
     if (!response.data) {
         if (response.errors && response.errors.length) {
-            throw new Error(response.errors[0].message);
+            const messages = response.errors
+                .map((error) => error.message)
+                .join('; ');
+            throw new errors_1.AppError(errors_1.ErrorCode.API_BAD_RESPONSE, `GitHub GraphQL error: ${messages}`, ['verify USERNAME and GITHUB_TOKEN']);
         }
         else {
-            throw new Error('JSON\n' + JSON.stringify(response, null, 2));
+            throw new errors_1.AppError(errors_1.ErrorCode.API_BAD_RESPONSE, 'GitHub GraphQL returned no data and no error details', ['check network connectivity to the GitHub API endpoint']);
         }
     }
     const user = response.data.user;
@@ -891,6 +895,7 @@ const pie = __importStar(__nccwpck_require__(91837));
 const radar = __importStar(__nccwpck_require__(26052));
 const colors = __importStar(__nccwpck_require__(92068));
 const util = __importStar(__nccwpck_require__(26240));
+const errors_1 = __nccwpck_require__(53834);
 const width = 1280;
 const height = 850;
 const pieHeight = 200 * 1.3;
@@ -899,6 +904,12 @@ const radarWidth = 400 * 1.3;
 const radarHeight = (radarWidth * 3) / 4;
 const radarX = width - radarWidth - 40;
 const createSvg = (userInfo, settings, isForcedAnimation) => {
+    if (userInfo.contributionCalendar.length === 0) {
+        throw new errors_1.AppError(errors_1.ErrorCode.YEAR_EMPTY, 'no contribution data for the requested period, cannot render a calendar', [
+            'omit YEAR to use the current year',
+            'the requested year may have no contributions, or its data may have been dropped by the GitHub data retention policy',
+        ]);
+    }
     let svgWidth = width;
     let svgHeight = height;
     if (settings.type === 'pie_lang_only') {
@@ -965,7 +976,6 @@ const createSvg = (userInfo, settings, isForcedAnimation) => {
             .attr('x', positionXContrib + 10)
             .attr('y', positionYContrib)
             .attr('text-anchor', 'start')
-            .attr('text-anchor', 'start')
             .text(contribLabel)
             .attr('class', 'fill-fg');
         const positionXStar = (width * 5) / 10;
@@ -1031,18 +1041,114 @@ exports.createSvg = createSvg;
 
 /***/ }),
 
+/***/ 53834:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.formatError = exports.AppError = exports.ErrorCode = void 0;
+/**
+ * Structured error code system.
+ *
+ * Every user-facing failure carries a stable `E_*` code, a short
+ * message and optional actionable hints. Exit code convention:
+ * 1 = configuration / input error, 2 = remote API error.
+ */
+exports.ErrorCode = {
+    TOKEN_MISSING: 'E_TOKEN_MISSING',
+    USERNAME_MISSING: 'E_USERNAME_MISSING',
+    MAX_REPOS_INVALID: 'E_MAX_REPOS_INVALID',
+    YEAR_INVALID: 'E_YEAR_INVALID',
+    YEAR_EMPTY: 'E_YEAR_EMPTY',
+    SETTINGS_INVALID: 'E_SETTINGS_INVALID',
+    FILENAME_INVALID: 'E_FILENAME_INVALID',
+    GITHUB_NO_DATA: 'E_GITHUB_NO_DATA',
+    GITHUB_AUTH: 'E_GITHUB_AUTH',
+    GITHUB_RATE_LIMIT: 'E_GITHUB_RATE_LIMIT',
+    GITHUB_NETWORK: 'E_GITHUB_NETWORK',
+    API_BAD_RESPONSE: 'E_API_BAD_RESPONSE',
+};
+const EXIT_CODE_BY_ERROR = {
+    E_TOKEN_MISSING: 1,
+    E_USERNAME_MISSING: 1,
+    E_MAX_REPOS_INVALID: 1,
+    E_YEAR_INVALID: 1,
+    E_YEAR_EMPTY: 1,
+    E_SETTINGS_INVALID: 1,
+    E_FILENAME_INVALID: 1,
+    E_GITHUB_NO_DATA: 2,
+    E_GITHUB_AUTH: 2,
+    E_GITHUB_RATE_LIMIT: 2,
+    E_GITHUB_NETWORK: 2,
+    E_API_BAD_RESPONSE: 2,
+};
+class AppError extends Error {
+    constructor(code, message, hints = []) {
+        super(`[${code}] ${message}`);
+        this.code = code;
+        this.hints = hints;
+        this.name = 'AppError';
+    }
+    get exitCode() {
+        var _a;
+        return (_a = EXIT_CODE_BY_ERROR[this.code]) !== null && _a !== void 0 ? _a : 1;
+    }
+}
+exports.AppError = AppError;
+/** Format any thrown value for `console.error`, keeping AppError hints. */
+const formatError = (error) => {
+    if (error instanceof AppError) {
+        const hints = error.hints.map((hint) => `  hint: ${hint}`);
+        return [error.message, ...hints].join('\n');
+    }
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return String(error);
+};
+exports.formatError = formatError;
+//# sourceMappingURL=errors.js.map
+
+/***/ }),
+
 /***/ 74975:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeFile = exports.OUTPUT_FOLDER = void 0;
+exports.writeFile = exports.sanitizeFileName = exports.OUTPUT_FOLDER = void 0;
 const fs_1 = __nccwpck_require__(79896);
+const errors_1 = __nccwpck_require__(53834);
 exports.OUTPUT_FOLDER = './profile-3d-contrib';
+/**
+ * Only plain file names are allowed: no path separators, no parent
+ * directory references, no hidden files, no Windows drive names.
+ * `fileName` can come from a user-provided settings JSON, so writing
+ * must never escape OUTPUT_FOLDER.
+ */
+const SAFE_FILE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$/;
+const sanitizeFileName = (fileName) => {
+    if (!SAFE_FILE_NAME.test(fileName) || fileName.includes('..')) {
+        throw new errors_1.AppError(errors_1.ErrorCode.FILENAME_INVALID, `invalid output file name: "${fileName}"`, [
+            'use a plain file name such as "profile-customize.svg"',
+            'path separators, ".." segments and leading dots are not allowed',
+        ]);
+    }
+    return fileName;
+};
+exports.sanitizeFileName = sanitizeFileName;
+let isOutputFolderCreated = false;
+const createOutputFolder = () => {
+    if (!isOutputFolderCreated) {
+        (0, fs_1.mkdirSync)(exports.OUTPUT_FOLDER, { recursive: true });
+        isOutputFolderCreated = true;
+    }
+};
 const writeFile = (fileName, content) => {
-    (0, fs_1.mkdirSync)(exports.OUTPUT_FOLDER, { recursive: true });
-    (0, fs_1.writeFileSync)(`${exports.OUTPUT_FOLDER}/${fileName}`, content);
+    createOutputFolder();
+    (0, fs_1.writeFileSync)(`${exports.OUTPUT_FOLDER}/${(0, exports.sanitizeFileName)(fileName)}`, content);
 };
 exports.writeFile = writeFile;
 //# sourceMappingURL=file-writer.js.map
@@ -1062,10 +1168,11 @@ exports.fetchData = exports.fetchNext = exports.fetchFirst = exports.URL = void 
 const axios_1 = __importDefault(__nccwpck_require__(58718));
 exports.URL = process.env.GITHUB_ENDPOINT || 'https://api.github.com/graphql';
 const maxReposOneQuery = 100;
-const fetchFirst = async (token, userName, year = null) => {
+const fetchFirst = async (token, userName, year = null, maxRepos = maxReposOneQuery) => {
     const yearArgs = year
         ? `(from:"${year}-01-01T00:00:00.000Z", to:"${year}-12-31T23:59:59.000Z")`
         : '';
+    const maxRepoCommitContribs = Math.min(Math.max(1, maxRepos), maxReposOneQuery);
     const headers = {
         Authorization: `bearer ${token}`,
     };
@@ -1085,7 +1192,7 @@ const fetchFirst = async (token, userName, year = null) => {
                                 }
                             }
                         }
-                        commitContributionsByRepository(maxRepositories: ${maxReposOneQuery}) {
+                        commitContributionsByRepository(maxRepositories: ${maxRepoCommitContribs}) {
                             repository {
                                 primaryLanguage {
                                     name
@@ -1155,7 +1262,7 @@ const fetchNext = async (token, userName, cursor) => {
 exports.fetchNext = fetchNext;
 /** Fetch data from GitHub GraphQL */
 const fetchData = async (token, userName, maxRepos, year = null) => {
-    const res1 = await (0, exports.fetchFirst)(token, userName, year);
+    const res1 = await (0, exports.fetchFirst)(token, userName, year, maxRepos);
     const result = res1.data;
     if (result && result.user.repositories.nodes.length === maxReposOneQuery) {
         const repos1 = result.user.repositories;
@@ -1165,6 +1272,7 @@ const fetchData = async (token, userName, maxRepos, year = null) => {
             if (res2.data) {
                 const repos2 = res2.data.user.repositories;
                 repos1.nodes.push(...repos2.nodes);
+                repos1.edges.push(...repos2.edges);
                 if (repos2.nodes.length !== maxReposOneQuery) {
                     break;
                 }
@@ -1174,6 +1282,14 @@ const fetchData = async (token, userName, maxRepos, year = null) => {
                 break;
             }
         }
+    }
+    // The pagination loop above appends whole pages, so the collected
+    // repositories may overshoot `maxRepos` by up to one page. Truncate
+    // to the configured cap so fork/star totals are not inflated.
+    if (result && result.user.repositories.nodes.length > maxRepos) {
+        console.info(`repositories used for statistics are truncated to the ${maxRepos} most recently pushed ones (MAX_REPOS=${maxRepos})`);
+        result.user.repositories.nodes.length = maxRepos;
+        result.user.repositories.edges.length = maxRepos;
     }
     return res1;
 };
@@ -1218,33 +1334,30 @@ const create = __importStar(__nccwpck_require__(69562));
 const f = __importStar(__nccwpck_require__(74975));
 const r = __importStar(__nccwpck_require__(53342));
 const client = __importStar(__nccwpck_require__(10066));
+const errors_1 = __nccwpck_require__(53834);
 const main = async () => {
+    var _a, _b;
     try {
         const token = process.env.GITHUB_TOKEN;
         if (!token) {
-            console.error('GITHUB_TOKEN is empty');
-            process.exitCode = 1;
-            return;
+            throw new errors_1.AppError(errors_1.ErrorCode.TOKEN_MISSING, 'GITHUB_TOKEN is empty', ['set a personal access token as the GITHUB_TOKEN secret']);
         }
         const userName = 3 <= process.argv.length ? process.argv[2] : process.env.USERNAME;
         if (!userName) {
-            console.error('USERNAME is empty');
-            process.exitCode = 1;
-            return;
+            throw new errors_1.AppError(errors_1.ErrorCode.USERNAME_MISSING, 'USERNAME is empty', ['pass the user name as an argument or set USERNAME']);
         }
         const maxRepos = process.env.MAX_REPOS
             ? Number(process.env.MAX_REPOS)
             : 100;
-        if (Number.isNaN(maxRepos)) {
-            console.error('MAX_REPOS is NaN');
-            process.exitCode = 1;
-            return;
+        if (!Number.isInteger(maxRepos) || maxRepos < 1) {
+            throw new errors_1.AppError(errors_1.ErrorCode.MAX_REPOS_INVALID, `MAX_REPOS must be a positive integer: "${(_a = process.env.MAX_REPOS) !== null && _a !== void 0 ? _a : ''}"`, ['set MAX_REPOS to 1 or more, or leave it unset for the default of 100']);
         }
         const year = process.env.YEAR ? Number(process.env.YEAR) : null;
-        if (Number.isNaN(year)) {
-            console.error('YEAR is NaN');
-            process.exitCode = 1;
-            return;
+        if (year !== null &&
+            (!Number.isInteger(year) ||
+                year < 2008 ||
+                year > new Date().getFullYear())) {
+            throw new errors_1.AppError(errors_1.ErrorCode.YEAR_INVALID, `YEAR must be an integer between 2008 and the current year: "${(_b = process.env.YEAR) !== null && _b !== void 0 ? _b : ''}"`, ['leave YEAR unset to use the current year']);
         }
         const response = await client.fetchData(token, userName, maxRepos, year);
         const userInfo = aggregate.aggregateUserInfo(response);
@@ -1275,12 +1388,15 @@ const main = async () => {
         }
     }
     catch (error) {
-        console.error(error);
-        process.exitCode = 1;
+        console.error((0, errors_1.formatError)(error));
+        process.exitCode = error instanceof errors_1.AppError ? error.exitCode : 1;
     }
 };
 exports.main = main;
-void (0, exports.main)();
+/* istanbul ignore next */
+if (require.main === require.cache[eval('__filename')]) {
+    void (0, exports.main)();
+}
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -1293,15 +1409,495 @@ void (0, exports.main)();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readSettingJson = void 0;
 const fs_1 = __nccwpck_require__(79896);
+const errors_1 = __nccwpck_require__(53834);
+const settings_validator_1 = __nccwpck_require__(58527);
+const toLineColumn = (content, position) => {
+    const before = content.slice(0, position);
+    const lines = before.split('\n');
+    return { line: lines.length, column: before.length - before.lastIndexOf('\n') };
+};
+const parseJson = (content, filePath) => {
+    try {
+        return JSON.parse(content);
+    }
+    catch (error) {
+        // Node parse errors look like: "... in JSON at position 123"
+        const detail = error instanceof Error ? error.message : 'unknown parse error';
+        const position = /position (\d+)/.exec(detail);
+        const where = position
+            ? (() => {
+                const { line, column } = toLineColumn(content, Number(position[1]));
+                return ` at line ${line}, column ${column}`;
+            })()
+            : '';
+        throw new errors_1.AppError(errors_1.ErrorCode.SETTINGS_INVALID, `failed to parse settings JSON ${filePath}${where}: ${detail}`, ['check for trailing commas, comments or unquoted keys']);
+    }
+};
 const readSettingJson = (filePath) => {
-    const content = (0, fs_1.readFileSync)(filePath, {
-        encoding: 'utf8',
-        flag: 'r',
-    });
-    return JSON.parse(content);
+    let content;
+    try {
+        content = (0, fs_1.readFileSync)(filePath, {
+            encoding: 'utf8',
+            flag: 'r',
+        });
+    }
+    catch {
+        throw new errors_1.AppError(errors_1.ErrorCode.SETTINGS_INVALID, `cannot read settings file: ${filePath}`, ['check the SETTING_JSON path']);
+    }
+    const parsed = parseJson(content, filePath);
+    const { errors, warnings } = (0, settings_validator_1.validateSettingFile)(parsed, content);
+    for (const warning of warnings) {
+        const where = warning.line ? ` (line ${warning.line})` : '';
+        console.warn(`::warning::settings ${warning.path}${where}: ${warning.message}`);
+    }
+    if (errors.length > 0) {
+        const details = errors
+            .map((issue) => {
+            const where = issue.line ? ` (line ${issue.line})` : '';
+            return `  - ${issue.path}${where}: ${issue.message}`;
+        })
+            .join('\n');
+        throw new errors_1.AppError(errors_1.ErrorCode.SETTINGS_INVALID, `invalid settings JSON ${filePath}:\n${details}`);
+    }
+    return parsed;
 };
 exports.readSettingJson = readSettingJson;
 //# sourceMappingURL=settings-reader.js.map
+
+/***/ }),
+
+/***/ 58527:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/**
+ * Zero-dependency structural validator for settings JSON.
+ *
+ * Design rules (phase 1):
+ * - An unknown or missing `type` is a *blocking* error, because the
+ *   renderer would otherwise silently produce a fully transparent
+ *   SVG (defect B1).
+ * - Every other issue (missing fields, wrong primitive types, odd
+ *   color strings, ...) is a *warning* so existing user configs keep
+ *   working.
+ */
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.validateSettingFile = exports.findKeyLine = exports.KNOWN_TYPES = void 0;
+exports.KNOWN_TYPES = [
+    'normal',
+    'season',
+    'rainbow',
+    'bitmap',
+    'pie_lang_only',
+    'radar_contrib_only',
+];
+const isObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
+/**
+ * Accepts hex colors, CSS color names, CSS functions like
+ * rgb(255,200,55) and percentages like "20%" (contribLightness).
+ */
+const COLORISH = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+(?:\([\d\s.,%]+\))?|\d+(?:\.\d+)?%)$/;
+const L10N_KEYS = {
+    full: ['commit', 'repo', 'review', 'pullreq', 'issue', 'contrib'],
+    radarOnly: ['commit', 'repo', 'review', 'pullreq', 'issue'],
+};
+const REQUIRED_COMMON_FIELDS = {
+    normal: [
+        'backgroundColor',
+        'foregroundColor',
+        'strongColor',
+        'weakColor',
+        'radarColor',
+    ],
+    season: [
+        'backgroundColor',
+        'foregroundColor',
+        'strongColor',
+        'weakColor',
+        'radarColor',
+    ],
+    rainbow: [
+        'backgroundColor',
+        'foregroundColor',
+        'strongColor',
+        'weakColor',
+        'radarColor',
+    ],
+    bitmap: [
+        'backgroundColor',
+        'foregroundColor',
+        'strongColor',
+        'weakColor',
+        'radarColor',
+    ],
+    pie_lang_only: ['backgroundColor', 'foregroundColor'],
+    radar_contrib_only: [
+        'backgroundColor',
+        'foregroundColor',
+        'weakColor',
+        'radarColor',
+    ],
+};
+const OPTIONAL_FIELDS = {
+    normal: [
+        'type',
+        'contribColors',
+        'darkMode',
+        'growingAnimation',
+        'fileName',
+        'l10n',
+        '$schema',
+    ],
+    season: [
+        'type',
+        'contribColors1',
+        'contribColors2',
+        'contribColors3',
+        'contribColors4',
+        'darkMode',
+        'growingAnimation',
+        'fileName',
+        'l10n',
+        '$schema',
+    ],
+    rainbow: [
+        'type',
+        'saturation',
+        'contribLightness',
+        'duration',
+        'hueRatio',
+        'darkMode',
+        'growingAnimation',
+        'fileName',
+        'l10n',
+        '$schema',
+    ],
+    bitmap: [
+        'type',
+        'contribPatterns',
+        'darkMode',
+        'growingAnimation',
+        'fileName',
+        'l10n',
+        '$schema',
+    ],
+    pie_lang_only: [
+        'type',
+        'backgroundColor',
+        'foregroundColor',
+        'darkMode',
+        'growingAnimation',
+        'fileName',
+        '$schema',
+    ],
+    radar_contrib_only: [
+        'type',
+        'backgroundColor',
+        'foregroundColor',
+        'weakColor',
+        'radarColor',
+        'darkMode',
+        'growingAnimation',
+        'fileName',
+        'l10n',
+        '$schema',
+    ],
+};
+/** Best-effort line lookup for a top-level key in pretty-printed JSON. */
+const findKeyLine = (rawText, key) => {
+    if (!rawText) {
+        return undefined;
+    }
+    const pattern = new RegExp(`^\\s*"${key}"\\s*:`, 'm');
+    const match = pattern.exec(rawText);
+    if (!match) {
+        return undefined;
+    }
+    return rawText.slice(0, match.index).split('\n').length;
+};
+exports.findKeyLine = findKeyLine;
+const checkColor = (value, path, warnings) => {
+    if (typeof value !== 'string') {
+        warnings.push({
+            path,
+            message: `expected a color string but got ${typeof value}`,
+        });
+    }
+    else if (!COLORISH.test(value)) {
+        warnings.push({
+            path,
+            message: `"${value}" does not look like a hex or CSS color`,
+        });
+    }
+};
+const checkColorArray = (value, path, warnings) => {
+    if (!Array.isArray(value)) {
+        warnings.push({ path, message: 'expected an array of 5 colors' });
+        return;
+    }
+    if (value.length !== 5) {
+        warnings.push({
+            path,
+            message: `expected 5 colors but got ${value.length}`,
+        });
+    }
+    value.forEach((color, index) => checkColor(color, `${path}[${index}]`, warnings));
+};
+const checkL10n = (value, path, keys, warnings) => {
+    if (!isObject(value)) {
+        warnings.push({ path, message: 'expected an object of labels' });
+        return;
+    }
+    for (const [key, label] of Object.entries(value)) {
+        if (!keys.includes(key)) {
+            warnings.push({
+                path: `${path}.${key}`,
+                message: `unknown label key (expected one of: ${keys.join(', ')})`,
+            });
+        }
+        else if (typeof label !== 'string') {
+            warnings.push({
+                path: `${path}.${key}`,
+                message: 'label must be a string',
+            });
+        }
+    }
+};
+const checkContribPatterns = (value, path, warnings) => {
+    if (!Array.isArray(value)) {
+        warnings.push({
+            path,
+            message: 'expected an array of 5 contribution patterns',
+        });
+        return;
+    }
+    if (value.length !== 5) {
+        warnings.push({
+            path,
+            message: `expected 5 contribution patterns but got ${value.length}`,
+        });
+    }
+    value.forEach((pattern, index) => {
+        const patternPath = `${path}[${index}]`;
+        if (!isObject(pattern)) {
+            warnings.push({ path: patternPath, message: 'expected an object' });
+            return;
+        }
+        for (const side of ['top', 'left', 'right']) {
+            const panel = pattern[side];
+            const panelPath = `${patternPath}.${side}`;
+            if (!isObject(panel)) {
+                warnings.push({
+                    path: panelPath,
+                    message: 'expected a panel object',
+                });
+                continue;
+            }
+            if (typeof panel.width !== 'number') {
+                warnings.push({
+                    path: `${panelPath}.width`,
+                    message: 'panel width must be a number',
+                });
+            }
+            if (!Array.isArray(panel.bitmap)) {
+                warnings.push({
+                    path: `${panelPath}.bitmap`,
+                    message: 'panel bitmap must be an array',
+                });
+            }
+        }
+    });
+};
+const validateOne = (input, basePath, rawText, errors, warnings, depth) => {
+    const pathOf = (key) => basePath ? `${basePath}.${key}` : key;
+    if (!isObject(input)) {
+        errors.push({
+            path: basePath || '(root)',
+            message: 'settings must be a JSON object',
+        });
+        return;
+    }
+    // Blocking: the renderer dispatches on `type`; a typo here used to
+    // produce a fully transparent SVG without any message.
+    const typeValue = input.type;
+    if (typeof typeValue !== 'string' || typeValue.length === 0) {
+        errors.push({
+            path: pathOf('type'),
+            message: `missing "type" (expected one of: ${exports.KNOWN_TYPES.join(', ')})`,
+            line: depth === 0 ? (0, exports.findKeyLine)(rawText, 'type') : undefined,
+        });
+        return;
+    }
+    if (!exports.KNOWN_TYPES.includes(typeValue)) {
+        errors.push({
+            path: pathOf('type'),
+            message: `unknown type "${typeValue}" (expected one of: ${exports.KNOWN_TYPES.join(', ')})`,
+            line: depth === 0 ? (0, exports.findKeyLine)(rawText, 'type') : undefined,
+        });
+        return;
+    }
+    const settingsType = typeValue;
+    // Warnings: required common fields.
+    for (const field of REQUIRED_COMMON_FIELDS[settingsType]) {
+        if (!(field in input)) {
+            warnings.push({
+                path: pathOf(field),
+                message: `missing field "${field}" for type "${settingsType}"`,
+                line: depth === 0 ? (0, exports.findKeyLine)(rawText, field) : undefined,
+            });
+        }
+        else {
+            checkColor(input[field], pathOf(field), warnings);
+        }
+    }
+    // Warnings: per-type extra fields.
+    if (settingsType === 'normal') {
+        if (!('contribColors' in input)) {
+            warnings.push({
+                path: pathOf('contribColors'),
+                message: 'missing field "contribColors" for type "normal"',
+            });
+        }
+        else {
+            checkColorArray(input.contribColors, pathOf('contribColors'), warnings);
+        }
+    }
+    if (settingsType === 'season') {
+        for (const field of [
+            'contribColors1',
+            'contribColors2',
+            'contribColors3',
+            'contribColors4',
+        ]) {
+            if (!(field in input)) {
+                warnings.push({
+                    path: pathOf(field),
+                    message: `missing field "${field}" for type "season"`,
+                });
+            }
+            else {
+                checkColorArray(input[field], pathOf(field), warnings);
+            }
+        }
+    }
+    if (settingsType === 'rainbow') {
+        if (!('contribLightness' in input)) {
+            warnings.push({
+                path: pathOf('contribLightness'),
+                message: 'missing field "contribLightness" for type "rainbow"',
+            });
+        }
+        else {
+            checkColorArray(input.contribLightness, pathOf('contribLightness'), warnings);
+        }
+        if (typeof input.saturation !== 'string') {
+            warnings.push({
+                path: pathOf('saturation'),
+                message: 'missing or non-string field "saturation" (ex. "80%")',
+            });
+        }
+        if (typeof input.duration !== 'string') {
+            warnings.push({
+                path: pathOf('duration'),
+                message: 'missing or non-string field "duration" (ex. "10s")',
+            });
+        }
+        if (typeof input.hueRatio !== 'number') {
+            warnings.push({
+                path: pathOf('hueRatio'),
+                message: 'missing or non-number field "hueRatio"',
+            });
+        }
+    }
+    if (settingsType === 'bitmap') {
+        if (!('contribPatterns' in input)) {
+            warnings.push({
+                path: pathOf('contribPatterns'),
+                message: 'missing field "contribPatterns" for type "bitmap"',
+            });
+        }
+        else {
+            checkContribPatterns(input.contribPatterns, pathOf('contribPatterns'), warnings);
+        }
+    }
+    // Warnings: optional well-known fields.
+    if ('growingAnimation' in input &&
+        typeof input.growingAnimation !== 'boolean') {
+        warnings.push({
+            path: pathOf('growingAnimation'),
+            message: 'expected a boolean',
+        });
+    }
+    if ('fileName' in input && typeof input.fileName !== 'string') {
+        warnings.push({
+            path: pathOf('fileName'),
+            message: 'expected a string',
+        });
+    }
+    if ('l10n' in input) {
+        const keys = settingsType === 'radar_contrib_only'
+            ? L10N_KEYS.radarOnly
+            : L10N_KEYS.full;
+        checkL10n(input.l10n, pathOf('l10n'), keys, warnings);
+    }
+    // Warnings: unknown fields may be typos.
+    const knownFields = new Set([
+        ...REQUIRED_COMMON_FIELDS[settingsType],
+        ...OPTIONAL_FIELDS[settingsType],
+    ]);
+    for (const key of Object.keys(input)) {
+        if (!knownFields.has(key)) {
+            warnings.push({
+                path: pathOf(key),
+                message: `unknown field "${key}" for type "${settingsType}"`,
+                line: depth === 0 ? (0, exports.findKeyLine)(rawText, key) : undefined,
+            });
+        }
+    }
+    // darkMode shares the shape of its parent type, one level deep.
+    if ('darkMode' in input) {
+        if (!isObject(input.darkMode)) {
+            warnings.push({
+                path: pathOf('darkMode'),
+                message: 'expected an object mirroring the parent settings',
+            });
+        }
+        else if (depth === 0) {
+            const darkMode = input.darkMode;
+            if ('type' in darkMode && darkMode.type !== settingsType) {
+                warnings.push({
+                    path: pathOf('darkMode.type'),
+                    message: `darkMode.type "${String(darkMode.type)}" differs from the parent type "${settingsType}"`,
+                });
+            }
+            validateOne({ type: settingsType, ...darkMode }, pathOf('darkMode'), undefined, errors, warnings, depth + 1);
+        }
+    }
+};
+/**
+ * Validate a parsed settings JSON value (single object or array).
+ * `rawText` is optional and only used to locate line numbers.
+ */
+const validateSettingFile = (input, rawText) => {
+    const errors = [];
+    const warnings = [];
+    if (Array.isArray(input)) {
+        if (input.length === 0) {
+            warnings.push({
+                path: '(root)',
+                message: 'settings array is empty',
+            });
+        }
+        input.forEach((entry, index) => validateOne(entry, `[${index}]`, undefined, errors, warnings, 0));
+    }
+    else {
+        validateOne(input, '', rawText, errors, warnings, 0);
+    }
+    return { errors, warnings };
+};
+exports.validateSettingFile = validateSettingFile;
+//# sourceMappingURL=settings-validator.js.map
 
 /***/ }),
 

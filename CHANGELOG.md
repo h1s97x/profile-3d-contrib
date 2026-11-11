@@ -8,6 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Behavior changes (bug fixes)
+
+- **`MAX_REPOS` is now a real cap.** The repository pagination previously overshot the limit by up to 99 entries (whole 100-repository pages were appended), inflating total fork/star counts. The merged repository list is now truncated to `MAX_REPOS` and an info message is logged when truncation happens. If you set `MAX_REPOS`, your fork/star totals may **decrease** to the correct value.
+- **Invalid settings `type` now fails fast.** A typo such as `"type": "norml"` previously produced a fully transparent SVG without any message. The action now exits with code 1 and prints `E_SETTINGS_INVALID` including the line number and the list of valid types. Other settings issues (missing fields, odd values) only emit `::warning::` messages and do not block execution.
+- **Empty contribution years fail fast.** Requesting a year without contribution data (or a year dropped by GitHub's data retention) previously crashed with an obscure `TypeError` inside d3. The action now exits with code 1 and prints `E_YEAR_EMPTY` with actionable hints.
+
+### Added
+
+- **Structured error codes.** All user-facing failures carry a stable `E_*` code and hints. Exit code convention: `1` = configuration/input error, `2` = remote API error.
+- **Settings validator and JSON schema.** Zero-dependency structural validation of `SETTING_JSON` files, plus `schema/settings.schema.json` (draft-07) for IDE autocompletion.
+- **Render output snapshot tests.** 16 SVG snapshots (8 built-in themes × animated/static) guard against accidental output changes.
+- `MAX_REPOS` / `YEAR` environment variables are validated for sane ranges (`MAX_REPOS` must be a positive integer, `YEAR` must be within 2008..current year).
+- Output file names from settings are validated (`E_FILENAME_INVALID` on path traversal attempts).
+
+### Changed
+
+- **API error output no longer dumps raw responses.** GraphQL failures previously serialized the whole response into logs, which could leak private repository names. Only server-provided error messages are printed now.
+- The GraphQL `errors` field type was corrected from a fixed one-element tuple to an array (type-level only).
+- `commitContributionsByRepository` now honors `MAX_REPOS` (capped at GitHub's maximum of 100).
+
+### Fixed (internal)
+
+- **Build pipeline.** `tsconfig.json` `rootDir` is now `./src` so `npm run build` works again (upstream commit `e733579c` had broken the `dist0/index.js` path). `npm run clean` also removes `dist0`.
+- Removed a duplicated `text-anchor` attribute and a redundant per-file `mkdirSync` call.
+- Importing `dist/index.js` as a library no longer runs `main()` as a side effect (`require.main` guard).
+
 ## [1.0.0] - 2026-10-03
 
 First release after the **maintenance handover**. Rendering logic and output format are **identical** to `0.9.3`; this release contains no functional changes.
