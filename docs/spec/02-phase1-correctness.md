@@ -200,6 +200,12 @@ if (result) {
 
 分页循环的终止条件同步调整:当前实现是 `if (result && result.user.repositories.nodes.length === maxReposOneQuery)`,截断后 `nodes.length` 已变为 `maxRepos`,**必须改为在截断前保存原始长度**,否则当 `maxRepos < 100` 时会错误地跳过多余分页,而当 `maxRepos > 100` 时会漏掉必要的分页。这是一个易错点,实现时须用「原始首页长度」变量固定判定基准。
 
+> **实现偏差(已合并):** 实际代码把截断放在分页循环**之后**,因此上述顺序陷阱不会发生 —
+> 循环终止条件读到的仍是首页原始长度。上方的「首页即截断」写法未采用。
+> 另外 `commitContributionsByRepository` 用的是 `Math.max(1, maxRepos)` 后的值,
+> 而非原文的 `Math.min(maxRepos, maxReposOneQuery)`;`MAX_REPOS < 1` 已在 `index.ts` 被拒,
+> 故两者等价,但计划文档的字面内容与代码不一致,此处以代码为准。
+
 ## 五、commit 切分
 
 一缺陷一 commit,便于逐条 Review 与 `git bisect` 定位。
