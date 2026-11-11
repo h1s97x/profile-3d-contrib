@@ -57,12 +57,11 @@ export type ResponseType = {
             repositories: Repositories;
         };
     };
-    errors?: [
-        {
-            message: string;
-            // snip
-        },
-    ];
+    errors?: Array<{
+        message: string;
+        type?: string;
+        // snip
+    }>;
 };
 
 /** Response(next) of GraphQL */
@@ -72,22 +71,26 @@ export type ResponseNextType = {
             repositories: Repositories;
         };
     };
-    errors?: [
-        {
-            message: string;
-            // snip
-        },
-    ];
+    errors?: Array<{
+        message: string;
+        type?: string;
+        // snip
+    }>;
 };
 
 export const fetchFirst = async (
     token: string,
     userName: string,
     year: number | null = null,
+    maxRepos: number = maxReposOneQuery,
 ): Promise<ResponseType> => {
     const yearArgs = year
         ? `(from:"${year}-01-01T00:00:00.000Z", to:"${year}-12-31T23:59:59.000Z")`
         : '';
+    const maxRepoCommitContribs = Math.min(
+        Math.max(1, maxRepos),
+        maxReposOneQuery,
+    );
     const headers = {
         Authorization: `bearer ${token}`,
     };
@@ -107,7 +110,7 @@ export const fetchFirst = async (
                                 }
                             }
                         }
-                        commitContributionsByRepository(maxRepositories: ${maxReposOneQuery}) {
+                        commitContributionsByRepository(maxRepositories: ${maxRepoCommitContribs}) {
                             repository {
                                 primaryLanguage {
                                     name
@@ -187,7 +190,7 @@ export const fetchData = async (
     maxRepos: number,
     year: number | null = null,
 ): Promise<ResponseType> => {
-    const res1 = await fetchFirst(token, userName, year);
+    const res1 = await fetchFirst(token, userName, year, maxRepos);
     const result = res1.data;
 
     if (result && result.user.repositories.nodes.length === maxReposOneQuery) {
@@ -198,6 +201,7 @@ export const fetchData = async (
             if (res2.data) {
                 const repos2 = res2.data.user.repositories;
                 repos1.nodes.push(...repos2.nodes);
+                repos1.edges.push(...repos2.edges);
                 if (repos2.nodes.length !== maxReposOneQuery) {
                     break;
                 }
@@ -206,6 +210,17 @@ export const fetchData = async (
                 break;
             }
         }
+    }
+
+    // The pagination loop above appends whole pages, so the collected
+    // repositories may overshoot `maxRepos` by up to one page. Truncate
+    // to the configured cap so fork/star totals are not inflated.
+    if (result && result.user.repositories.nodes.length > maxRepos) {
+        console.info(
+            `repositories used for statistics are truncated to the ${maxRepos} most recently pushed ones (MAX_REPOS=${maxRepos})`,
+        );
+        result.user.repositories.nodes.length = maxRepos;
+        result.user.repositories.edges.length = maxRepos;
     }
     return res1;
 };
