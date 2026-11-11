@@ -1,8 +1,40 @@
 import { mkdirSync, writeFileSync } from 'fs';
+import { AppError, ErrorCode } from './errors';
 
 export const OUTPUT_FOLDER = './profile-3d-contrib';
 
+/**
+ * Only plain file names are allowed: no path separators, no parent
+ * directory references, no hidden files, no Windows drive names.
+ * `fileName` can come from a user-provided settings JSON, so writing
+ * must never escape OUTPUT_FOLDER.
+ */
+const SAFE_FILE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,254}$/;
+
+export const sanitizeFileName = (fileName: string): string => {
+    if (!SAFE_FILE_NAME.test(fileName) || fileName.includes('..')) {
+        throw new AppError(
+            ErrorCode.FILENAME_INVALID,
+            `invalid output file name: "${fileName}"`,
+            [
+                'use a plain file name such as "profile-customize.svg"',
+                'path separators, ".." segments and leading dots are not allowed',
+            ],
+        );
+    }
+    return fileName;
+};
+
+let isOutputFolderCreated = false;
+
+const createOutputFolder = (): void => {
+    if (!isOutputFolderCreated) {
+        mkdirSync(OUTPUT_FOLDER, { recursive: true });
+        isOutputFolderCreated = true;
+    }
+};
+
 export const writeFile = (fileName: string, content: string): void => {
-    mkdirSync(OUTPUT_FOLDER, { recursive: true });
-    writeFileSync(`${OUTPUT_FOLDER}/${fileName}`, content);
+    createOutputFolder();
+    writeFileSync(`${OUTPUT_FOLDER}/${sanitizeFileName(fileName)}`, content);
 };
