@@ -47,6 +47,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `type`, but the remaining fields are re-checked against the `normal` field set, so block-worthy
   issues such as a broken bitmap pattern are reported in the same run.
 
+### Fixed (documentation and metadata)
+
+- **`package-lock.json` version realigned with `package.json`.** The lock file still carried
+  `0.9.3` while `package.json` was already `1.0.0`. `release.yml` only compares the tag against
+  `package.json` and CI only runs `npm ci`, so nothing caught the mismatch.
+- **Takeover checklist no longer contradicts the code.** `docs/spec/00-takeover.md` claimed the
+  handover shipped without touching `src/` and that every `YOUR_GITHUB_*` placeholder was replaced;
+  both were stale. The placeholder section now distinguishes coordinates that are already updated
+  from the CNB secret-repository examples that must stay placeholders, and the dead `sed` one-liner
+  (it also rewrote planned examples in the spec docs) is gone.
+- **`docs/spec/03-phase2-architecture.md` acceptance check fixed.** The self-check
+  `git grep -c 'yoshi389111/github-profile-3d-contrib'` could never pass, because the eleven README
+  fork notices must keep the upstream link. It is now path-filtered and states the one allowed hit.
+- **Phase 0 status updated.** `docs/spec/01-phase0-safety-net.md` still said the render snapshots and
+  the `spec/` type check were pending; both shipped.
+- **Planned examples use the real coordinate.** `docs/spec/04-phase3-config-api.md` and
+  `docs/spec/06-phase5-advanced.md` described this repository's own future CLI and packaging but
+  referred to `YOUR_GITHUB_USER`; they now say `h1s97x/...`.
+
+### Fixed (tests)
+
+- **`settings-validator.ts` branch coverage.** 81.36% → 99.37% statements and 97.61% branches, with
+  the file at 100% line coverage: season color arrays, missing rainbow fields, malformed panels,
+  `l10n` key sets, empty arrays, `fileName` / `growingAnimation` type checks and the typo fallback
+  path are now all exercised.
+
 ### Fixed (internal)
 
 - **Build pipeline.** `tsconfig.json` `rootDir` is now `./src` so `npm run build` works again (upstream commit `e733579c` had broken the `dist0/index.js` path). `npm run clean` also removes `dist0`.
@@ -55,7 +81,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-10-03
 
-First release after the **maintenance handover**. Rendering logic and output format are **identical** to `0.9.3`; this release contains no functional changes.
+First release after the **maintenance handover**. `src/` was byte-for-byte untouched in the
+handover commit `a2c5e2a`, so the generated output is identical to `0.9.3`; this release contains
+no runtime code changes.
+
+> Functional fixes landed afterwards on the same unreleased line (see `[Unreleased]`):
+> `src/` has since changed and `dist/index.js` grew from 190,611 to 191,885 lines. The 16 render
+> snapshots are still byte-identical, so existing users' images are unaffected, but the code is no
+> longer 「unchanged since 0.9.3」.
 
 ### Breaking changes
 
