@@ -62,8 +62,14 @@ export const main = async (): Promise<void> => {
             const settingInfos =
                 'length' in settingFile ? settingFile : [settingFile];
             for (const settingInfo of settingInfos) {
+                // The reader already warned about an unusable name, and
+                // writeFile refuses it, so fall back instead of failing an
+                // otherwise valid render.
                 const fileName =
-                    settingInfo.fileName || 'profile-customize.svg';
+                    settingInfo.fileName &&
+                    f.isSafeFileName(settingInfo.fileName)
+                        ? settingInfo.fileName
+                        : f.DEFAULT_FILE_NAME;
                 f.writeFile(
                     fileName,
                     create.createSvg(userInfo, settingInfo, false),

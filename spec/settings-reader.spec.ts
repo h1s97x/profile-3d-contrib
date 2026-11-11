@@ -1,4 +1,4 @@
-import { readSettingJson } from "../src/settings-reader";
+import { readSettingJson } from '../src/settings-reader';
 import { AppError, ErrorCode } from '../src/errors';
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
@@ -23,23 +23,23 @@ const writeSettings = (name: string, content: string): string => {
 describe('settings-reader', () => {
     it('readSettingJson(Single Settings)', () => {
         const settings = readSettingJson('./spec/settings.json');
-        if ("type" in settings) {
+        if ('type' in settings) {
             expect(settings.type).toEqual('normal');
             expect(settings.backgroundColor).toEqual('#ffffff');
             expect(settings.foregroundColor).toEqual('#00000f');
         } else {
-            throw new Error("invalid value")
+            throw new Error('invalid value');
         }
     });
 
     it('readSettingJson(Multiple Settings)', () => {
         const settings = readSettingJson('./spec/settings2.json');
-        if ("length" in settings) {
+        if ('length' in settings) {
             expect(settings.length).toEqual(2);
             expect(settings[0].type).toEqual('normal');
             expect(settings[1].type).toEqual('rainbow');
         } else {
-            throw new Error("invalid value")
+            throw new Error('invalid value');
         }
     });
 
@@ -78,6 +78,65 @@ describe('settings-reader', () => {
         ).toThrow(/E_SETTINGS_INVALID/);
     });
 
+    it('warns instead of failing on an unsafe fileName', () => {
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const filePath = writeSettings(
+            'unsafe-name.json',
+            JSON.stringify({
+                type: 'normal',
+                backgroundColor: '#ffffff',
+                foregroundColor: '#00000f',
+                strongColor: '#111133',
+                weakColor: 'gray',
+                radarColor: '#47a042',
+                contribColors: [
+                    '#efefef',
+                    '#d8e887',
+                    '#8cc569',
+                    '#47a042',
+                    '#1d6a23',
+                ],
+                fileName: 'out/custom.svg',
+            }),
+        );
+        const settings = readSettingJson(filePath);
+        expect('type' in settings && settings.fileName).toEqual(
+            'out/custom.svg',
+        );
+        expect(warnSpy).toHaveBeenCalledWith(
+            expect.stringContaining('fileName: "out/custom.svg"'),
+        );
+        warnSpy.mockRestore();
+    });
+
+    it('warns on a non-string fileName', () => {
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const filePath = writeSettings(
+            'bad-fileName.json',
+            JSON.stringify({
+                type: 'normal',
+                backgroundColor: '#ffffff',
+                foregroundColor: '#00000f',
+                strongColor: '#111133',
+                weakColor: 'gray',
+                radarColor: '#47a042',
+                contribColors: [
+                    '#efefef',
+                    '#d8e887',
+                    '#8cc569',
+                    '#47a042',
+                    '#1d6a23',
+                ],
+                fileName: 42,
+            }),
+        );
+        readSettingJson(filePath);
+        expect(warnSpy).toHaveBeenCalledWith(
+            expect.stringContaining('fileName: expected a string'),
+        );
+        warnSpy.mockRestore();
+    });
+
     it('warns without blocking on minor issues', () => {
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
         const filePath = writeSettings(
@@ -95,7 +154,7 @@ describe('settings-reader', () => {
         const settings = readSettingJson(filePath);
         expect('type' in settings && settings.type).toEqual('normal');
         expect(warnSpy).toHaveBeenCalledWith(
-            expect.stringContaining('::warning::'),
+            expect.stringContaining('WARNING: settings'),
         );
         warnSpy.mockRestore();
     });

@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import * as type from './type';
 import { AppError, ErrorCode } from './errors';
 import { validateSettingFile } from './settings-validator';
+import { isSafeFileName } from './file-writer';
 
 const toLineColumn = (
     content: string,
@@ -37,6 +38,36 @@ const parseJson = (content: string, filePath: string): unknown => {
     }
 };
 
+/**
+ * `fileName` is the only field that reaches the filesystem, so it is
+ * checked separately: an unsafe name with no fallback would break an
+ * existing config that used to work, hence a warning plus the default.
+ */
+const collectFileNameWarnings = (parsed: unknown): string[] => {
+    const entries = Array.isArray(parsed) ? parsed : [parsed];
+    const messages: string[] = [];
+    entries.forEach((entry, index) => {
+        if (!entry || typeof entry !== 'object') {
+            return;
+        }
+        const { fileName } = entry as { fileName?: unknown };
+        if (fileName === undefined) {
+            return;
+        }
+        const where = Array.isArray(parsed) ? `[${index}].fileName` : 'fileName';
+        if (typeof fileName !== 'string') {
+            messages.push(
+                `${where}: expected a string, got ${typeof fileName}; falling back to the default name`,
+            );
+        } else if (!isSafeFileName(fileName)) {
+            messages.push(
+                `${where}: "${fileName}" is not a plain file name; falling back to the default name`,
+            );
+        }
+    });
+    return messages;
+};
+
 export const readSettingJson = (filePath: string): type.SettingFile => {
     let content: string;
     try {
@@ -58,8 +89,11 @@ export const readSettingJson = (filePath: string): type.SettingFile => {
     for (const warning of warnings) {
         const where = warning.line ? ` (line ${warning.line})` : '';
         console.warn(
-            `::warning::settings ${warning.path}${where}: ${warning.message}`,
+            `WARNING: settings ${warning.path}${where}: ${warning.message}`,
         );
+    }
+    for (const warning of collectFileNameWarnings(parsed)) {
+        console.warn(`WARNING: ${warning}`);
     }
     if (errors.length > 0) {
         const details = errors
