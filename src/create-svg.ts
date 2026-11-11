@@ -29,7 +29,7 @@ export const createSvg = (
             'no contribution data for the requested period, cannot render a calendar',
             [
                 'omit YEAR to use the current year',
-                'the requested year may have no contributions, or its data may have been dropped by the GitHub data retention policy',
+                'the requested year may have no contributions, or it may predate the account (or be beyond the data retention window of the data source)',
             ],
         );
     }

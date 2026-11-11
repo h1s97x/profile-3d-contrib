@@ -24,6 +24,31 @@ exports.aggregateCnbUserInfo = void 0;
 const OTHER_COLOR = '#444444';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const toIsoDate = (date) => date.toISOString().slice(0, 10);
+/**
+ * Normalize a calendar key to `YYYY-MM-DD`.
+ *
+ * The OpenAPI document describes the keys as `date`, and the live API
+ * answers with compact `YYYYMMDD` keys (`{"20260528": {...}}`), so both
+ * forms are accepted.
+ */
+const normalizeDateKey = (key) => {
+    const digits = key.replace(/[^0-9]/g, '');
+    if (digits.length !== 8) {
+        return null;
+    }
+    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+};
+/** Re-index the calendar by normalized date so both key styles look the same. */
+const indexCalendar = (calendar) => {
+    const byDate = {};
+    Object.keys(calendar).forEach((key) => {
+        const date = normalizeDateKey(key);
+        if (date) {
+            byDate[date] = calendar[key];
+        }
+    });
+    return byDate;
+};
 /** GitHub counts commits, issues and pull requests as contributions. */
 const dailyContributionCount = (day) => {
     var _a, _b, _c;
@@ -64,7 +89,8 @@ const isHalloween = (now) => now.getUTCMonth() === 9 && now.getUTCDate() >= 25;
  * the range must be present (missing days become zero-count days).
  */
 const buildCalendar = (calendar, year, now) => {
-    const keys = Object.keys(calendar).sort();
+    const byDate = indexCalendar(calendar);
+    const keys = Object.keys(byDate).sort();
     let start;
     let end;
     if (year !== null) {
@@ -89,7 +115,7 @@ const buildCalendar = (calendar, year, now) => {
         const date = new Date(timestamp);
         days.push({
             date,
-            count: dailyContributionCount(calendar[toIsoDate(date)]),
+            count: dailyContributionCount(byDate[toIsoDate(date)]),
         });
     }
     const thresholds = quartileThresholds(days.map((day) => day.count));
@@ -1165,7 +1191,7 @@ const createSvg = (userInfo, settings, isForcedAnimation) => {
     if (userInfo.contributionCalendar.length === 0) {
         throw new errors_1.AppError(errors_1.ErrorCode.YEAR_EMPTY, 'no contribution data for the requested period, cannot render a calendar', [
             'omit YEAR to use the current year',
-            'the requested year may have no contributions, or its data may have been dropped by the GitHub data retention policy',
+            'the requested year may have no contributions, or it may predate the account (or be beyond the data retention window of the data source)',
         ]);
     }
     let svgWidth = width;

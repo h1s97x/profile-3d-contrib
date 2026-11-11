@@ -20,6 +20,35 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const toIsoDate = (date: Date): string => date.toISOString().slice(0, 10);
 
+/**
+ * Normalize a calendar key to `YYYY-MM-DD`.
+ *
+ * The OpenAPI document describes the keys as `date`, and the live API
+ * answers with compact `YYYYMMDD` keys (`{"20260528": {...}}`), so both
+ * forms are accepted.
+ */
+const normalizeDateKey = (key: string): string | null => {
+    const digits = key.replace(/[^0-9]/g, '');
+    if (digits.length !== 8) {
+        return null;
+    }
+    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+};
+
+/** Re-index the calendar by normalized date so both key styles look the same. */
+const indexCalendar = (
+    calendar: cnbApi.ActivityCalendar,
+): { [date: string]: cnbApi.ActivityCalendarDate } => {
+    const byDate: { [date: string]: cnbApi.ActivityCalendarDate } = {};
+    Object.keys(calendar).forEach((key) => {
+        const date = normalizeDateKey(key);
+        if (date) {
+            byDate[date] = calendar[key];
+        }
+    });
+    return byDate;
+};
+
 /** GitHub counts commits, issues and pull requests as contributions. */
 const dailyContributionCount = (
     day: cnbApi.ActivityCalendarDate | undefined,
@@ -74,7 +103,8 @@ const buildCalendar = (
     year: number | null,
     now: Date,
 ): type.CalendarInfo[] => {
-    const keys = Object.keys(calendar).sort();
+    const byDate = indexCalendar(calendar);
+    const keys = Object.keys(byDate).sort();
     let start: Date;
     let end: Date;
     if (year !== null) {
@@ -102,7 +132,7 @@ const buildCalendar = (
         const date = new Date(timestamp);
         days.push({
             date,
-            count: dailyContributionCount(calendar[toIsoDate(date)]),
+            count: dailyContributionCount(byDate[toIsoDate(date)]),
         });
     }
 

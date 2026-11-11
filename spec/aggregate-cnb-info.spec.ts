@@ -37,6 +37,30 @@ describe('aggregate-cnb-info calendar', () => {
         expect(marchFirst?.contributionLevel).toBeGreaterThan(0);
     });
 
+    it('accepts the compact YYYYMMDD keys the live API returns', () => {
+        const calendar = {
+            '20240301': day(2),
+            '20240302': day(0, 1),
+        };
+
+        const userInfo = aggregateCnb.aggregateCnbUserInfo(
+            calendar,
+            [],
+            2024,
+            NOW,
+        );
+
+        const counts = userInfo.contributionCalendar
+            .filter((info) =>
+                ['2024-03-01', '2024-03-02'].includes(
+                    info.date.toISOString().slice(0, 10),
+                ),
+            )
+            .map((info) => info.contributionCount);
+        expect(counts).toEqual([2, 1]);
+        expect(userInfo.totalContributions).toBe(3);
+    });
+
     it('stops the current year at today like GitHub does', () => {
         const userInfo = aggregateCnb.aggregateCnbUserInfo(
             {},
