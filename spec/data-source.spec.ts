@@ -61,6 +61,16 @@ describe('data-source resolveToken', () => {
         );
     });
 
+    it('prefers a user-provided CNB_ACCESS_TOKEN for private repositories', () => {
+        const env = { CNB_TOKEN: 'pipeline-temp', CNB_ACCESS_TOKEN: 'pat' };
+        expect(dataSource.detectPlatform({ CNB_ACCESS_TOKEN: 'pat' })).toBe('cnb');
+        expect(dataSource.tokenEnvName('cnb', env)).toBe('CNB_ACCESS_TOKEN');
+        expect(dataSource.resolveToken('cnb', env)).toBe('pat');
+        expect(dataSource.tokenEnvName('cnb', { CNB_TOKEN: 'pipeline-temp' })).toBe(
+            'CNB_TOKEN',
+        );
+    });
+
     it('fails with a platform specific hint when the token is missing', () => {
         const githubError = (() => {
             try {

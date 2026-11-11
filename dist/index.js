@@ -318,6 +318,7 @@ const axios_1 = __importDefault(__nccwpck_require__(87269));
 const errors_1 = __nccwpck_require__(75600);
 const DEFAULT_API_ENDPOINT = 'https://api.cnb.cool';
 const PAGE_SIZE = 100;
+const MAX_PAGES = 20;
 const apiEndpoint = () => {
     const raw = process.env.CNB_API_ENDPOINT || DEFAULT_API_ENDPOINT;
     return raw.replace(/\/+$/, '');
@@ -340,8 +341,8 @@ const toAppError = (action, error) => {
         const suffix = detail ? `: ${detail}` : '';
         if (status === 401 || status === 403) {
             return new errors_1.AppError(errors_1.ErrorCode.API_BAD_RESPONSE, `${action} was rejected by the CNB API (HTTP ${status})${suffix}`, [
-                'CNB_TOKEN needs the account-engage:r (read) scope',
-                'inside a CNB pipeline CNB_TOKEN is provided automatically; check that the pipeline imports it',
+                'the token needs the account-engage:r (read) scope',
+                'to include private repositories, set CNB_ACCESS_TOKEN to an access token with private-repository access',
             ]);
         }
         if (status === 404) {
@@ -376,28 +377,47 @@ const fetchCalendar = async (token, userName, year) => {
 };
 exports.fetchCalendar = fetchCalendar;
 /**
- * Fetch owned repositories of a user, newest first, capped at `maxRepos`.
+ * Fetch every repository visible to the token.
  *
- * The cap is enforced locally (like the GitHub data source) so the star /
- * fork totals never include repositories beyond the requested limit.
+ * CNB reports the exact total in the `x-cnb-total` response header, and
+ * `role=Guest` includes repositories where the user is not the owner (the
+ * API defaults to `role=Owner`). Pagination stops on the reported total or
+ * on a short page, never on a local cap.
+ *
+ * `maxRepos` is kept as an optional safety valve for callers that still want
+ * one. The CNB data source does not pass it, so star / fork / repository
+ * totals reflect every repository the token can see — including private
+ * ones when the token has been granted that scope.
  */
-const fetchRepos = async (token, userName, maxRepos) => {
+const fetchRepos = async (token, userName, maxRepos = Number.POSITIVE_INFINITY) => {
+    var _a;
     const repos = [];
-    for (let page = 1;; page += 1) {
+    for (let page = 1; page <= MAX_PAGES; page += 1) {
         let batch;
+        let reportedTotal = null;
         try {
             const response = await axios_1.default.get(`${apiEndpoint()}/users/${encodeURIComponent(userName)}/repos`, {
                 headers: authHeaders(token),
-                params: { page, page_size: PAGE_SIZE },
+                params: { page, page_size: PAGE_SIZE, role: 'Guest' },
                 timeout: 30000,
             });
             batch = Array.isArray(response.data) ? response.data : [];
+            const headers = (_a = response.headers) !== null && _a !== void 0 ? _a : {};
+            const raw = headers['x-cnb-total'];
+            const parsed = typeof raw === 'string' || typeof raw === 'number'
+                ? Number(raw)
+                : Number.NaN;
+            if (Number.isFinite(parsed) && parsed >= 0) {
+                reportedTotal = parsed;
+            }
         }
         catch (error) {
             throw toAppError(`fetching the CNB repositories of "${userName}"`, error);
         }
         repos.push(...batch);
-        if (repos.length >= maxRepos || batch.length < PAGE_SIZE) {
+        if (batch.length < PAGE_SIZE ||
+            (reportedTotal !== null && repos.length >= reportedTotal) ||
+            repos.length >= maxRepos) {
             break;
         }
     }
@@ -1409,8 +1429,8 @@ const errors_1 = __nccwpck_require__(75600);
  *
  * Priority:
  * 1. explicit `PLATFORM` environment variable;
- * 2. automatic detection — CNB pipelines inject `CNB_TOKEN`, so its
- *    presence selects CNB;
+ * 2. automatic detection — either a user-provided `CNB_ACCESS_TOKEN` or
+ *    the pipeline-injected `CNB_TOKEN` selects CNB;
  * 3. GitHub, the historical default.
  */
 const detectPlatform = (env = process.env) => {
@@ -1422,23 +1442,36 @@ const detectPlatform = (env = process.env) => {
         }
         throw new errors_1.AppError(errors_1.ErrorCode.PLATFORM_INVALID, `PLATFORM must be "github" or "cnb": "${(_b = env.PLATFORM) !== null && _b !== void 0 ? _b : ''}"`, ['remove PLATFORM to auto-detect, or set it to "github" / "cnb"']);
     }
-    if (env.CNB_TOKEN) {
+    if (env.CNB_ACCESS_TOKEN || env.CNB_TOKEN) {
         return 'cnb';
     }
     return 'github';
 };
 exports.detectPlatform = detectPlatform;
-/** Token environment variable name for a platform. */
-const tokenEnvName = (platform) => platform === 'cnb' ? 'CNB_TOKEN' : 'GITHUB_TOKEN';
+/**
+ * Token environment variable name for a platform.
+ *
+ * A dedicated `CNB_ACCESS_TOKEN` wins over the pipeline's temporary
+ * `CNB_TOKEN`: the latter is scoped to the current repository and cannot
+ * see private repositories. `imports` in `.cnb.yml` can inject the former
+ * from a secret repository without shadowing the built-in variable.
+ */
+const tokenEnvName = (platform, env = process.env) => {
+    if (platform === 'github') {
+        return 'GITHUB_TOKEN';
+    }
+    return env.CNB_ACCESS_TOKEN ? 'CNB_ACCESS_TOKEN' : 'CNB_TOKEN';
+};
 exports.tokenEnvName = tokenEnvName;
 /** Read the token for a platform, failing fast when it is missing. */
 const resolveToken = (platform, env = process.env) => {
-    const name = (0, exports.tokenEnvName)(platform);
+    const name = (0, exports.tokenEnvName)(platform, env);
     const token = env[name];
     if (!token) {
         throw new errors_1.AppError(errors_1.ErrorCode.TOKEN_MISSING, `${name} is empty`, platform === 'cnb'
             ? [
-                'CNB pipelines provide CNB_TOKEN automatically; otherwise create an access token with the account-engage:r (read) scope',
+                'CNB pipelines provide CNB_TOKEN automatically, but that temporary token cannot see private repositories',
+                'to include private repositories, set CNB_ACCESS_TOKEN to an access token with the account-engage:r scope and private-repository access',
             ]
             : ['set a personal access token as the GITHUB_TOKEN secret']);
     }
@@ -1449,7 +1482,9 @@ exports.resolveToken = resolveToken;
 const fetchUserInfo = async (platform, options) => {
     if (platform === 'cnb') {
         const calendar = await cnbApi.fetchCalendar(options.token, options.userName, options.year);
-        const repos = await cnbApi.fetchRepos(options.token, options.userName, options.maxRepos);
+        // CNB reports the exact repository count in `x-cnb-total`, so every
+        // visible repository is fetched. `MAX_REPOS` only applies to GitHub.
+        const repos = await cnbApi.fetchRepos(options.token, options.userName);
         return aggregateCnb.aggregateCnbUserInfo(calendar, repos, options.year);
     }
     const response = await client.fetchData(options.token, options.userName, options.maxRepos, options.year);

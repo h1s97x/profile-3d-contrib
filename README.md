@@ -116,13 +116,14 @@ In the sample, only `GITHUB_TOKEN` and `USERNAME` are specified as environment v
 
 - `GITHUB_TOKEN` : (required for GitHub data) access token
 - `USERNAME` : (required) target username (or specify with an argument).
-- `MAX_REPOS` : (optional) max repositories, default 100 - since ver. 0.2.0
+- `MAX_REPOS` : (optional, **GitHub data source only**) max repositories, default 100 - since ver. 0.2.0
 - `SETTING_JSON` : (optional) settings json file path. See `sample-settings/*.json` and `src/type.ts` in `h1s97x/github-profile-3d-contrib` repository for details. - since ver. 0.6.0
 - `GITHUB_ENDPOINT` : (optional) Github GraphQL endpoint. For example, if you want to create a contribution calendar based on your company's GitHub Enterprise activity instead of GitHub.com, set this environment variable. e.g. `https://github.mycompany.com/api/graphql` - since ver. 0.8.0
 - `YEAR` : (optional) For past calendars, specify the year. This is intended to be specified when running the tool from the command line. - since ver. 0.8.0
-- `PLATFORM` : (optional) `github` (default) or `cnb` — selects the contribution data source. When unset, a present `CNB_TOKEN` means `cnb`, otherwise `github`. Any other value fails with `E_PLATFORM_INVALID`. - since ver. 1.1.0
-- `CNB_TOKEN` : (required for CNB data) CNB access token with the `account-engage:r` (read) scope. CNB pipelines inject it automatically. - since ver. 1.1.0
-- `CNB_API_ENDPOINT` : (optional) CNB OpenAPI endpoint, default `https://api.cnb.cool`. Also injected by CNB pipelines. - since ver. 1.1.0
+- `PLATFORM` : (optional) `github` (default) or `cnb` — selects the contribution data source. When unset, a present `CNB_TOKEN` or `CNB_ACCESS_TOKEN` means `cnb`, otherwise `github`. Any other value fails with `E_PLATFORM_INVALID`.
+- `CNB_TOKEN` : (required for CNB data) CNB access token with the `account-engage:r` (read) scope. CNB pipelines inject it automatically, but that temporary token can only see public repositories.
+- `CNB_ACCESS_TOKEN` : (optional) access token with private-repository access. Takes precedence over `CNB_TOKEN`; inject it from a secret repository via `imports` (see the CNB section below).
+- `CNB_API_ENDPOINT` : (optional) CNB OpenAPI endpoint, default `https://api.cnb.cool`. Also injected by CNB pipelines.
 
 #### About `GITHUB_TOKEN`
 
@@ -280,8 +281,19 @@ Create a repository named after your CNB account.
 CNB does not use `${{ secrets.* }}`. Secrets are stored in a dedicated
 [secret repository](https://docs.cnb.cool/zh/repo/secret) and injected via `imports`.
 
-With `PLATFORM: cnb` **no secret is required** — CNB pipelines inject `CNB_TOKEN` automatically.
-For GitHub data, create a secret repository containing an `envs.yml`:
+With `PLATFORM: cnb` the pipeline injects `CNB_TOKEN` automatically, which is enough for
+**public** repositories. That temporary token is scoped to the current repository, so it
+cannot see private repositories. To include them, create an access token with
+private-repository access and store it in a secret repository:
+
+```yaml title="envs.yml (in your secret repository)"
+CNB_ACCESS_TOKEN: <access-token-with-private-repository-access>
+```
+
+`CNB_ACCESS_TOKEN` takes precedence over the built-in `CNB_TOKEN`. Keeping a distinct
+name means `imports` does not have to shadow a platform-provided variable.
+
+For GitHub data, store `GITHUB_TOKEN` the same way:
 
 ```yaml title="envs.yml (in your secret repository)"
 GITHUB_TOKEN: ghp_xxxxxxxxxxxxxxxxxxxx
@@ -293,12 +305,12 @@ Add `.cnb.yml` to your profile repository:
 
 ```yaml title=".cnb.yml"
 main:
-  "crontab: 0 18 * * *": # 03:00 JST == 18:00 UTC
+  "crontab: 0 18 * * *": # 18:00 Asia/Shanghai (UTC+8) — CNB crontab uses the system timezone
     - name: generate
       docker:
         image: node:24
-      # Only needed for GitHub data. With PLATFORM: cnb the pipeline
-      # already has CNB_TOKEN, so this import can be dropped.
+      # Needed for GitHub data, or for CNB private repositories
+      # (CNB_ACCESS_TOKEN). Drop this when public CNB repositories are enough.
       imports:
         - https://cnb.cool/YOUR_CNB_USER/YOUR_SECRET_REPO/-/blob/main/envs.yml
       stages:
@@ -350,7 +362,7 @@ node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env
 |---|---|---|
 | Reference | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` | Download `dist/index.js` in a `script` job |
 | Data source | GitHub API | GitHub API, or the CNB API with `PLATFORM: cnb` |
-| Secrets | `${{ secrets.GITHUB_TOKEN }}` | Secret repository + `imports`; `PLATFORM: cnb` needs none |
+| Secrets | `${{ secrets.GITHUB_TOKEN }}` | Secret repository + `imports`; optional `CNB_ACCESS_TOKEN` when CNB private repositories should be included |
 | Repo context | `${{ github.repository_owner }}` | `${CNB_REPO_SLUG%%/*}` |
 | Pipeline config | `.github/workflows/*.yml` | `.cnb.yml` (Pipeline / Stage / Job) |
 | Schedule | `on.schedule.cron` | `"crontab: ..."` trigger key |

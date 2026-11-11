@@ -27,8 +27,8 @@ export interface FetchOptions {
  *
  * Priority:
  * 1. explicit `PLATFORM` environment variable;
- * 2. automatic detection — CNB pipelines inject `CNB_TOKEN`, so its
- *    presence selects CNB;
+ * 2. automatic detection — either a user-provided `CNB_ACCESS_TOKEN` or
+ *    the pipeline-injected `CNB_TOKEN` selects CNB;
  * 3. GitHub, the historical default.
  */
 export const detectPlatform = (
@@ -45,22 +45,36 @@ export const detectPlatform = (
             ['remove PLATFORM to auto-detect, or set it to "github" / "cnb"'],
         );
     }
-    if (env.CNB_TOKEN) {
+    if (env.CNB_ACCESS_TOKEN || env.CNB_TOKEN) {
         return 'cnb';
     }
     return 'github';
 };
 
-/** Token environment variable name for a platform. */
-export const tokenEnvName = (platform: Platform): string =>
-    platform === 'cnb' ? 'CNB_TOKEN' : 'GITHUB_TOKEN';
+/**
+ * Token environment variable name for a platform.
+ *
+ * A dedicated `CNB_ACCESS_TOKEN` wins over the pipeline's temporary
+ * `CNB_TOKEN`: the latter is scoped to the current repository and cannot
+ * see private repositories. `imports` in `.cnb.yml` can inject the former
+ * from a secret repository without shadowing the built-in variable.
+ */
+export const tokenEnvName = (
+    platform: Platform,
+    env: NodeJS.ProcessEnv = process.env,
+): string => {
+    if (platform === 'github') {
+        return 'GITHUB_TOKEN';
+    }
+    return env.CNB_ACCESS_TOKEN ? 'CNB_ACCESS_TOKEN' : 'CNB_TOKEN';
+};
 
 /** Read the token for a platform, failing fast when it is missing. */
 export const resolveToken = (
     platform: Platform,
     env: NodeJS.ProcessEnv = process.env,
 ): string => {
-    const name = tokenEnvName(platform);
+    const name = tokenEnvName(platform, env);
     const token = env[name];
     if (!token) {
         throw new AppError(
@@ -68,7 +82,8 @@ export const resolveToken = (
             `${name} is empty`,
             platform === 'cnb'
                 ? [
-                      'CNB pipelines provide CNB_TOKEN automatically; otherwise create an access token with the account-engage:r (read) scope',
+                      'CNB pipelines provide CNB_TOKEN automatically, but that temporary token cannot see private repositories',
+                      'to include private repositories, set CNB_ACCESS_TOKEN to an access token with the account-engage:r scope and private-repository access',
                   ]
                 : ['set a personal access token as the GITHUB_TOKEN secret'],
         );
@@ -87,11 +102,9 @@ export const fetchUserInfo = async (
             options.userName,
             options.year,
         );
-        const repos = await cnbApi.fetchRepos(
-            options.token,
-            options.userName,
-            options.maxRepos,
-        );
+        // CNB reports the exact repository count in `x-cnb-total`, so every
+        // visible repository is fetched. `MAX_REPOS` only applies to GitHub.
+        const repos = await cnbApi.fetchRepos(options.token, options.userName);
         return aggregateCnb.aggregateCnbUserInfo(calendar, repos, options.year);
     }
     const response = await client.fetchData(

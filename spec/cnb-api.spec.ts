@@ -121,4 +121,36 @@ describe('cnb-api fetchRepos', () => {
         expect(repos).toHaveLength(1);
         expect(mock.history.get).toHaveLength(1);
     });
+
+    it('fetches every visible repository when no cap is given', async () => {
+        const page1 = Array.from({ length: 100 }, (_, i) => repo(i));
+        const page2 = Array.from({ length: 100 }, (_, i) => repo(100 + i));
+        const page3 = Array.from({ length: 5 }, (_, i) => repo(200 + i));
+        mock.onGet(`${BASE}/users/alice/repos`).reply((config) => {
+            const page = Number((config.params as { page?: number })?.page);
+            return [
+                200,
+                page === 1 ? page1 : page === 2 ? page2 : page3,
+                { 'x-cnb-total': '205' },
+            ];
+        });
+
+        const repos = await cnb.fetchRepos('dummy-token', 'alice');
+
+        expect(repos).toHaveLength(205);
+        expect(mock.history.get).toHaveLength(3);
+        expect(mock.history.get[0].params).toMatchObject({ role: 'Guest' });
+    });
+
+    it('stops on the reported total even when pages are full', async () => {
+        const page = Array.from({ length: 100 }, (_, i) => repo(i));
+        mock.onGet(`${BASE}/users/alice/repos`).reply(200, page, {
+            'x-cnb-total': '100',
+        });
+
+        const repos = await cnb.fetchRepos('dummy-token', 'alice');
+
+        expect(repos).toHaveLength(100);
+        expect(mock.history.get).toHaveLength(1);
+    });
 });

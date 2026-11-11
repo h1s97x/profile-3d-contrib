@@ -30,6 +30,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **The CNB data source now fetches every repository visible to the token.** The repository
+  list was previously truncated to `MAX_REPOS` (default 100), so the `Repo`, star, fork and
+  language totals silently omitted older and private repositories. CNB reports the exact count
+  in the `x-cnb-total` response header, so pagination now stops on that total (or a short page),
+  and `role=Guest` is requested to include repositories the user does not own. `MAX_REPOS` now
+  applies only to the GitHub data source. **CNB users' generated SVGs change** — totals become
+  larger and every committed image is redrawn once.
+- **New `CNB_ACCESS_TOKEN` for private repositories.** The pipeline-injected `CNB_TOKEN` is a
+  temporary token scoped to the current repository and can only see public repositories.
+  Setting `CNB_ACCESS_TOKEN` from a secret repository via `imports` takes precedence and lets
+  the CNB data source include private repositories; `PLATFORM` auto-detection recognizes it too.
 - **CNB is now the canonical repository.** `package.json` repository/homepage/bugs now point to
   `cnb.cool/h1s97x/plugins/profile-3d-contrib`, and the README notices describe an independently
   maintained project instead of an upstream-tracking fork. The original author's MIT attribution is
@@ -107,6 +118,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build pipeline.** `tsconfig.json` `rootDir` is now `./src` so `npm run build` works again (upstream commit `e733579c` had broken the `dist0/index.js` path). `npm run clean` also removes `dist0`.
 - Removed a duplicated `text-anchor` attribute and a redundant per-file `mkdirSync` call.
 - Importing `dist/index.js` as a library no longer runs `main()` as a side effect (`require.main` guard).
+
+## [1.0.1] - 2026-11-12
+
+Patch release for version and documentation alignment. The CNB data-source work committed alongside it is recorded under `[Unreleased]`.
+
+Starting with this release the project evolves in small, individually verifiable patch releases
+instead of bundling unrelated work into a minor release. The functional changes still listed under
+`[Unreleased]` are already present on `main` and in the committed `dist/index.js`, but are
+intentionally not announced as released features yet; they will be promoted one patch at a time.
+
+### Changed
+
+- Version bumped to `1.0.1` in `package.json` and `package-lock.json`.
+- Removed the premature `since ver. 1.1.0` annotations from `PLATFORM`, `CNB_TOKEN` and
+  `CNB_API_ENDPOINT` in the README. `1.1.0` was never released and conflicted with the version in
+  `package.json`; version history is now tracked in this changelog only, so small-step releases no
+  longer require editing the environment variable table.
+- `docs/spec/README.md` now reports `1.0.1` as the current version.
 
 ## [1.0.0] - 2026-10-03
 

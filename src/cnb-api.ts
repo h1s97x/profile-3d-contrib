@@ -4,10 +4,10 @@ import { AppError, ErrorCode } from './errors';
 /**
  * Thin client for the CNB OpenAPI (https://api.cnb.cool).
  *
- * Inside a CNB pipeline both `CNB_TOKEN` and `CNB_API_ENDPOINT` are
- * injected automatically, so the defaults below normally need no
- * configuration. Only the endpoints needed to build a contribution
- * card are implemented.
+ * `CNB_API_ENDPOINT` is injected by CNB pipelines. The token is resolved by
+ * `data-source.ts`, which prefers a user-provided `CNB_ACCESS_TOKEN` over the
+ * pipeline's temporary `CNB_TOKEN`. Only the endpoints needed to build a
+ * contribution card are implemented.
  */
 
 /** One day in `GET /users/{username}/calendar`. */
@@ -42,6 +42,7 @@ export interface CnbRepo {
 
 const DEFAULT_API_ENDPOINT = 'https://api.cnb.cool';
 const PAGE_SIZE = 100;
+const MAX_PAGES = 20;
 
 const apiEndpoint = (): string => {
     const raw = process.env.CNB_API_ENDPOINT || DEFAULT_API_ENDPOINT;
@@ -69,8 +70,8 @@ const toAppError = (action: string, error: unknown): AppError => {
                 ErrorCode.API_BAD_RESPONSE,
                 `${action} was rejected by the CNB API (HTTP ${status})${suffix}`,
                 [
-                    'CNB_TOKEN needs the account-engage:r (read) scope',
-                    'inside a CNB pipeline CNB_TOKEN is provided automatically; check that the pipeline imports it',
+                    'the token needs the account-engage:r (read) scope',
+                    'to include private repositories, set CNB_ACCESS_TOKEN to an access token with private-repository access',
                 ],
             );
         }
@@ -125,29 +126,46 @@ export const fetchCalendar = async (
 };
 
 /**
- * Fetch owned repositories of a user, newest first, capped at `maxRepos`.
+ * Fetch every repository visible to the token.
  *
- * The cap is enforced locally (like the GitHub data source) so the star /
- * fork totals never include repositories beyond the requested limit.
+ * CNB reports the exact total in the `x-cnb-total` response header, and
+ * `role=Guest` includes repositories where the user is not the owner (the
+ * API defaults to `role=Owner`). Pagination stops on the reported total or
+ * on a short page, never on a local cap.
+ *
+ * `maxRepos` is kept as an optional safety valve for callers that still want
+ * one. The CNB data source does not pass it, so star / fork / repository
+ * totals reflect every repository the token can see — including private
+ * ones when the token has been granted that scope.
  */
 export const fetchRepos = async (
     token: string,
     userName: string,
-    maxRepos: number,
+    maxRepos: number = Number.POSITIVE_INFINITY,
 ): Promise<CnbRepo[]> => {
     const repos: CnbRepo[] = [];
-    for (let page = 1; ; page += 1) {
+    for (let page = 1; page <= MAX_PAGES; page += 1) {
         let batch: CnbRepo[];
+        let reportedTotal: number | null = null;
         try {
             const response = await axios.get<CnbRepo[]>(
                 `${apiEndpoint()}/users/${encodeURIComponent(userName)}/repos`,
                 {
                     headers: authHeaders(token),
-                    params: { page, page_size: PAGE_SIZE },
+                    params: { page, page_size: PAGE_SIZE, role: 'Guest' },
                     timeout: 30000,
                 },
             );
             batch = Array.isArray(response.data) ? response.data : [];
+            const headers: Record<string, unknown> = response.headers ?? {};
+            const raw = headers['x-cnb-total'];
+            const parsed =
+                typeof raw === 'string' || typeof raw === 'number'
+                    ? Number(raw)
+                    : Number.NaN;
+            if (Number.isFinite(parsed) && parsed >= 0) {
+                reportedTotal = parsed;
+            }
         } catch (error) {
             throw toAppError(
                 `fetching the CNB repositories of "${userName}"`,
@@ -155,7 +173,11 @@ export const fetchRepos = async (
             );
         }
         repos.push(...batch);
-        if (repos.length >= maxRepos || batch.length < PAGE_SIZE) {
+        if (
+            batch.length < PAGE_SIZE ||
+            (reportedTotal !== null && repos.length >= reportedTotal) ||
+            repos.length >= maxRepos
+        ) {
             break;
         }
     }
