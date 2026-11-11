@@ -156,7 +156,6 @@ export const createSvg = (
             .attr('x', positionXContrib + 10)
             .attr('y', positionYContrib)
             .attr('text-anchor', 'start')
-            .attr('text-anchor', 'start')
             .text(contribLabel)
             .attr('class', 'fill-fg');
 

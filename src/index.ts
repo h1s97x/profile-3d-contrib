@@ -28,17 +28,24 @@ export const main = async (): Promise<void> => {
         const maxRepos = process.env.MAX_REPOS
             ? Number(process.env.MAX_REPOS)
             : 100;
-        if (Number.isNaN(maxRepos)) {
+        if (!Number.isInteger(maxRepos) || maxRepos < 1) {
             throw new AppError(
                 ErrorCode.MAX_REPOS_INVALID,
-                `MAX_REPOS is not a number: "${process.env.MAX_REPOS ?? ''}"`,
+                `MAX_REPOS must be a positive integer: "${process.env.MAX_REPOS ?? ''}"`,
+                ['set MAX_REPOS to 1 or more, or leave it unset for the default of 100'],
             );
         }
         const year = process.env.YEAR ? Number(process.env.YEAR) : null;
-        if (Number.isNaN(year)) {
+        if (
+            year !== null &&
+            (!Number.isInteger(year) ||
+                year < 2008 ||
+                year > new Date().getFullYear())
+        ) {
             throw new AppError(
                 ErrorCode.YEAR_INVALID,
-                `YEAR is not a number: "${process.env.YEAR ?? ''}"`,
+                `YEAR must be an integer between 2008 and the current year: "${process.env.YEAR ?? ''}"`,
+                ['leave YEAR unset to use the current year'],
             );
         }
 
@@ -122,4 +129,7 @@ export const main = async (): Promise<void> => {
     }
 };
 
-void main();
+/* istanbul ignore next */
+if (require.main === module) {
+    void main();
+}
