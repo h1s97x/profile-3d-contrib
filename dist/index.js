@@ -102,7 +102,11 @@ const buildCalendar = (calendar, year, now) => {
     }
     else if (keys.length > 0) {
         start = new Date(`${keys[0]}T00:00:00Z`);
-        end = new Date(`${keys[keys.length - 1]}T00:00:00Z`);
+        // The rolling window never extends past today: a payload may carry
+        // days in the future, and the renderer cannot show them.
+        const lastDay = Date.parse(`${keys[keys.length - 1]}T00:00:00Z`);
+        const today = Date.parse(`${toIsoDate(now)}T00:00:00Z`);
+        end = new Date(Math.min(lastDay, today));
     }
     else {
         return [];
@@ -124,6 +128,22 @@ const buildCalendar = (calendar, year, now) => {
         contributionLevel: levelOf(day.count, thresholds),
         date: day.date,
     }));
+};
+/**
+ * Narrow the payload to the calendar window.
+ *
+ * Without `YEAR` the CNB API answers with a rolling year, so the totals
+ * must not pick up days the rendered calendar does not show.
+ */
+const withinCalendar = (byDate, calendar) => {
+    const days = [];
+    calendar.forEach((info) => {
+        const day = byDate[toIsoDate(info.date)];
+        if (day) {
+            days.push(day);
+        }
+    });
+    return days;
 };
 const sumBy = (items, pick) => items.reduce((total, item) => { var _a; return total + ((_a = pick(item)) !== null && _a !== void 0 ? _a : 0); }, 0);
 const buildLanguages = (repos) => {
@@ -160,8 +180,9 @@ const repositoriesCreatedWithin = (repos, calendar) => {
     }).length;
 };
 const aggregateCnbUserInfo = (calendar, repos, year, now = new Date()) => {
+    const byDate = indexCalendar(calendar);
     const contributionCalendar = buildCalendar(calendar, year, now);
-    const days = Object.values(calendar);
+    const days = withinCalendar(byDate, contributionCalendar);
     return {
         isHalloween: isHalloween(now),
         contributionCalendar,

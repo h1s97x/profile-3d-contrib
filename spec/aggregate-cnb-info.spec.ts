@@ -138,6 +138,43 @@ describe('aggregate-cnb-info totals', () => {
         expect(userInfo.totalContributions).toBe(13);
     });
 
+    it('ignores days outside the requested year in the totals', () => {
+        const wideCalendar: cnb.ActivityCalendar = {
+            '2024-01-02': day(2, 1),
+            '2023-12-30': day(100, 100), // before the requested year
+            '2025-01-02': day(100, 100), // beyond the requested year
+        };
+
+        const yearInfo = aggregateCnb.aggregateCnbUserInfo(
+            wideCalendar,
+            [],
+            2024,
+            NOW,
+        );
+
+        expect(yearInfo.totalCommitContributions).toBe(2);
+        expect(yearInfo.totalIssueContributions).toBe(1);
+        expect(yearInfo.totalContributions).toBe(3);
+    });
+
+    it('ignores days after today in a rolling window', () => {
+        const calendar: cnb.ActivityCalendar = {
+            '2024-06-10': day(4),
+            '2024-06-14': day(3),
+            '2024-06-20': day(99), // future day, cannot be rendered
+        };
+
+        const userInfo = aggregateCnb.aggregateCnbUserInfo(
+            calendar,
+            [],
+            null,
+            new Date('2024-06-15T08:00:00Z'),
+        );
+
+        expect(userInfo.totalCommitContributions).toBe(7);
+        expect(userInfo.totalContributions).toBe(7);
+    });
+
     it('aggregates languages by repository count and stars/forks', () => {
         const repos: cnb.CnbRepo[] = [
             {
