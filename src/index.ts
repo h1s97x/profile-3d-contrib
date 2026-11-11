@@ -1,21 +1,14 @@
-import * as aggregate from './aggregate-user-info';
 import * as template from './color-template';
 import * as create from './create-svg';
 import * as f from './file-writer';
 import * as r from './settings-reader';
-import * as client from './github-graphql';
+import * as dataSource from './data-source';
 import { AppError, ErrorCode, formatError } from './errors';
 
 export const main = async (): Promise<void> => {
     try {
-        const token = process.env.GITHUB_TOKEN;
-        if (!token) {
-            throw new AppError(
-                ErrorCode.TOKEN_MISSING,
-                'GITHUB_TOKEN is empty',
-                ['set a personal access token as the GITHUB_TOKEN secret'],
-            );
-        }
+        const platform = dataSource.detectPlatform();
+        const token = dataSource.resolveToken(platform);
         const userName =
             3 <= process.argv.length ? process.argv[2] : process.env.USERNAME;
         if (!userName) {
@@ -49,13 +42,12 @@ export const main = async (): Promise<void> => {
             );
         }
 
-        const response = await client.fetchData(
+        const userInfo = await dataSource.fetchUserInfo(platform, {
             token,
             userName,
             maxRepos,
             year,
-        );
-        const userInfo = aggregate.aggregateUserInfo(response);
+        });
 
         if (process.env.SETTING_JSON) {
             const settingFile = r.readSettingJson(process.env.SETTING_JSON);
