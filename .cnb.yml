@@ -70,3 +70,24 @@ main:
                   echo "ERROR: dist/ 与源码不一致。"
                   exit 1
                 fi
+
+# ============================================================================
+# 插件镜像发布:打 v* tag 时构建并推送到本仓库自带的 Docker 制品库。
+# 镜像由 Dockerfile 从 src/ 现场编译,不使用仓库内提交的 dist/ —— 那份 dist/
+# 只为 GitHub Action 的 uses: 分发保留,两者互不做版本对齐。
+# ============================================================================
+v*:
+  tag_push:
+    - name: publish-plugin-image
+      services:
+        - docker
+      stages:
+        - name: build-and-push
+          script: |
+            set -e
+            IMAGE="${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}"
+            TAG="${CNB_BRANCH}"
+            echo "${CNB_TOKEN}" | docker login "${CNB_DOCKER_REGISTRY}" -u cnb --password-stdin
+            docker build -t "${IMAGE}:${TAG}" -t "${IMAGE}:latest" .
+            docker push "${IMAGE}:${TAG}"
+            docker push "${IMAGE}:latest"

@@ -240,11 +240,60 @@ dependency on `@actions/*`. The **same** `dist/index.js` runs on both platforms.
 invoke it differs.
 
 > [!IMPORTANT]
-> **CNB has no `uses: owner/repo@ref` mechanism.** In CNB, pipeline plugins are Docker images, so a
-> GitHub repository cannot be referenced as an action. The consumption model is inverted: your CNB
-> pipeline downloads `dist/index.js` and runs it with Node.
+> **CNB has no `uses: owner/repo@ref` mechanism.** Pipeline plugins are Docker images, so a GitHub
+> repository cannot be referenced as an action. Use the **plugin image** below (recommended), or
+> download `dist/index.js` and run it with Node (the script method described in the steps below).
 >
 > If you only use GitHub Actions, you do not need this section at all.
+
+### Recommended: use the plugin image
+
+The image is published to this repository's Docker artifact registry on every `v*` tag. It is built
+from `src/` at release time, so it always matches the source and does not depend on the committed
+`dist/`.
+
+```yaml title=".cnb.yml (in your profile repository)"
+main:
+  "crontab: 0 0 * * *": # 00:00 Asia/Shanghai — CNB crontab uses the system timezone
+    - name: refresh-homepage-assets
+      stages:
+        - name: profile-3d-contrib
+          image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+          settingsFrom:
+            - https://cnb.cool/YOUR_CNB_USER/YOUR_SECRET_REPO/-/blob/main/plugin.yml
+          settings:
+            username: h1s97x
+            platform: cnb
+```
+
+```yaml title="plugin.yml (in your secret repository)"
+access_token: <access token with private-repository access>
+```
+
+> [!NOTE]
+> **Plugin tasks do not receive variables injected by `imports`.** Per the
+> [script vs plugin task documentation](https://docs.cnb.cool/zh/build/script-vs-plugin.md), custom
+> environment variables are only passed to script tasks, so the token must arrive via `settingsFrom`
+> (which loads plugin parameters from a file). Never put the token in `settings` directly. Without
+> `access_token` the built-in `CNB_TOKEN` is used, which only sees public repositories.
+
+CNB turns `settings.foo` into `PLUGIN_FOO`; the image entrypoint maps those back to the generator's
+environment variables:
+
+| `settings` key | Generator variable | Notes |
+|---|---|---|
+| `username` | `USERNAME` | required (or run in a CNB profile repository) |
+| `platform` | `PLATFORM` | `cnb` (default) or `github` |
+| `access_token` | `CNB_ACCESS_TOKEN` | private CNB repositories; load via `settingsFrom` |
+| `github_token` | `GITHUB_TOKEN` | GitHub data source |
+| `github_endpoint` | `GITHUB_ENDPOINT` | GitHub Enterprise |
+| `cnb_api_endpoint` | `CNB_API_ENDPOINT` | defaults to `https://api.cnb.cool` |
+| `max_repos` | `MAX_REPOS` | GitHub data source only |
+| `year` | `YEAR` | 2008..current year |
+| `setting_json` | `SETTING_JSON` | path to a settings file |
+
+The image writes 10 SVGs to `./profile-3d-contrib/` in the shared build workspace, so it composes
+with your other plugin stages — just add that directory to your commit stage.
 
 ### Choose the data source
 
@@ -253,7 +302,7 @@ Contribution data can come from **GitHub** (the historical behaviour) or from **
 | | GitHub data | CNB data |
 |---|---|---|
 | Set `PLATFORM` | `github` (default) | `cnb` |
-| Token | `GITHUB_TOKEN` | `CNB_TOKEN` (injected automatically in CNB pipelines) |
+| Token | `GITHUB_TOKEN` | `CNB_TOKEN` (auto-injected), or `CNB_ACCESS_TOKEN` / plugin `access_token` for private repositories |
 | `USERNAME` | GitHub username | CNB username |
 | Calendar | GraphQL contribution calendar | `GET /users/{username}/calendar` |
 | Language pie | per-language commit contributions | primary language of each repository (every repository weighs 1) |
