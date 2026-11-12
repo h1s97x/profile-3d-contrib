@@ -51,6 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Technical roadmap moved to `docs/roadmap/`.** The former `docs/spec/` directory (Chinese
+  design and planning documents) was renamed to avoid confusion with the root `spec/` directory,
+  which contains the Jest test suite. All internal links, `CHANGELOG.md` references and the
+  roadmap README were updated; the root `spec/` tests are untouched.
 - **Demo assets moved to `examples/` and images now use the CNB primary repository.** The
   `docs/demo/` directory was moved to the repository root as `examples/` (effect previews plus
   copyable pipeline YAML). All README images now point at
@@ -110,18 +114,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`package-lock.json` version realigned with `package.json`.** The lock file still carried
   `0.9.3` while `package.json` was already `1.0.0`. `release.yml` only compares the tag against
   `package.json` and CI only runs `npm ci`, so nothing caught the mismatch.
-- **Takeover checklist no longer contradicts the code.** `docs/spec/00-takeover.md` claimed the
+- **Takeover checklist no longer contradicts the code.** `docs/roadmap/00-takeover.md` claimed the
   handover shipped without touching `src/` and that every `YOUR_GITHUB_*` placeholder was replaced;
   both were stale. The placeholder section now distinguishes coordinates that are already updated
   from the CNB secret-repository examples that must stay placeholders, and the dead `sed` one-liner
   (it also rewrote planned examples in the spec docs) is gone.
-- **`docs/spec/03-phase2-architecture.md` acceptance check fixed.** The self-check
+- **`docs/roadmap/03-phase2-architecture.md` acceptance check fixed.** The self-check
   `git grep -c 'yoshi389111/github-profile-3d-contrib'` could never pass, because the eleven README
   fork notices must keep the upstream link. It is now path-filtered and states the one allowed hit.
-- **Phase 0 status updated.** `docs/spec/01-phase0-safety-net.md` still said the render snapshots and
+- **Phase 0 status updated.** `docs/roadmap/01-phase0-safety-net.md` still said the render snapshots and
   the `spec/` type check were pending; both shipped.
-- **Planned examples use the real coordinate.** `docs/spec/04-phase3-config-api.md` and
-  `docs/spec/06-phase5-advanced.md` described this repository's own future CLI and packaging but
+- **Planned examples use the real coordinate.** `docs/roadmap/04-phase3-config-api.md` and
+  `docs/roadmap/06-phase5-advanced.md` described this repository's own future CLI and packaging but
   referred to `YOUR_GITHUB_USER`; they now say `h1s97x/...`.
 
 ### Fixed (tests)
@@ -166,7 +170,7 @@ intentionally not announced as released features yet; they will be promoted one 
   `CNB_API_ENDPOINT` in the README. `1.1.0` was never released and conflicted with the version in
   `package.json`; version history is now tracked in this changelog only, so small-step releases no
   longer require editing the environment variable table.
-- `docs/spec/README.md` now reports `1.0.1` as the current version.
+- `docs/roadmap/README.md` now reports `1.0.1` as the current version.
 
 ## [1.0.0] - 2026-10-03
 
@@ -227,9 +231,9 @@ no runtime code changes.
 
 ### Known issues (not fixed here)
 
-These all predate `0.9.3`. This release is infrastructure-only and deliberately does not fix them; they are the subject of `docs/spec/02-phase1-correctness.md`.
+These all predate `0.9.3`. This release is infrastructure-only and deliberately does not fix them; they are the subject of `docs/roadmap/02-phase1-correctness.md`.
 
-- **Settings JSON is not validated at runtime.** A typo in the `type` field (e.g. `"norml"`) produces a **fully transparent SVG with exit code 0** — a completely silent failure. Highest impact; recommended first. @see `docs/spec/02-phase1-correctness.md` B1
+- **Settings JSON is not validated at runtime.** A typo in the `type` field (e.g. `"norml"`) produces a **fully transparent SVG with exit code 0** — a completely silent failure. Highest impact; recommended first. @see `docs/roadmap/02-phase1-correctness.md` B1
 - **`MAX_REPOS` does not mean what it says.** It only acts as a pagination stop threshold, not a repository cap — the first page of 100 repositories is never truncated, and the `commitContributionsByRepository` limit is hardcoded to 100. Reported star / fork counts may therefore be **inflated**. @see B3
 - **An empty contribution calendar crashes.** Pointing `YEAR` at a year with no data throws a `TypeError` instead of a helpful message. @see B2
 - **`fileName` in `SETTING_JSON` is not path-validated**, so in principle it can write outside the output directory. @see B4

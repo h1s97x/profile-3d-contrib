@@ -186,7 +186,7 @@ describe.each(CASES)('render snapshot: %s', (_name, settings) => {
 
 - [ ] `npm ci` 在 Node 24 下成功,`npm test` 全部通过
 - [ ] `npm run lint` 与 `npm run check-types` 均覆盖 `src/` **和** `spec/`
-- [ ] `docs/spec/` 之外未新增任何 `.md` 文档
+- [ ] `docs/roadmap/` 之外未新增任何 `.md` 文档
 - [ ] 打开 PR 时 `CI / verify` 任务运行 `npm ci`、`lint`、`check-types`、`test`、`build`
 - [ ] 人为在 `src/` 中引入一处渲染错误(如改 `create-3d-contrib.ts:204` 的 `144`),提交 PR 后 **CI 必须失败**
 - [ ] 人为在 `src/` 中做一处不改变行为的改动后重新构建,`git diff --exit-code -- dist/` **必须失败**(证明一致性校验有效)

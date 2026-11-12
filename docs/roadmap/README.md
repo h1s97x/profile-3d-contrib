@@ -1,9 +1,13 @@
-# github-profile-3d-contrib 技术演进 Spec
+# github-profile-3d-contrib 技术演进路线图
 
 > 本文档是 `github-profile-3d-contrib` 后续重构的**技术规格说明书**,供评审、排期与逐步实施使用。
 >
 > **重要约定**:本文档及全部子文档中出现的所有代码、目录树、配置项、接口签名均为**计划内容,尚未实现**。
 > 当前真实实现请以 `src/` 下源码为准。凡描述现状的部分,均已标注精确的文件与行号锚点。
+>
+> **目录说明(2026-11-12)**:本目录原名 `docs/spec/`,已迁至 `docs/roadmap/`。它是给人看的
+> 路线图与历史决策记录,**不参与任何构建、测试或 CI**;根目录的 `spec/` 是 Jest 测试代码
+> (`package.json` 的 `jest.testMatch`),两者同名但无关。
 >
 > **分发契约变更(2026-11-12)**:仓库已不再提交 `dist/`,GitHub Action 改为 container action,
 > CNB 与 GitHub 共用根目录 `Dockerfile`。下文及子文档中关于 `dist/` 一致性闸门、产物体积、
