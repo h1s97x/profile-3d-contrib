@@ -69,7 +69,7 @@ jobs:
     name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: h1s97x/github-profile-3d-contrib@latest
+      - uses: h1s97x/profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -101,7 +101,7 @@ jobs:
 - `GITHUB_TOKEN` : (必須) アクセストークン
 - `USERNAME` : (必須) 対象のユーザー名. （あるいは引数で指定する）
 - `MAX_REPOS` : (任意) 最大のリポジトリ数。デフォルトは100 - バージョン 0.2.0 で追加
-- `SETTING_JSON` : (任意) 設定JSONファイルパス。詳細は `h1s97x/github-profile-3d-contrib` リポジトリの `examples/pipelines/` や `src/type.ts` を参照してください - バージョン 0.6.0 で追加
+- `SETTING_JSON` : (任意) 設定JSONファイルパス。詳細は `h1s97x/profile-3d-contrib` リポジトリの `examples/pipelines/` や `src/type.ts` を参照してください - バージョン 0.6.0 で追加
 - `GITHUB_ENDPOINT` : (任意) Github GraphQL エンドポイント。たとえば、GitHub.comではなく、会社のGitHub Enterpriseのアクティビティに基づいてコントリビュートカレンダーを作成したい場合は、この環境変数を設定します。例： `https://github.mycompany.com/api/graphql` - バージョン 0.8.0 で追加
 - `YEAR` : (任意) 過去のカレンダーを出力する場合、年を指定。特にコマンドラインからツールを実行するときを想定しています。 - バージョン 0.8.0 で追加
 

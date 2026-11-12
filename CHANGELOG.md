@@ -63,6 +63,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **GitHub distribution repository renamed; `uses:` coordinates updated.** The GitHub-side mirror
+  is now `h1s97x/profile-3d-contrib`, matching the CNB primary repository name. The old
+  `github-profile-3d-contrib` name returns HTTP 301, so existing pinned references keep working.
+  The README, its 10 translations, `EXAMPLES.md` and the pipeline snippets now use the new
+  coordinate, with pinned examples pointing at `v1.0.1`. Upstream `yoshi389111/...` links and
+  historical changelog / roadmap references are intentionally left unchanged. `sync-github.sh`
+  targets the new repository and pushes the nearest release tag alongside `main` / `latest`.
 - **Platform-neutral display name and full attribution.** The project name shown in `README.md`
   (all 11 languages) and `action.yml` is now `Profile 3D Contrib`; the `github-` prefix was also
   dropped from the sample workflow step name. `uses:` coordinates, the upstream repository link

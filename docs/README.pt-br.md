@@ -66,7 +66,7 @@ jobs:
     name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: h1s97x/github-profile-3d-contrib@latest
+      - uses: h1s97x/profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -96,7 +96,7 @@ No exemplo, apenas `GITHUB_TOKEN` e `USERNAME` sestão definidos como variáveis
 - `GITHUB_TOKEN` : (obrigatório) token de acesso
 - `USERNAME` : (obrigatório) nome de usuário alvo (ou especifique como argumento).
 - `MAX_REPOS` : (opcional) número máximo de repositórios, padrão é 100 — desde a versão 0.2.0
-- `SETTING_JSON` : (opcional) caminho para o arquivo JSON de configurações. Veja `examples/pipelines/` e `src/type.ts` no repositório `h1s97x/github-profile-3d-contrib` para mais detalhes — desde a versão 0.6.0
+- `SETTING_JSON` : (opcional) caminho para o arquivo JSON de configurações. Veja `examples/pipelines/` e `src/type.ts` no repositório `h1s97x/profile-3d-contrib` para mais detalhes — desde a versão 0.6.0
 - `GITHUB_ENDPOINT` : (opcional) endpoint GraphQL do GitHub. Por exemplo, se você quiser criar o calendário de contribuições baseado no GitHub Enterprise da sua empresa em vez do GitHub.com, defina essa variável. Exemplo: `https://github.mycompany.com/api/graphql` — desde a versão 0.8.0
 - `YEAR` : (opcional) para gerar calendários de anos anteriores, especifique o ano. Essa opção é pensada principalmente para quando a ferramenta é executada via linha de comando — desde a versão 0.8.0
 

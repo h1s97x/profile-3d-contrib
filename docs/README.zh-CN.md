@@ -72,7 +72,7 @@ jobs:
     name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: h1s97x/github-profile-3d-contrib@latest
+      - uses: h1s97x/profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -291,7 +291,7 @@ node dist/index.js "$USERNAME"        # 目标用户名（或直接设置 USERNA
 
 | 主题 | GitHub Actions | CNB |
 |---|---|---|
-| 引用方式 | `uses: h1s97x/github-profile-3d-contrib@v1.0.0`(容器 action) | 插件 `image:` 任务;或在 `script` 任务中从源码构建 |
+| 引用方式 | `uses: h1s97x/profile-3d-contrib@v1.0.1`(容器 action) | 插件 `image:` 任务;或在 `script` 任务中从源码构建 |
 | 密钥 | `${{ secrets.GITHUB_TOKEN }}` 通过 `env:` | 密钥仓库 + `settingsFrom`(`access_token`);`imports` 仅用于脚本方式 |
 | 仓库上下文 | `${{ github.repository_owner }}` | `${{ CNB_REPO_SLUG }}` |
 | 流水线配置 | `.github/workflows/*.yml` | `.cnb.yml`（Pipeline / Stage / Job 三层） |

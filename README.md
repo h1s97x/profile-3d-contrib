@@ -87,7 +87,7 @@ jobs:
     name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: h1s97x/github-profile-3d-contrib@latest
+      - uses: h1s97x/profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -448,7 +448,7 @@ node dist/index.js "$USERNAME"        # target username (or set the USERNAME env
 
 | Topic | GitHub Actions | CNB |
 |---|---|---|
-| Reference | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` (container action) | Plugin `image:` stage; optionally build from source in a `script` job |
+| Reference | `uses: h1s97x/profile-3d-contrib@v1.0.1` (container action) | Plugin `image:` stage; optionally build from source in a `script` job |
 | Data source | GitHub API | GitHub API, or the CNB API with `PLATFORM: cnb` |
 | Secrets | `${{ secrets.GITHUB_TOKEN }}` via `env:` | Secret repository + `settingsFrom` (`access_token`); `imports` only for the script method |
 | Repo context | `${{ github.repository_owner }}` | `${CNB_REPO_SLUG%%/*}` |

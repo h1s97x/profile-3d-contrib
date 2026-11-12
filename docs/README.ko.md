@@ -73,7 +73,7 @@ jobs:
     name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: h1s97x/github-profile-3d-contrib@latest
+      - uses: h1s97x/profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}

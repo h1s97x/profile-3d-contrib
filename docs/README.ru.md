@@ -73,7 +73,7 @@ jobs:
     name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
-      - uses: h1s97x/github-profile-3d-contrib@latest
+      - uses: h1s97x/profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -104,7 +104,7 @@ jobs:
 - `GITHUB_TOKEN` : (обязательно) токен доступа
 - `USERNAME` : (обязательно) целевое имя пользователя (или укажите аргументом).
 - `MAX_REPOS` : (опционально) максимальное количество репозиториев, по умолчанию 100 - начиная с версии 0.2.0
-- `SETTING_JSON` : (опционально) путь к файлу настроек json. См. `examples/pipelines/` и `src/type.ts` в репозитории `h1s97x/github-profile-3d-contrib` для подробностей. - начиная с версии 0.6.0
+- `SETTING_JSON` : (опционально) путь к файлу настроек json. См. `examples/pipelines/` и `src/type.ts` в репозитории `h1s97x/profile-3d-contrib` для подробностей. - начиная с версии 0.6.0
 - `GITHUB_ENDPOINT` : (опционально) конечная точка Github GraphQL. Например, если вы хотите создать календарь вкладов на основе активности вашей корпоративной GitHub Enterprise, установите эту переменную окружения. Например: `https://github.mycompany.com/api/graphql` - начиная с версии 0.8.0
 - `YEAR` : (опционально) Для календарей прошлых лет укажите год. Это предназначено для использования при запуске инструмента из командной строки. - начиная с версии 0.8.0
 
