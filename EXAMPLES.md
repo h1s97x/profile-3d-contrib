@@ -4,7 +4,7 @@
 > `crazy-max/ghaction-github-pages` marketplace action — none of which have equivalents on CNB.
 > If you are on CNB, see the [CNB section in README.md](./README.md#how-to-use-cnb) instead.
 >
-> Ready-to-copy pipeline snippets for both platforms live in [`docs/demo/pipelines/`](./docs/demo/pipelines/).
+> Ready-to-copy pipeline snippets for both platforms live in [`examples/pipelines/`](./examples/pipelines/).
 
 ## Advanced example 1: automatic day/night switching + keeping output in other branch
 

@@ -11,10 +11,13 @@
 > `Dockerfile`、`action.yml` 与 `.cnb.yml` 为准。
 >
 > **示例与 schema(2026-11-12)**:`sample-settings/` 与 `schema/` 已删除,可复制的流水线
-> 示例统一放在 `docs/demo/pipelines/`。子文档中引用这两个目录之处均为历史记录。
+> 示例统一放在 `examples/pipelines/`。子文档中引用这两个目录之处均为历史记录。
 >
 > **默认输出(2026-11-12)**:默认由 10 张改为 1 张 `profile-green.svg`,`theme: all` /
 > `ALL_THEMES=true` 可恢复全套。下文 `:103` 的「固定输出 10 个文件」为迁移前状态。
+>
+> **目录与外链(2026-11-12)**:效果图与示例已从 `docs/demo/` 迁到根目录 `examples/`,
+> 图片外链由 GitHub raw 改为 CNB 主仓 raw。子文档中残留的 `docs/demo/` 均为历史记录。
 
 当前版本:`1.0.1`(2026-11-12,小版本演进起点;接管后首个版本为 `1.0.0`,2026-10-03)
 
@@ -325,7 +328,7 @@ README 让用户「参考 `sample-settings/*.json` 和 `src/type.ts`」,但**没
 
 | 风险 | 等级 | 说明 | 缓解措施 |
 |---|---|---|---|
-| 渲染输出变化导致全量 diff 抖动 | **高** | 重构 D3 绘制顺序会改变 SVG 属性顺序与浮点精度,导致所有用户 README 图片**一次性全量重绘**,产生大量无意义 commit | 阶段 0 先建立 SVG 快照基线;阶段 2 每迁移一个 renderer 即比对,不一致则阻断合并;切换前用 `docs/demo/` 下 10 个 SVG 人工比对 |
+| 渲染输出变化导致全量 diff 抖动 | **高** | 重构 D3 绘制顺序会改变 SVG 属性顺序与浮点精度,导致所有用户 README 图片**一次性全量重绘**,产生大量无意义 commit | 阶段 0 先建立 SVG 快照基线;阶段 2 每迁移一个 renderer 即比对,不一致则阻断合并;切换前用 `examples/` 下 10 个 SVG 人工比对 |
 | 引入 `ajv` / `linkedom` 新依赖 | 中 | 与 `0.9.2` 「为规避 `undici` 漏洞移除依赖」的既定策略相悖 | schema 校验**先用零依赖手写 validator**;`ajv` 列为可选方案;`linkedom` 先做兼容性 spike,不过则维持现状 |
 | TypeScript 4.2 → 5.x 类型收紧 | 中 | 升级可能触发大量类型错误 | 独立 PR,只做版本升级不做逻辑改动;`skipLibCheck` 已开启可缓解大部分 |
 | 重构期产物与社区 `@latest` 使用方式不匹配 | 中 | 已有大量用户通过 `@latest` 引用,中间态会直接暴露 | 分阶段发布,`latest` 分支仅在 minor 版本时更新;patch 版本不含重构 |

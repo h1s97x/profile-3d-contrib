@@ -51,8 +51,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Demo assets moved to `examples/` and images now use the CNB primary repository.** The
+  `docs/demo/` directory was moved to the repository root as `examples/` (effect previews plus
+  copyable pipeline YAML). All README images now point at
+  `https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/*.svg` instead of
+  the GitHub-side distribution repository's raw URL, which is no longer synchronized.
 - **Configuration examples are now pipeline YAML.** `sample-settings/` and `schema/` were
-  removed; ready-to-copy snippets live in `docs/demo/pipelines/` (flat `settings:`, inline
+  removed; ready-to-copy snippets live in `examples/pipelines/` (flat `settings:`, inline
   `settings_json`, `settingsFrom` for private tokens, GitHub Actions workflow). The image
   entrypoint now also reads flat options from plain environment variables, so GitHub Actions
   can use the same style via `env:`.

@@ -6,6 +6,7 @@ dist
 dist0
 spec
 docs
+examples
 profile-3d-contrib
 *.md
 .cnb.yml
