@@ -12,7 +12,8 @@
  * that variable at it. Nothing in `src/` needs to know about plugin settings.
  *
  * When no rendering option is given, `SETTING_JSON` stays unset and the
- * generator produces its default set of 10 SVGs — the historical behaviour.
+ * generator writes its single default image, `profile-green.svg`. Setting
+ * `theme: all` toggles the full set of 10 via `ALL_THEMES`.
  */
 const { spawnSync } = require('child_process');
 const fs = require('fs');

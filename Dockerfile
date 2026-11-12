@@ -21,6 +21,6 @@ WORKDIR /workspace
 COPY --from=builder /build/dist /app/dist
 # 内置主题预设:入口脚本按 settings.theme 名称加载,避免用户再准备 JSON 文件
 COPY --from=builder /build/src/settings /app/settings
-COPY docker/entrypoint.js /app/entrypoint.js
+COPY entrypoint.js /app/entrypoint.js
 
 ENTRYPOINT ["node", "/app/entrypoint.js"]

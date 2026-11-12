@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **The image entrypoint moved to the repository root.** `docker/entrypoint.js` is now
+  `entrypoint.js`; `Dockerfile` and the CI image-contract checks were updated. No behaviour change.
 - **Technical roadmap moved to `docs/roadmap/`.** The former `docs/spec/` directory (Chinese
   design and planning documents) was renamed to avoid confusion with the root `spec/` directory,
   which contains the Jest test suite. All internal links, `CHANGELOG.md` references and the

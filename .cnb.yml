@@ -32,9 +32,9 @@ main:
             - name: Ensure the image sources are intact
               script: |
                 test -s Dockerfile || { echo "ERROR: Dockerfile 缺失"; exit 1; }
-                test -s docker/entrypoint.js || { echo "ERROR: 镜像入口缺失"; exit 1; }
+                test -s entrypoint.js || { echo "ERROR: 镜像入口缺失"; exit 1; }
                 grep -q "using: 'docker'" action.yml || { echo "ERROR: action.yml 不是 container action"; exit 1; }
-                node --check docker/entrypoint.js
+                node --check entrypoint.js
             - name: Verify build chain
               script: npm run build
 
@@ -60,9 +60,9 @@ main:
             - name: Ensure the image sources are intact
               script: |
                 test -s Dockerfile || { echo "ERROR: Dockerfile 缺失"; exit 1; }
-                test -s docker/entrypoint.js || { echo "ERROR: 镜像入口缺失"; exit 1; }
+                test -s entrypoint.js || { echo "ERROR: 镜像入口缺失"; exit 1; }
                 grep -q "using: 'docker'" action.yml || { echo "ERROR: action.yml 不是 container action"; exit 1; }
-                node --check docker/entrypoint.js
+                node --check entrypoint.js
 
 # ============================================================================
 # 插件镜像发布:打 v* tag 时构建并推送到本仓库自带的 Docker 制品库。

@@ -31,7 +31,7 @@ jobs:
       - name: Verify container action contract
         run: |
           test -s Dockerfile || { echo "::error::Dockerfile 缺失。"; exit 1; }
-          test -s docker/entrypoint.js || { echo "::error::镜像入口缺失。"; exit 1; }
+          test -s entrypoint.js || { echo "::error::镜像入口缺失。"; exit 1; }
           grep -q "using: 'docker'" action.yml || { echo "::error::action.yml 不是 container action。"; exit 1; }
           echo "container action: ok"
 
