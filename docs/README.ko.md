@@ -1,4 +1,4 @@
-# GitHub 프로필 3D 기여도
+# 프로필 3D 기여도
 
 ![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
@@ -57,7 +57,7 @@ GitHub에서 사용자 이름과 동일한 이름의 저장소를 생성하세�
 - `.github/workflows/profile-3d.yml`
 
 ```yaml:.github/workflows/profile-3d.yml
-name: GitHub-Profile-3D-Contrib
+name: Profile 3D Contrib
 
 on:
   schedule: # 03:00 JST == 18:00 UTC
@@ -70,7 +70,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: generate-github-profile-3d-contrib
+    name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
       - uses: h1s97x/github-profile-3d-contrib@latest
@@ -153,7 +153,7 @@ on:
 
 처음에는 워크플로우를 수동으로 실행하세요.
 
-- `Actions` -> `GitHub-Profile-3D-Contrib` -> `Run workflow`
+- `Actions` -> `Profile 3D Contrib` -> `Run workflow`
 
 프로필 이미지는 다음 경로에 생성됩니다:
 
@@ -232,5 +232,6 @@ node dist/index.js USER_NAME
 ## 라이선스
 
 &copy; 2021 SATO Yoshiyuki. MIT 라이선스 하에 제공됩니다.
+&copy; 2026 h1s97x.
 
 > **CNB 사용법은 [English README](../README.md#how-to-use-cnb)를 참고하세요.**
