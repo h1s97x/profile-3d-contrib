@@ -276,7 +276,53 @@ access_token: <access token with private-repository access>
 > (which loads plugin parameters from a file). Never put the token in `settings` directly. Without
 > `access_token` the built-in `CNB_TOKEN` is used, which only sees public repositories.
 
-CNB turns `settings.foo` into `PLUGIN_FOO`; the image entrypoint maps those back to the generator's
+### Configure it like `cnb-metrics`
+
+No settings file is needed. Common options go straight into `settings:`, and the image entrypoint
+assembles them into the generator's settings object:
+
+```yaml
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settings:
+    username: h1s97x
+    platform: cnb
+    theme: gitblock
+    output: my-3d-contrib.svg
+    animation: true
+    background_color: "#0d1117"
+    contrib_colors: "#efefef,#d8e887,#8cc569,#47a042,#1d6a23"
+```
+
+| `settings` key | Purpose | Default |
+|---|---|---|
+| `username` | target account | owner of `CNB_REPO_SLUG` / `GITHUB_REPOSITORY` |
+| `platform` | `cnb` or `github` | auto-detected |
+| `theme` | built-in theme name | `green` |
+| `output` | output file name | `profile-<theme>.svg` |
+| `background_color` / `foreground_color` / `strong_color` / `weak_color` / `radar_color` | override theme colours | from the theme |
+| `contrib_colors` | 5 comma-separated bar colours (ignored by `season` / `bitmap`) | from the theme |
+| `animation` | bar growing animation | from the theme |
+| `l10n` | JSON object overriding radar labels and "contributions" | English |
+| `settings_json` | a whole inline settings JSON (object or array), advanced | — |
+| `settings_file` | path to a settings JSON, equivalent to the legacy `SETTING_JSON` | — |
+
+Themes: `green` (same as `normal`), `halloween`, `season`, `season-south`, `night-view`,
+`night-green`, `night-rainbow`, `gitblock`.
+
+**With no rendering option at all the behaviour is unchanged**: 10 SVGs from the built-in themes.
+Only when you set `theme` / `output` / colours / `animation` / `l10n` does it switch to a single
+configured image. For multi-theme arrays or custom `bitmap` patterns, use `settings_json` (inline)
+or `settings_file`; `sample-settings/*.json` and `schema/settings.schema.json` remain the templates
+and validation reference for those two paths.
+
+Internally the entrypoint writes a temporary JSON and points `SETTING_JSON` at it, so the existing
+`src/settings-validator.ts` still validates the structure (with line numbers) and still blocks
+unsafe `fileName` values. `src/` and the 18 SVG snapshots are untouched.
+
+### Data-source and advanced parameters
+
+CNB turns `settings.foo` into `PLUGIN_FOO`; the entrypoint maps those to the generator's
 environment variables:
 
 | `settings` key | Generator variable | Notes |
@@ -291,7 +337,7 @@ environment variables:
 | `year` | `YEAR` | 2008..current year |
 | `setting_json` | `SETTING_JSON` | path to a settings file |
 
-The image writes 10 SVGs to `./profile-3d-contrib/` in the shared build workspace, so it composes
+The image writes SVGs to `./profile-3d-contrib/` in the shared build workspace, so it composes
 with your other plugin stages — just add that directory to your commit stage.
 
 ### Choose the data source
