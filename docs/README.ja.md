@@ -154,16 +154,7 @@ on:
 
 プロフィール画像は以下のパスで生成されます。
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 あるいは、`SETTING_JSON` を指定した場合は、以下のファイルが生成されます。
 
@@ -206,7 +197,7 @@ on:
 例：
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## 使い方 (GitHub Actions) - 高度な例

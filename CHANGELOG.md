@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- **The default output is now one SVG instead of ten.** With no rendering option the generator
+  writes only `profile-green.svg`; the other nine built-in theme images are no longer produced.
+  Use `theme: all` (CNB plugin / GitHub `env: THEME=all`) or `ALL_THEMES=true` to restore the
+  previous set of 10. **Users whose README references any of the other nine files must either
+  set `theme: all` or switch to a single configured image** — otherwise those images silently
+  stop updating. Existing files are not deleted.
 - **The GitHub Action is now a container action and `dist/` is no longer committed.** `action.yml`
   uses `runs.using: docker` with `image: 'Dockerfile'`, so GitHub builds the image from `src/` at
   the pinned ref; CNB uses the same `Dockerfile` as a prebuilt plugin image. The three files under

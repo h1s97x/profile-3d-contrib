@@ -14,6 +14,7 @@
 | 示例 | 场景 | 产物 |
 |---|---|---|
 | [`basic.cnb.yml`](./pipelines/basic.cnb.yml) | 最简：像 `cnb-metrics` 一样用扁平 `settings:` 出单图 | `profile-gitblock.svg` |
+| [`all-themes.cnb.yml`](./pipelines/all-themes.cnb.yml) | `theme: all`，一次产出全部 10 张 | 10 张内置主题图 |
 | [`private.cnb.yml`](./pipelines/private.cnb.yml) | 私有仓库令牌，走密钥仓库 `settingsFrom` | `profile-green.svg` |
 | [`multi-theme.cnb.yml`](./pipelines/multi-theme.cnb.yml) | `settings_json` 数组，一次生成多张 | `day.svg` / `night.svg` |
 | [`panels.cnb.yml`](./pipelines/panels.cnb.yml) | 只画语言饼 / 只画雷达 | `pie_lang_only.svg` / `radar_contrib_only.svg` |
@@ -25,7 +26,7 @@
 > 工作区只在同一条流水线的各 stage 之间共享，拆成两条会看不到生成的 SVG。
 
 `theme` 可取值：`green`（同 `normal`）、`halloween`、`season`、`season-south`、
-`night-view`、`night-green`、`night-rainbow`、`gitblock`。不给任何渲染选项时，生成器
-仍按历史行为产出 10 张内置主题图。
+`night-view`、`night-green`、`night-rainbow`、`gitblock`；`theme: all` 会一次产出全部
+10 张内置主题图。不给任何渲染选项时，生成器只产出一张 `profile-green.svg`。
 
 完整参数表见 [README 的 CNB 章节](../../README.md#how-to-use-cnb)。

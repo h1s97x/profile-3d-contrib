@@ -157,16 +157,7 @@ La primera vez, ejecuta este workflow manualmente.
 
 Las imágenes de perfil se generan en las siguientes rutas:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 Si especificas la variable de entorno `SETTING_JSON` sin la propiedad `fileName` en el archivo json, se generará la siguiente imagen:
 
@@ -209,7 +200,7 @@ Agrega la ruta de la imagen generada en tu archivo README.
 Ejemplo:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## Cómo usar (GitHub Actions) - Ejemplos avanzados

@@ -99,6 +99,7 @@ if (!env.USERNAME) {
 const inlineJson = get('SETTINGS_JSON');
 const settingsFile = get('SETTINGS_FILE') || process.env.PLUGIN_SETTING_JSON;
 const hasFlat = FLAT_KEYS.some((key) => get(key) !== undefined);
+const theme = (get('THEME') || 'green').toLowerCase();
 
 let tempFile;
 const writeTemp = (content) => {
@@ -113,11 +114,12 @@ if (inlineJson) {
     writeTemp(inlineJson);
 } else if (settingsFile) {
     env.SETTING_JSON = settingsFile;
+} else if (theme === 'all') {
+    env.ALL_THEMES = 'true';
 } else if (hasFlat) {
-    const theme = (get('THEME') || 'green').toLowerCase();
     const themeFile = THEMES[theme];
     if (!themeFile) {
-        fail(`unknown theme "${theme}"; available: ${Object.keys(THEMES).join(', ')}`);
+        fail(`unknown theme "${theme}"; available: all, ${Object.keys(THEMES).join(', ')}`);
     }
     const settings = JSON.parse(
         fs.readFileSync(path.join(__dirname, 'settings', themeFile), 'utf8'),

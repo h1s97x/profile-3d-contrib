@@ -157,16 +157,7 @@ Führen Sie diesen Workflow beim ersten Mal manuell aus.
 
 Die Profilbilder werden an den folgenden Pfaden generiert:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 Wenn Sie die Umgebungsvariable `SETTING_JSON` ohne die Eigenschaft `fileName` in der JSON-Datei angeben, wird folgendes Bild generiert:
 
@@ -209,7 +200,7 @@ Fügen Sie den Pfad zum generierten Bild in Ihre README-Datei ein.
 Beispiel:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## Verwendung (GitHub Actions) – Erweiterte Beispiele

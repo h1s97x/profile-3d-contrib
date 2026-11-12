@@ -156,16 +156,7 @@ on:
 
 個人檔案圖片將產生於以下路徑：
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 若指定 `SETTING_JSON` 環境變數且 json 檔案未含 `fileName` 屬性，將產生以下圖片：
 
@@ -208,7 +199,7 @@ on:
 範例：
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## 如何使用（GitHub Actions）- 進階範例

@@ -175,22 +175,15 @@ The first time, run this workflow manually.
 
 The profile images are generated at the following paths:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 If you specify the `SETTING_JSON` environment variable without a `fileName` property in the json file, the following image will be generated:
 
 - `profile-3d-contrib/profile-customize.svg`
 
-You can use these images in your README.md as shown below.
+The gallery below shows the optional built-in themes (static previews stored in this repository).
+Pick one with `settings.theme`, or use `theme: all` to generate them all — a default run produces
+only `profile-green.svg`.
 
 Example: green version
 
@@ -227,7 +220,7 @@ Add the path to the generated image in your README file.
 Example:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## How to use (GitHub Actions) - Advanced examples
@@ -298,7 +291,7 @@ assembles them into the generator's settings object:
 |---|---|---|
 | `username` | target account | owner of `CNB_REPO_SLUG` / `GITHUB_REPOSITORY` |
 | `platform` | `cnb` or `github` | auto-detected |
-| `theme` | built-in theme name | `green` |
+| `theme` | built-in theme name, or `all` for the full set of 10 | `green` |
 | `output` | output file name | `profile-<theme>.svg` |
 | `background_color` / `foreground_color` / `strong_color` / `weak_color` / `radar_color` | override theme colours | from the theme |
 | `contrib_colors` | 5 comma-separated bar colours (ignored by `season` / `bitmap`) | from the theme |
@@ -310,9 +303,9 @@ assembles them into the generator's settings object:
 Themes: `green` (same as `normal`), `halloween`, `season`, `season-south`, `night-view`,
 `night-green`, `night-rainbow`, `gitblock`.
 
-**With no rendering option at all the behaviour is unchanged**: 10 SVGs from the built-in themes.
-Only when you set `theme` / `output` / colours / `animation` / `l10n` does it switch to a single
-configured image. For multi-theme arrays, single panels or custom `bitmap` patterns, use
+**With no rendering option at all the generator writes one image**, `profile-green.svg`. Setting
+`theme` / `output` / colours / `animation` / `l10n` produces a single configured image instead.
+Use `theme: all` (or `ALL_THEMES=true`) to get the legacy set of 10 built-in theme images. For multi-theme arrays, single panels or custom `bitmap` patterns, use
 `settings_json` (inline) or `settings_file`; ready-to-copy pipeline snippets live in
 [`docs/demo/pipelines/`](./docs/demo/pipelines/).
 

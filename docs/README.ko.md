@@ -157,16 +157,7 @@ on:
 
 프로필 이미지는 다음 경로에 생성됩니다:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 `SETTING_JSON` 환경 변수를 지정하고 json 파일에 `fileName` 속성이 없으면 다음 이미지가 생성됩니다:
 
@@ -209,7 +200,7 @@ on:
 예시:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## 사용 방법 (GitHub Actions) - 고급 예시
