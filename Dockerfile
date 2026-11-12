@@ -1,7 +1,7 @@
-# CNB 插件镜像。
+# CNB 插件镜像 / GitHub container action 共用镜像。
 #
-# 从源码构建，不依赖仓库里提交的 dist/ —— 那份 dist/ 只为 GitHub Action
-# 的 `uses:` 分发保留，镜像与它天然解耦，也不需要做版本对齐。
+# 一律从源码构建:GitHub 通过 action.yml 的 image: 'Dockerfile' 现场构建,
+# CNB 通过 .cnb.yml 预构建并推送到制品库。仓库不再提交 dist/。
 FROM node:24-alpine AS builder
 
 WORKDIR /build

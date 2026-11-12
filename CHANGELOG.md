@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- **The GitHub Action is now a container action and `dist/` is no longer committed.** `action.yml`
+  uses `runs.using: docker` with `image: 'Dockerfile'`, so GitHub builds the image from `src/` at
+  the pinned ref; CNB uses the same `Dockerfile` as a prebuilt plugin image. The three files under
+  `dist/` were removed, `.gitattributes` and `build.yml` were deleted, and the `dist-consistency`
+  gates in `ci.yml`, `release.yml` and `.cnb.yml` were replaced by lint / type / test plus an
+  image-contract check. Existing `uses:` coordinates still resolve, but each run now builds the
+  image instead of executing a prebuilt bundle. Older immutable tags such as `v1.0.0` still carry
+  their original `dist/` and are unaffected. The CNB Docker registry requires authentication, so
+  GitHub cannot reference the CNB image directly.
+- **The image entrypoint no longer forces `PLATFORM=cnb`.** Platform selection is delegated to the
+  generator's auto-detection, so the shared image works on GitHub Actions without extra config.
+  The entrypoint now also honours `GITHUB_WORKSPACE` / `CNB_BUILD_WORKSPACE` for the output folder.
+
 ### Behavior changes (bug fixes)
 
 - **`MAX_REPOS` is now a real cap.** The repository pagination previously overshot the limit by up to 99 entries (whole 100-repository pages were appended), inflating total fork/star counts. The merged repository list is now truncated to `MAX_REPOS` and an info message is logged when truncation happens. If you set `MAX_REPOS`, your fork/star totals may **decrease** to the correct value.

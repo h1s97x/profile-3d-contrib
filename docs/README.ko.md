@@ -233,8 +233,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 또는
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## 라이선스

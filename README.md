@@ -44,8 +44,9 @@ English (en) |
 This GitHub Action creates a GitHub contribution calendar on a 3D profile image.
 
 The rendering logic is platform-agnostic: it reads only `process.env` and has no dependency on
-`@actions/*` or `@octokit/*`. The very same `dist/index.js` runs on both GitHub Actions and CNB —
-only the invocation contract differs. See [How to use (CNB)](#how-to-use-cnb).
+`@actions/*` or `@octokit/*`. One `Dockerfile` builds the image used by both GitHub Actions
+(container action) and CNB (pipeline plugin) — only the invocation contract differs. The repository
+no longer commits a prebuilt `dist/`. See [How to use (CNB)](#how-to-use-cnb).
 
 
 ## How to use (GitHub Actions) - Basic
@@ -235,22 +236,20 @@ Example:
 
 ## How to use (CNB)
 
-The generator itself is platform-agnostic — it reads only environment variables and has no
-dependency on `@actions/*`. The **same** `dist/index.js` runs on both platforms. Only the way you
-invoke it differs.
+The generator is platform-agnostic — it reads only environment variables and has no dependency on
+`@actions/*`. The **same `Dockerfile`** builds the image used by GitHub Actions (container action)
+and CNB (pipeline plugin); only the invocation contract differs. No prebuilt `dist/` is committed.
 
 > [!IMPORTANT]
 > **CNB has no `uses: owner/repo@ref` mechanism.** Pipeline plugins are Docker images, so a GitHub
-> repository cannot be referenced as an action. Use the **plugin image** below (recommended), or
-> download `dist/index.js` and run it with Node (the script method described in the steps below).
+> repository cannot be referenced as an action. Use the plugin image below.
 >
 > If you only use GitHub Actions, you do not need this section at all.
 
-### Recommended: use the plugin image
+### Use the plugin image
 
 The image is published to this repository's Docker artifact registry on every `v*` tag. It is built
-from `src/` at release time, so it always matches the source and does not depend on the committed
-`dist/`.
+from `src/` at release time, so it always matches the source.
 
 ```yaml title=".cnb.yml (in your profile repository)"
 main:
@@ -328,7 +327,9 @@ Create a repository named after your CNB account.
 ### Step 2. Prepare a secret repository
 
 CNB does not use `${{ secrets.* }}`. Secrets are stored in a dedicated
-[secret repository](https://docs.cnb.cool/zh/repo/secret) and injected via `imports`.
+[secret repository](https://docs.cnb.cool/zh/repo/secret). The plugin image loads its token from
+`plugin.yml` via `settingsFrom` (see above); the `envs.yml` + `imports` form below is only for the
+script method in Step 3, because plugin tasks do not receive imported environment variables.
 
 With `PLATFORM: cnb` the pipeline injects `CNB_TOKEN` automatically, which is enough for
 **public** repositories. That temporary token is scoped to the current repository, so it
@@ -367,11 +368,10 @@ main:
           jobs:
             - name: Download the generator
               script: |
-                mkdir -p .tool
-                # Pin a release tag in production, e.g. .../-/git/raw/v1.0.0/dist/index.js
-                curl -fsSL -o .tool/dist.js \
-                  https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/dist/index.js
-                test -s .tool/dist.js
+                # dist/ 不再提交仓库:在流水线里从源码现场构建
+                npm ci
+                npm run build
+                test -s dist/index.js
 
         - name: generate
           jobs:
@@ -382,7 +382,7 @@ main:
                 # CNB_REPO_SLUG looks like "your-name/your-repo"; for a
                 # profile repository the first segment is your account name.
                 USERNAME="${CNB_REPO_SLUG%%/*}"
-                node .tool/dist.js "$USERNAME"
+                node dist/index.js "$USERNAME"
 
         - name: commit
           jobs:
@@ -399,19 +399,19 @@ main:
                 fi
 ```
 
-The generator also accepts a settings file and a custom output directory:
+The generator also accepts a settings file via `SETTING_JSON` (see `sample-settings/`):
 
 ```sh
-node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env var)
+node dist/index.js "$USERNAME"        # target username (or set the USERNAME env var)
 ```
 
 ### Step 4. Differences from GitHub Actions
 
 | Topic | GitHub Actions | CNB |
 |---|---|---|
-| Reference | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` | Download `dist/index.js` in a `script` job |
+| Reference | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` (container action) | Plugin `image:` stage; optionally build from source in a `script` job |
 | Data source | GitHub API | GitHub API, or the CNB API with `PLATFORM: cnb` |
-| Secrets | `${{ secrets.GITHUB_TOKEN }}` | Secret repository + `imports`; optional `CNB_ACCESS_TOKEN` when CNB private repositories should be included |
+| Secrets | `${{ secrets.GITHUB_TOKEN }}` via `env:` | Secret repository + `settingsFrom` (`access_token`); `imports` only for the script method |
 | Repo context | `${{ github.repository_owner }}` | `${CNB_REPO_SLUG%%/*}` |
 | Pipeline config | `.github/workflows/*.yml` | `.cnb.yml` (Pipeline / Stage / Job) |
 | Schedule | `on.schedule.cron` | `"crontab: ..."` trigger key |
@@ -424,8 +424,8 @@ node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env
 
 ### Build this project on CNB
 
-The `.cnb.yml` in this repository is the project's own CI. It runs on the CNB primary repository and
-verifies that the committed `dist/` still matches the source:
+The `.cnb.yml` in this repository is the project's own CI. It runs lint, type checks and tests on
+the CNB primary repository, validates the image sources, and publishes the plugin image on `v*` tags:
 
 - [CNB pipeline syntax](https://docs.cnb.cool/zh/build/grammar)
 - [Environment variables and secrets](https://docs.cnb.cool/zh/build/env)
@@ -455,8 +455,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 or
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## License

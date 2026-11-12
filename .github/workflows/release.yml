@@ -1,27 +1,15 @@
 name: Verify Release
 
-# ============================================================================
-# 职责边界
-# ============================================================================
-# 本工作流只做「发布前校验」,不创建 tag、不发布 Release、不修改 latest 分支。
-# 注:主仓已在 CNB;本工作流及其余 .github/workflows/* 只作用于 GitHub 侧分发仓库。
-#   tag 与 Release   —— 由维护者在 GitHub 分发仓库上手工创建
-#   latest 分支更新  —— 由 latest-branch.yml 在 release published 后处理
-#   主仓产物一致性  —— 由主仓(CNB)的 .cnb.yml 在 push 时校验
-#
-# 之所以拆成独立环节,是为了让每个环节的失败都能被独立定位:
-#   产物不一致   → 本工作流失败
-#   主仓产物过期 → .cnb.yml 的 verify-dist 失败
-#   latest 未更新 → latest-branch.yml 失败
-# ============================================================================
-
+# 只做「发布前校验」，不创建 tag、不发布 Release、不修改 latest 分支。
+# 分发产物不再是提交的 dist/，而是 GitHub container action 与 CNB 插件镜像
+# 共用的 Dockerfile + src/。
 on:
   release:
     types: [published]
 
 jobs:
   verify:
-    name: Verify release artifact
+    name: Verify release metadata
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -40,27 +28,12 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: npm
-
-      - run: npm ci
-
-      - run: npm run build
-
-      - name: Verify committed dist matches the released source
+      - name: Verify container action contract
         run: |
-          if ! git diff --exit-code -- dist/; then
-            echo "::error::tag $GITHUB_REF_NAME 对应的 dist/ 与源码不一致。"
-            echo "::error::该 tag 下的产物不可复现,不应发布。请修复后重新打 tag。"
-            exit 1
-          fi
-
-      - name: Verify entry point
-        run: |
-          test -s dist/index.js || { echo "::error::dist/index.js 缺失或为空。"; exit 1; }
-          echo "dist/index.js size: $(du -h dist/index.js | cut -f1)"
+          test -s Dockerfile || { echo "::error::Dockerfile 缺失。"; exit 1; }
+          test -s docker/entrypoint.js || { echo "::error::镜像入口缺失。"; exit 1; }
+          grep -q "using: 'docker'" action.yml || { echo "::error::action.yml 不是 container action。"; exit 1; }
+          echo "container action: ok"
 
       - name: Summarize
         run: |
@@ -68,6 +41,6 @@ jobs:
             echo "### 发布校验通过"
             echo ""
             echo "- Tag: \`$GITHUB_REF_NAME\`"
-            echo "- dist/index.js: $(du -h dist/index.js | cut -f1)"
-            echo "- 产物与源码一致: 是"
+            echo "- 分发方式: GitHub container action + CNB 插件镜像(共用 Dockerfile)"
+            echo "- 仓库内不再提交 dist/: 是"
           } >> "$GITHUB_STEP_SUMMARY"
