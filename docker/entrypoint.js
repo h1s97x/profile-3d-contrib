@@ -61,9 +61,13 @@ const FLAT_KEYS = [
     ...Object.keys(COLOR_KEYS).map((k) => k.toUpperCase()),
 ];
 
-/** Read a CNB `settings` value, exposed as PLUGIN_<UPPER_SNAKE_CASE>. */
+/**
+ * Read a flat option. CNB exposes `settings.foo` as PLUGIN_FOO; GitHub
+ * Actions has no such conversion (the action declares no inputs), so plain
+ * env keys are accepted too — one configuration style works on both sides.
+ */
 const get = (key) => {
-    const value = process.env[`PLUGIN_${key}`];
+    const value = process.env[`PLUGIN_${key}`] ?? process.env[key];
     return value === undefined || value === '' ? undefined : value;
 };
 

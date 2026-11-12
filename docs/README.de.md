@@ -104,7 +104,7 @@ Im Beispiel werden nur `GITHUB_TOKEN` und `USERNAME` als Umgebungsvariablen ange
 - `GITHUB_TOKEN` : (erforderlich) Zugriffstoken
 - `USERNAME` : (erforderlich) Ziel-Benutzername (oder als Argument angeben).
 - `MAX_REPOS` : (optional) maximale Anzahl von Repositories, Standard 100 – seit Version 0.2.0
-- `SETTING_JSON` : (optional) Pfad zur Einstellungs-JSON-Datei. Siehe `sample-settings/*.json` und `src/type.ts` im Repository `h1s97x/github-profile-3d-contrib` für Details. – seit Version 0.6.0
+- `SETTING_JSON` : (optional) Pfad zur Einstellungs-JSON-Datei. Siehe `docs/demo/pipelines/` und `src/type.ts` im Repository `h1s97x/github-profile-3d-contrib` für Details. – seit Version 0.6.0
 - `GITHUB_ENDPOINT` : (optional) Github GraphQL-Endpunkt. Wenn Sie z. B. einen Beitragskalender basierend auf der GitHub Enterprise-Aktivität Ihres Unternehmens statt GitHub.com erstellen möchten, setzen Sie diese Umgebungsvariable. z. B. `https://github.mycompany.com/api/graphql` – seit Version 0.8.0
 - `YEAR` : (optional) Für vergangene Kalender geben Sie das Jahr an. Dies ist für die Ausführung des Tools über die Kommandozeile gedacht. – seit Version 0.8.0
 

@@ -118,7 +118,7 @@ In the sample, only `GITHUB_TOKEN` and `USERNAME` are specified as environment v
 - `GITHUB_TOKEN` : (required for GitHub data) access token
 - `USERNAME` : (required) target username (or specify with an argument).
 - `MAX_REPOS` : (optional, **GitHub data source only**) max repositories, default 100 - since ver. 0.2.0
-- `SETTING_JSON` : (optional) settings json file path. See `sample-settings/*.json` and `src/type.ts` in `h1s97x/github-profile-3d-contrib` repository for details. - since ver. 0.6.0
+- `SETTING_JSON` : (optional) path to a settings JSON file. For ready-to-copy pipeline snippets (flat `settings:` or inline `settings_json`), see [`docs/demo/pipelines/`](./docs/demo/pipelines/). - since ver. 0.6.0
 - `GITHUB_ENDPOINT` : (optional) Github GraphQL endpoint. For example, if you want to create a contribution calendar based on your company's GitHub Enterprise activity instead of GitHub.com, set this environment variable. e.g. `https://github.mycompany.com/api/graphql` - since ver. 0.8.0
 - `YEAR` : (optional) For past calendars, specify the year. This is intended to be specified when running the tool from the command line. - since ver. 0.8.0
 - `PLATFORM` : (optional) `github` (default) or `cnb` — selects the contribution data source. When unset, a present `CNB_TOKEN` or `CNB_ACCESS_TOKEN` means `cnb`, otherwise `github`. Any other value fails with `E_PLATFORM_INVALID`.
@@ -312,9 +312,9 @@ Themes: `green` (same as `normal`), `halloween`, `season`, `season-south`, `nigh
 
 **With no rendering option at all the behaviour is unchanged**: 10 SVGs from the built-in themes.
 Only when you set `theme` / `output` / colours / `animation` / `l10n` does it switch to a single
-configured image. For multi-theme arrays or custom `bitmap` patterns, use `settings_json` (inline)
-or `settings_file`; `sample-settings/*.json` and `schema/settings.schema.json` remain the templates
-and validation reference for those two paths.
+configured image. For multi-theme arrays, single panels or custom `bitmap` patterns, use
+`settings_json` (inline) or `settings_file`; ready-to-copy pipeline snippets live in
+[`docs/demo/pipelines/`](./docs/demo/pipelines/).
 
 Internally the entrypoint writes a temporary JSON and points `SETTING_JSON` at it, so the existing
 `src/settings-validator.ts` still validates the structure (with line numbers) and still blocks
@@ -445,7 +445,7 @@ main:
                 fi
 ```
 
-The generator also accepts a settings file via `SETTING_JSON` (see `sample-settings/`):
+The generator also accepts a settings file via `SETTING_JSON` (see [`docs/demo/pipelines/`](./docs/demo/pipelines/)):
 
 ```sh
 node dist/index.js "$USERNAME"        # target username (or set the USERNAME env var)

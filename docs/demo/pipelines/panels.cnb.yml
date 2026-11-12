@@ -1,0 +1,22 @@
+# 只画单个面板：语言饼 / 雷达图，不生成完整的 3D 日历。
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settings:
+    username: h1s97x
+    settings_json: |
+      [
+        {
+          "type": "pie_lang_only",
+          "fileName": "pie_lang_only.svg",
+          "backgroundColor": "#ffffff",
+          "foregroundColor": "#00000f"
+        },
+        {
+          "type": "radar_contrib_only",
+          "fileName": "radar_contrib_only.svg",
+          "backgroundColor": "#ffffff",
+          "foregroundColor": "#00000f",
+          "weakColor": "gray",
+          "radarColor": "#47a042"
+        }
+      ]

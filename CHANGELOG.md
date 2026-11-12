@@ -45,6 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Configuration examples are now pipeline YAML.** `sample-settings/` and `schema/` were
+  removed; ready-to-copy snippets live in `docs/demo/pipelines/` (flat `settings:`, inline
+  `settings_json`, `settingsFrom` for private tokens, GitHub Actions workflow). The image
+  entrypoint now also reads flat options from plain environment variables, so GitHub Actions
+  can use the same style via `env:`.
 - **The CNB data source now fetches every repository visible to the token.** The repository
   list was previously truncated to `MAX_REPOS` (default 100), so the `Repo`, star, fork and
   language totals silently omitted older and private repositories. CNB reports the exact count

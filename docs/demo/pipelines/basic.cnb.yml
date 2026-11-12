@@ -1,0 +1,11 @@
+# 最简用法：所有选项都在 settings 里，不需要 JSON 文件。
+# 把下面这段插进你 profile 仓库 .cnb.yml 的 stages 数组，
+# 并和 commit stage 放在同一条流水线。
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settings:
+    username: h1s97x
+    platform: cnb
+    theme: gitblock
+    output: profile-gitblock.svg
+    animation: true

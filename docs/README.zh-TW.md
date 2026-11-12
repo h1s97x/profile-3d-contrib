@@ -103,7 +103,7 @@ jobs:
 - `GITHUB_TOKEN`：（必填）存取權杖
 - `USERNAME`：（必填）目標使用者名稱（或以參數指定）。
 - `MAX_REPOS`：（選填）最大倉庫數，預設 100 - 自 v0.2.0 起
-- `SETTING_JSON`：（選填）設定 json 檔案路徑。詳見 `sample-settings/*.json` 及 `src/type.ts`。- 自 v0.6.0 起
+- `SETTING_JSON`：（選填）設定 json 檔案路徑。詳見 `docs/demo/pipelines/` 及 `src/type.ts`。- 自 v0.6.0 起
 - `GITHUB_ENDPOINT`：（選填）Github GraphQL 端點。例如，若要根據公司 GitHub Enterprise 活動建立貢獻日曆，請設定此環境變數。例如：`https://github.mycompany.com/api/graphql` - 自 v0.8.0 起
 - `YEAR`：（選填）指定年份以產生過去的日曆。僅限命令列執行時指定。- 自 v0.8.0 起
 

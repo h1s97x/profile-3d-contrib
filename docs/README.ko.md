@@ -104,7 +104,7 @@ jobs:
 - `GITHUB_TOKEN` : (필수) 액세스 토큰
 - `USERNAME` : (필수) 대상 사용자 이름 (또는 인수로 지정)
 - `MAX_REPOS` : (선택) 최대 저장소 수, 기본값 100 - ver. 0.2.0부터
-- `SETTING_JSON` : (선택) 설정 json 파일 경로. 자세한 내용은 `sample-settings/*.json` 및 `src/type.ts`를 참고하세요. - ver. 0.6.0부터
+- `SETTING_JSON` : (선택) 설정 json 파일 경로. 자세한 내용은 `docs/demo/pipelines/` 및 `src/type.ts`를 참고하세요. - ver. 0.6.0부터
 - `GITHUB_ENDPOINT` : (선택) Github GraphQL 엔드포인트. 예를 들어, 회사의 GitHub Enterprise 활동을 기반으로 기여도 캘린더를 만들고 싶다면 이 환경 변수를 설정하세요. 예: `https://github.mycompany.com/api/graphql` - ver. 0.8.0부터
 - `YEAR` : (선택) 과거 캘린더를 위해 연도를 지정하세요. 커맨드라인에서 도구를 실행할 때 지정합니다. - ver. 0.8.0부터
 

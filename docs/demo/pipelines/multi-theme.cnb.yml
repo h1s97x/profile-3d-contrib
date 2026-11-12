@@ -1,0 +1,29 @@
+# 一次生成多张：扁平 settings 只能出一张，多主题用内联 settings_json 数组。
+# 每个对象都要带 fileName，否则会互相覆盖成 profile-customize.svg。
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settings:
+    username: h1s97x
+    settings_json: |
+      [
+        {
+          "type": "normal",
+          "fileName": "day.svg",
+          "backgroundColor": "#ffffff",
+          "foregroundColor": "#00000f",
+          "strongColor": "#111133",
+          "weakColor": "gray",
+          "radarColor": "#47a042",
+          "contribColors": ["#efefef", "#d8e887", "#8cc569", "#47a042", "#1d6a23"]
+        },
+        {
+          "type": "normal",
+          "fileName": "night.svg",
+          "backgroundColor": "#00000f",
+          "foregroundColor": "#eeeeff",
+          "strongColor": "rgb(255,200,55)",
+          "weakColor": "gray",
+          "radarColor": "#47a042",
+          "contribColors": ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"]
+        }
+      ]

@@ -1,0 +1,15 @@
+# 本地化：CNB 会把 settings 里的对象转成 JSON 字符串传给插件，
+# 入口脚本解析后合并进主题自带的 l10n。
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settings:
+    username: h1s97x
+    theme: green
+    output: profile-es.svg
+    l10n:
+      commit: Commit
+      repo: Repositorios
+      review: Revisiones
+      pullreq: Pull/Req
+      issue: Issues
+      contrib: contribuciones

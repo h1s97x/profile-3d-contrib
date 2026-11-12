@@ -9,6 +9,9 @@
 > CNB 与 GitHub 共用根目录 `Dockerfile`。下文及子文档中关于 `dist/` 一致性闸门、产物体积、
 > `node24` + `dist/index.js` 运行时的描述均为**迁移前的历史/计划状态**;请以 `src/`、
 > `Dockerfile`、`action.yml` 与 `.cnb.yml` 为准。
+>
+> **示例与 schema(2026-11-12)**:`sample-settings/` 与 `schema/` 已删除,可复制的流水线
+> 示例统一放在 `docs/demo/pipelines/`。子文档中引用这两个目录之处均为历史记录。
 
 当前版本:`1.0.1`(2026-11-12,小版本演进起点;接管后首个版本为 `1.0.0`,2026-10-03)
 

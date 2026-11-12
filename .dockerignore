@@ -6,8 +6,6 @@ dist
 dist0
 spec
 docs
-sample-settings
-schema
 profile-3d-contrib
 *.md
 .cnb.yml

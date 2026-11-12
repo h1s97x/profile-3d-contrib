@@ -104,7 +104,7 @@ Dans l'exemple, seules `GITHUB_TOKEN` et `USERNAME` sont spécifiées comme vari
 - `GITHUB_TOKEN` : (obligatoire) jeton d'accès
 - `USERNAME` : (obligatoire) nom d'utilisateur cible (ou à spécifier en argument).
 - `MAX_REPOS` : (optionnel) nombre max de dépôts, par défaut 100 - depuis la version 0.2.0
-- `SETTING_JSON` : (optionnel) chemin du fichier json de configuration. Voir `sample-settings/*.json` et `src/type.ts` dans le dépôt `h1s97x/github-profile-3d-contrib` pour plus de détails. - depuis la version 0.6.0
+- `SETTING_JSON` : (optionnel) chemin du fichier json de configuration. Voir `docs/demo/pipelines/` et `src/type.ts` dans le dépôt `h1s97x/github-profile-3d-contrib` pour plus de détails. - depuis la version 0.6.0
 - `GITHUB_ENDPOINT` : (optionnel) endpoint GraphQL de Github. Par exemple, pour créer un calendrier de contributions basé sur l'activité GitHub Enterprise de votre entreprise au lieu de GitHub.com, définissez cette variable d'environnement. ex. `https://github.mycompany.com/api/graphql` - depuis la version 0.8.0
 - `YEAR` : (optionnel) Pour les calendriers passés, spécifiez l'année. Ceci est destiné à être spécifié lors de l'exécution de l'outil en ligne de commande. - depuis la version 0.8.0
 

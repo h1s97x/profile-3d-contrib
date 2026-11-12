@@ -104,7 +104,7 @@ En el ejemplo, solo se especifican `GITHUB_TOKEN` y `USERNAME`, pero puedes usar
 - `GITHUB_TOKEN` : (requerido) token de acceso
 - `USERNAME` : (requerido) nombre de usuario objetivo (o especificar como argumento).
 - `MAX_REPOS` : (opcional) número máximo de repositorios, por defecto 100 - desde ver. 0.2.0
-- `SETTING_JSON` : (opcional) ruta del archivo json de configuración. Consulta `sample-settings/*.json` y `src/type.ts` en el repositorio `h1s97x/github-profile-3d-contrib` para más detalles. - desde ver. 0.6.0
+- `SETTING_JSON` : (opcional) ruta del archivo json de configuración. Consulta `docs/demo/pipelines/` y `src/type.ts` en el repositorio `h1s97x/github-profile-3d-contrib` para más detalles. - desde ver. 0.6.0
 - `GITHUB_ENDPOINT` : (opcional) endpoint de Github GraphQL. Por ejemplo, si quieres crear el calendario de contribuciones basado en la actividad de GitHub Enterprise de tu empresa en vez de GitHub.com, configura esta variable. Ejemplo: `https://github.mycompany.com/api/graphql` - desde ver. 0.8.0
 - `YEAR` : (opcional) Para calendarios pasados, especifica el año. Pensado para ejecución desde la línea de comandos. - desde ver. 0.8.0
 

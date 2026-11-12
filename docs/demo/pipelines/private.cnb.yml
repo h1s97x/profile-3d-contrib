@@ -1,0 +1,14 @@
+# 私有仓库：访问令牌放密钥仓库，用 settingsFrom 加载，绝不写进 .cnb.yml。
+# 密钥仓库里的 plugin.yml 内容：
+#   access_token: <勾选了私有仓库授权范围的访问令牌>
+#
+# 插件任务不接收 imports 注入的自定义环境变量，令牌必须走 settingsFrom。
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settingsFrom:
+    - https://cnb.cool/<user>/<secret-repo>/-/blob/main/plugin.yml
+  settings:
+    username: h1s97x
+    platform: cnb
+    theme: green
+    output: profile-green.svg
