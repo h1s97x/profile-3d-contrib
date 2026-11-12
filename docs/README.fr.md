@@ -1,4 +1,4 @@
-# GitHub Profile 3D Contrib
+# Profile 3D Contrib
 
 ![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
@@ -57,7 +57,7 @@ Créez un fichier de workflow comme ci-dessous.
 - `.github/workflows/profile-3d.yml`
 
 ```yaml:.github/workflows/profile-3d.yml
-name: GitHub-Profile-3D-Contrib
+name: Profile 3D Contrib
 
 on:
   schedule: # 03:00 JST == 18:00 UTC
@@ -70,7 +70,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: generate-github-profile-3d-contrib
+    name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
       - uses: h1s97x/github-profile-3d-contrib@latest
@@ -153,7 +153,7 @@ Cependant, notez que l'heure doit être spécifiée en UTC.
 
 La première fois, exécutez ce workflow manuellement.
 
-- `Actions` -> `GitHub-Profile-3D-Contrib` -> `Run workflow`
+- `Actions` -> `Profile 3D Contrib` -> `Run workflow`
 
 Les images de profil sont générées aux chemins suivants :
 
@@ -232,5 +232,6 @@ node dist/index.js USER_NAME
 ## Licence
 
 &copy; 2021 SATO Yoshiyuki. Sous licence MIT.
+&copy; 2026 h1s97x.
 
 > **Pour l'utilisation sur CNB, consultez le [English README](../README.md#how-to-use-cnb).**

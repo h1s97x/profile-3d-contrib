@@ -1,4 +1,4 @@
-# GitHub Profile 3D Contrib
+# Profile 3D Contrib
 
 ![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
@@ -53,7 +53,7 @@
 - `.github/workflows/profile-3d.yml`
 
 ```yaml:.github/workflows/profile-3d.yml
-name: GitHub-Profile-3D-Contrib
+name: Profile 3D Contrib
 
 on:
   schedule: # 03:00 JST == 18:00 UTC
@@ -66,7 +66,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: generate-github-profile-3d-contrib
+    name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
       - uses: h1s97x/github-profile-3d-contrib@latest
@@ -150,7 +150,7 @@ on:
 
 追加したアクションを起動してください。
 
-- `Actions` -> `GitHub-Profile-3D-Contrib` -> `Run workflow`
+- `Actions` -> `Profile 3D Contrib` -> `Run workflow`
 
 プロフィール画像は以下のパスで生成されます。
 
@@ -229,5 +229,6 @@ node dist/index.js USER_NAME
 ## License
 
 &copy; 2021 SATO Yoshiyuki. Licensed under the MIT License.
+&copy; 2026 h1s97x.
 
 > **CNB での使用については、[English README](../README.md#how-to-use-cnb) を参照してください。**

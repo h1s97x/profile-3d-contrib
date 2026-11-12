@@ -51,6 +51,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Platform-neutral display name and full attribution.** The project name shown in `README.md`
+  (all 11 languages) and `action.yml` is now `Profile 3D Contrib`; the `github-` prefix was also
+  dropped from the sample workflow step name. `uses:` coordinates, the upstream repository link
+  and the npm package name are unchanged — they are hard references, not display names.
+  `LICENSE` and every README now credit `h1s97x` for maintenance and modifications alongside
+  the original author's required MIT notice.
 - **The image entrypoint moved to the repository root.** `docker/entrypoint.js` is now
   `entrypoint.js`; `Dockerfile` and the CI image-contract checks were updated. No behaviour change.
 - **Technical roadmap moved to `docs/roadmap/`.** The former `docs/spec/` directory (Chinese

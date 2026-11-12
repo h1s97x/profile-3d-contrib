@@ -1,4 +1,4 @@
-# GitHub Profile 3D Contrib
+# Profile 3D Contrib
 
 ![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
@@ -71,7 +71,7 @@ Create a workflow file like the one below.
 - `.github/workflows/profile-3d.yml`
 
 ```yaml:.github/workflows/profile-3d.yml
-name: GitHub-Profile-3D-Contrib
+name: Profile 3D Contrib
 
 on:
   schedule: # 03:00 JST == 18:00 UTC
@@ -84,7 +84,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: generate-github-profile-3d-contrib
+    name: generate-profile-3d-contrib
     steps:
       - uses: actions/checkout@v5
       - uses: h1s97x/github-profile-3d-contrib@latest
@@ -171,7 +171,7 @@ However, please note that the time must be specified in UTC.
 
 The first time, run this workflow manually.
 
-- `Actions` -> `GitHub-Profile-3D-Contrib` -> `Run workflow`
+- `Actions` -> `Profile 3D Contrib` -> `Run workflow`
 
 The profile images are generated at the following paths:
 
@@ -501,8 +501,9 @@ node dist/index.js USER_NAME
 
 ## License
 
-&copy; 2021 SATO Yoshiyuki. Licensed under the MIT License.
+&copy; 2021 SATO Yoshiyuki — original work.
+&copy; 2026 h1s97x — maintenance and modifications since the handover.
 
-The original work is copyright SATO Yoshiyuki and is redistributed under the MIT License.
-Subsequent maintenance and modifications are by the current maintainer (`h1s97x`).
-The full license text is in [LICENSE](./LICENSE).
+This project is derived from the original work and is redistributed under the MIT License.
+The original copyright notice is retained as required by the license. The full text is in
+[LICENSE](./LICENSE).
