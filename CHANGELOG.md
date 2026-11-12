@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> [!IMPORTANT]
+> **Release status (2026-11-12).** Everything below is already merged into `main` and is part of
+> the `v1.0.1` tag's source tree, but it is **not yet announced as a released feature set**. Per
+> the small-step release policy these items are promoted one patch at a time, starting with the
+> next version. Until then this section is the authoritative list of behaviour changes —
+> especially the three breaking changes below — even though `package.json` still reads `1.0.1`.
+> A few entries describe the pre-migration state (the committed `dist/`, the removed `schema/`);
+> the current contracts are `Dockerfile`, `action.yml`, `entrypoint.js` and `src/`.
+
 ### Breaking changes
 
 - **The default output is now one SVG instead of ten.** With no rendering option the generator
@@ -37,10 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `sync-github.sh` — a one-command mirror of `main` / `latest` to the GitHub-side distribution
+  repository. The old `sync-cnb.yml` mirrored in the opposite direction and was removed; a
+  `GITHUB_TOKEN` PAT with `contents:write` is required to run the new script.
 - **CNB as a first-class data source.** Set `PLATFORM=cnb` (or simply provide `CNB_TOKEN`) to build the calendar from [CNB](https://cnb.cool) instead of GitHub. Data comes from the CNB OpenAPI (`GET /users/{username}/calendar`, `GET /users/{username}/repos`); the renderer, the themes, the settings system and the snapshot baselines are untouched. Contribution levels are derived with the same quartile rule GitHub uses, and the language pie is aggregated from each repository's primary language. See "How to use (CNB)" in the README.
 - `PLATFORM`, `CNB_TOKEN` and `CNB_API_ENDPOINT` environment variables. An unknown `PLATFORM` value fails fast with `E_PLATFORM_INVALID`, and CNB API errors surface the server `errmsg` alongside the HTTP status.
 - **Structured error codes.** All user-facing failures carry a stable `E_*` code and hints. Exit code convention: `1` = configuration/input error, `2` = remote API error.
-- **Settings validator and JSON schema.** Zero-dependency structural validation of `SETTING_JSON` files, plus `schema/settings.schema.json` (draft-07) for IDE autocompletion.
+- **Settings validator.** Zero-dependency structural validation of settings files, with line-number diagnostics and `fileName` path-traversal blocking. The earlier `schema/settings.schema.json` draft-07 schema was removed when configuration moved to pipeline YAML.
 - **Render output snapshot tests.** 16 SVG snapshots (8 built-in themes × animated/static) guard against accidental output changes.
 - `MAX_REPOS` / `YEAR` environment variables are validated for sane ranges (`MAX_REPOS` must be a positive integer, `YEAR` must be within 2008..current year).
 - Output file names from settings are validated. A `fileName` that can leave the output folder — path separators, `..` segments, a leading dot — fails with `E_FILENAME_INVALID` before anything is rendered. A name that is merely unusual (a space, a non-`.svg` suffix) warns and falls back to `profile-customize.svg`.
@@ -164,12 +176,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - 2026-11-12
 
-Patch release for version and documentation alignment. The CNB data-source work committed alongside it is recorded under `[Unreleased]`.
+Patch release for version and documentation alignment. The feature work committed alongside it is
+recorded under `[Unreleased]`.
 
 Starting with this release the project evolves in small, individually verifiable patch releases
-instead of bundling unrelated work into a minor release. The functional changes still listed under
-`[Unreleased]` are already present on `main` and in the committed `dist/index.js`, but are
-intentionally not announced as released features yet; they will be promoted one patch at a time.
+instead of bundling unrelated work into a minor release. The changes listed under `[Unreleased]`
+are present in this tag's source tree but are intentionally not announced as released features
+yet; they will be promoted one patch at a time. `v1.0.1` also switches distribution to a
+container action / plugin image built from `src/`, so the repository no longer commits a prebuilt
+bundle.
 
 ### Changed
 
