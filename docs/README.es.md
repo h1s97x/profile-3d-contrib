@@ -1,6 +1,6 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 > [!IMPORTANT]
 > **Este repositorio se mantiene de forma independiente en CNB.**
@@ -104,7 +104,7 @@ En el ejemplo, solo se especifican `GITHUB_TOKEN` y `USERNAME`, pero puedes usar
 - `GITHUB_TOKEN` : (requerido) token de acceso
 - `USERNAME` : (requerido) nombre de usuario objetivo (o especificar como argumento).
 - `MAX_REPOS` : (opcional) número máximo de repositorios, por defecto 100 - desde ver. 0.2.0
-- `SETTING_JSON` : (opcional) ruta del archivo json de configuración. Consulta `sample-settings/*.json` y `src/type.ts` en el repositorio `h1s97x/github-profile-3d-contrib` para más detalles. - desde ver. 0.6.0
+- `SETTING_JSON` : (opcional) ruta del archivo json de configuración. Consulta `examples/pipelines/` y `src/type.ts` en el repositorio `h1s97x/github-profile-3d-contrib` para más detalles. - desde ver. 0.6.0
 - `GITHUB_ENDPOINT` : (opcional) endpoint de Github GraphQL. Por ejemplo, si quieres crear el calendario de contribuciones basado en la actividad de GitHub Enterprise de tu empresa en vez de GitHub.com, configura esta variable. Ejemplo: `https://github.mycompany.com/api/graphql` - desde ver. 0.8.0
 - `YEAR` : (opcional) Para calendarios pasados, especifica el año. Pensado para ejecución desde la línea de comandos. - desde ver. 0.8.0
 
@@ -157,16 +157,7 @@ La primera vez, ejecuta este workflow manualmente.
 
 Las imágenes de perfil se generan en las siguientes rutas:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 Si especificas la variable de entorno `SETTING_JSON` sin la propiedad `fileName` en el archivo json, se generará la siguiente imagen:
 
@@ -176,31 +167,31 @@ Puedes usar estas imágenes en tu README.md como se muestra a continuación.
 
 Ejemplo: versión green
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-green-animate.svg)
 
 Ejemplo: versión season (hemisferio norte)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-season-animate.svg)
 
 Ejemplo: versión season (hemisferio sur)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-south-season-animate.svg)
 
 Ejemplo: versión night view
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-view.svg)
 
 Ejemplo: versión night green
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-green.svg)
 
 Ejemplo: versión night rainbow
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-rainbow.svg)
 
 Ejemplo: versión git block
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 ### Paso 4. Agregar imagen al README.md
 
@@ -209,7 +200,7 @@ Agrega la ruta de la imagen generada en tu archivo README.
 Ejemplo:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## Cómo usar (GitHub Actions) - Ejemplos avanzados
@@ -233,8 +224,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 o
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## Licencia

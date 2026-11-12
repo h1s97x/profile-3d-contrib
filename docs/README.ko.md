@@ -1,6 +1,6 @@
 # GitHub 프로필 3D 기여도
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 > [!IMPORTANT]
 > **이 저장소는 CNB에서 독립적으로 관리됩니다.**
@@ -104,7 +104,7 @@ jobs:
 - `GITHUB_TOKEN` : (필수) 액세스 토큰
 - `USERNAME` : (필수) 대상 사용자 이름 (또는 인수로 지정)
 - `MAX_REPOS` : (선택) 최대 저장소 수, 기본값 100 - ver. 0.2.0부터
-- `SETTING_JSON` : (선택) 설정 json 파일 경로. 자세한 내용은 `sample-settings/*.json` 및 `src/type.ts`를 참고하세요. - ver. 0.6.0부터
+- `SETTING_JSON` : (선택) 설정 json 파일 경로. 자세한 내용은 `examples/pipelines/` 및 `src/type.ts`를 참고하세요. - ver. 0.6.0부터
 - `GITHUB_ENDPOINT` : (선택) Github GraphQL 엔드포인트. 예를 들어, 회사의 GitHub Enterprise 활동을 기반으로 기여도 캘린더를 만들고 싶다면 이 환경 변수를 설정하세요. 예: `https://github.mycompany.com/api/graphql` - ver. 0.8.0부터
 - `YEAR` : (선택) 과거 캘린더를 위해 연도를 지정하세요. 커맨드라인에서 도구를 실행할 때 지정합니다. - ver. 0.8.0부터
 
@@ -157,16 +157,7 @@ on:
 
 프로필 이미지는 다음 경로에 생성됩니다:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 `SETTING_JSON` 환경 변수를 지정하고 json 파일에 `fileName` 속성이 없으면 다음 이미지가 생성됩니다:
 
@@ -176,31 +167,31 @@ on:
 
 예시: green 버전
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-green-animate.svg)
 
 예시: season 버전 (북반구)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-season-animate.svg)
 
 예시: season 버전 (남반구)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-south-season-animate.svg)
 
 예시: night view 버전
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-view.svg)
 
 예시: night green 버전
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-green.svg)
 
 예시: night rainbow 버전
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-rainbow.svg)
 
 예시: git block 버전
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 ### 4단계. README.md에 이미지 추가
 
@@ -209,7 +200,7 @@ on:
 예시:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## 사용 방법 (GitHub Actions) - 고급 예시
@@ -233,8 +224,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 또는
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## 라이선스

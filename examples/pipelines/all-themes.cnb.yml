@@ -1,0 +1,8 @@
+# 一次产出全部 10 张内置主题图（旧版默认行为）。
+# 默认只出一张 profile-green.svg，需要全套时显式写 theme: all。
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settings:
+    username: h1s97x
+    platform: cnb
+    theme: all

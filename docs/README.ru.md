@@ -1,6 +1,6 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 > [!IMPORTANT]
 > **Этот репозиторий поддерживается независимо на CNB.**
@@ -104,7 +104,7 @@ jobs:
 - `GITHUB_TOKEN` : (обязательно) токен доступа
 - `USERNAME` : (обязательно) целевое имя пользователя (или укажите аргументом).
 - `MAX_REPOS` : (опционально) максимальное количество репозиториев, по умолчанию 100 - начиная с версии 0.2.0
-- `SETTING_JSON` : (опционально) путь к файлу настроек json. См. `sample-settings/*.json` и `src/type.ts` в репозитории `h1s97x/github-profile-3d-contrib` для подробностей. - начиная с версии 0.6.0
+- `SETTING_JSON` : (опционально) путь к файлу настроек json. См. `examples/pipelines/` и `src/type.ts` в репозитории `h1s97x/github-profile-3d-contrib` для подробностей. - начиная с версии 0.6.0
 - `GITHUB_ENDPOINT` : (опционально) конечная точка Github GraphQL. Например, если вы хотите создать календарь вкладов на основе активности вашей корпоративной GitHub Enterprise, установите эту переменную окружения. Например: `https://github.mycompany.com/api/graphql` - начиная с версии 0.8.0
 - `YEAR` : (опционально) Для календарей прошлых лет укажите год. Это предназначено для использования при запуске инструмента из командной строки. - начиная с версии 0.8.0
 
@@ -157,16 +157,7 @@ on:
 
 Изображения профиля генерируются по следующим путям:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 Если вы укажете переменную окружения `SETTING_JSON` без свойства `fileName` в json-файле, будет сгенерировано следующее изображение:
 
@@ -176,31 +167,31 @@ on:
 
 Пример: зеленая версия
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-green-animate.svg)
 
 Пример: сезонная версия (Северное полушарие.)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-season-animate.svg)
 
 Пример: сезонная версия (Южное полушарие.)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-south-season-animate.svg)
 
 Пример: ночная версия
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-view.svg)
 
 Пример: ночная зеленая версия
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-green.svg)
 
 Пример: ночная радужная версия
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-rainbow.svg)
 
 Пример: версия git block
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 ### Шаг 4. Добавьте изображение в README.md
 
@@ -209,7 +200,7 @@ on:
 Пример:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## Как использовать (GitHub Actions) - Продвинутые примеры
@@ -233,8 +224,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 или
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## Лицензия

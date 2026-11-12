@@ -1,6 +1,6 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 > [!IMPORTANT]
 > **本仓库在 CNB 独立维护。**
@@ -103,7 +103,7 @@ jobs:
 - `GITHUB_TOKEN` : （必需）访问令牌
 - `USERNAME` : （必需）目标用户名（或通过参数指定）。
 - `MAX_REPOS` : （可选）最大仓库数，默认 100 - 自 v0.2.0 起
-- `SETTING_JSON` : （可选）设置 json 文件路径。详情请参见仓库中的 `sample-settings/*.json` 和 `src/type.ts`。- 自 v0.6.0 起
+- `SETTING_JSON` : （可选）设置 json 文件路径。详情请参见仓库中的 `examples/pipelines/` 和 `src/type.ts`。- 自 v0.6.0 起
 - `GITHUB_ENDPOINT` : （可选）Github GraphQL 端点。例如，如果您希望基于公司 GitHub Enterprise 活动而不是 GitHub.com 创建贡献日历，请设置此环境变量。例如：`https://github.mycompany.com/api/graphql` - 自 v0.8.0 起
 - `YEAR` : （可选）如需生成往年日历，请指定年份。此项主要用于命令行运行工具时指定。- 自 v0.8.0 起
 
@@ -156,16 +156,7 @@ on:
 
 个人资料图片会生成在以下路径：
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 如果您指定了 `SETTING_JSON` 环境变量且 json 文件中未包含 `fileName` 属性，则会生成以下图片：
 
@@ -175,31 +166,31 @@ on:
 
 示例：绿色版本
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-green-animate.svg)
 
 示例：季节版本（北半球）
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-season-animate.svg)
 
 示例：季节版本（南半球）
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-south-season-animate.svg)
 
 示例：夜景版本
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-view.svg)
 
 示例：夜间绿色版本
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-green.svg)
 
 示例：夜间彩虹版本
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-rainbow.svg)
 
 示例：git block 版本
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 ### 步骤 4. 将图片添加到 README.md
 
@@ -208,7 +199,7 @@ on:
 示例：
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## 如何使用（GitHub Actions）- 高级示例
@@ -217,10 +208,12 @@ on:
 
 ## 如何使用（CNB）
 
-生成器本身与平台无关 —— 它只读取环境变量,不依赖 `@actions/*`。**同一份** `dist/index.js` 在两个平台上都能运行,差别只在于调用方式。
+生成器本身与平台无关 —— 它只读取环境变量,不依赖 `@actions/*`。**同一个 `Dockerfile`** 构建出的镜像同时服务 GitHub Actions(容器 action)与 CNB(流水线插件),差别只在于调用方式。仓库不再提交预构建的 `dist/`。
 
 > [!IMPORTANT]
-> **CNB 没有 `uses: owner/repo@ref` 这套机制。** 在 CNB 中,流水线插件是 Docker 镜像,无法像 GitHub Actions 那样引用一个仓库作为 action。因此使用方式正好相反:由你的 CNB 流水线下载 `dist/index.js` 并用 Node 执行。
+> **CNB 没有 `uses: owner/repo@ref` 这套机制。** 在 CNB 中,流水线插件是 Docker 镜像,无法像 GitHub Actions 那样引用一个仓库作为 action,请使用 CNB 插件镜像。
+>
+> **推荐的插件镜像写法(含 `settingsFrom` 私有仓库令牌)以[英文 README 的 CNB 章节](../README.md#how-to-use-cnb)为准**,本节保留脚本方式的说明。
 >
 > 如果你只用 GitHub Actions,本节可以跳过。
 
@@ -229,7 +222,7 @@ on:
 创建一个与你的 CNB 账号同名的仓库,并确认你希望统计贡献的 GitHub 账号已设置为你的 GitHub 个人主页。
 
 > [!NOTE]
-> 生成的文件会提交到你的 **CNB** 仓库,但贡献数据始终来自 **GitHub** —— 生成器查询的是 GitHub GraphQL API,因此这里依然需要 `GITHUB_TOKEN`。
+> 生成的文件提交到你的 **CNB** 仓库。贡献数据可以来自 GitHub(默认,需要 `GITHUB_TOKEN`),也可以来自 CNB 自身(设置 `PLATFORM: cnb`,流水线自动注入 `CNB_TOKEN`);私有 CNB 仓库需要额外的 `CNB_ACCESS_TOKEN`。
 
 ### 第 2 步. 准备密钥仓库
 
@@ -247,7 +240,7 @@ GITHUB_TOKEN: ghp_xxxxxxxxxxxxxxxxxxxx
 
 ```yaml title=".cnb.yml"
 main:
-  "crontab: 0 18 * * *": # 03:00 JST == 18:00 UTC
+  "crontab: 0 18 * * *": # 18:00 Asia/Shanghai(UTC+8),CNB crontab 使用系统时区
     - name: generate
       docker:
         image: node:24
@@ -258,9 +251,10 @@ main:
           jobs:
             - name: 下载生成器
               script: |
-                mkdir -p .tool
-                curl -fsSL -o .tool/dist.js \
-                  https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/v1.0.0/dist/index.js
+                # dist/ 不再提交仓库:在流水线里从源码现场构建
+                npm ci
+                npm run build
+                test -s dist/index.js
 
         - name: generate
           jobs:
@@ -270,7 +264,7 @@ main:
                 # CNB_REPO_SLUG 形如 "你的账号/你的仓库"，取第一段。
                 USERNAME: ${CNB_REPO_SLUG}
               script: |
-                node .tool/dist.js "$USERNAME"
+                node dist/index.js "$USERNAME"
 
         - name: commit
           jobs:
@@ -290,15 +284,15 @@ main:
 生成器也支持指定设置文件与输出目录:
 
 ```sh
-node .tool/dist.js "$USERNAME"        # 目标用户名（或直接设置 USERNAME 环境变量）
+node dist/index.js "$USERNAME"        # 目标用户名（或直接设置 USERNAME 环境变量）
 ```
 
 ### 第 4 步. 与 GitHub Actions 的差异
 
 | 主题 | GitHub Actions | CNB |
 |---|---|---|
-| 引用方式 | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` | 在 `script` 任务中下载 `dist/index.js` |
-| 密钥 | `${{ secrets.GITHUB_TOKEN }}` | 密钥仓库 + `imports` |
+| 引用方式 | `uses: h1s97x/github-profile-3d-contrib@v1.0.0`(容器 action) | 插件 `image:` 任务;或在 `script` 任务中从源码构建 |
+| 密钥 | `${{ secrets.GITHUB_TOKEN }}` 通过 `env:` | 密钥仓库 + `settingsFrom`(`access_token`);`imports` 仅用于脚本方式 |
 | 仓库上下文 | `${{ github.repository_owner }}` | `${{ CNB_REPO_SLUG }}` |
 | 流水线配置 | `.github/workflows/*.yml` | `.cnb.yml`（Pipeline / Stage / Job 三层） |
 | 定时触发 | `on.schedule.cron` | `"crontab: ..."` 触发键 |
@@ -332,8 +326,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 或
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## 许可证

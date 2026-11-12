@@ -87,7 +87,7 @@ sha256sum upstream-v0.9.3.bundle
 | 占位符 | 位置 | 处理 |
 |---|---|---|
 | `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `package.json`(3 处:repository / homepage / bugs)、11 份 README 与 `EXAMPLES.md` 的 `uses:`、`.github/workflows/sync-cnb.yml` 注释(该文件已删除,见 0.1;坐标现指向 CNB 主仓) | **已替换**为 `h1s97x/github-profile-3d-contrib`(GitHub 侧分发坐标保留) |
-| `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `docs/spec/04-phase3-config-api.md`、`docs/spec/06-phase5-advanced.md` 中已规划但未实现的内容 | **已替换**为真实坐标 —— 这些文档描述的就是本仓库未来的样子,留占位符等于让人以为发布前还要再改一遍 |
+| `YOUR_GITHUB_USER` / `YOUR_GITHUB_REPO` | `docs/roadmap/04-phase3-config-api.md`、`docs/roadmap/06-phase5-advanced.md` 中已规划但未实现的内容 | **已替换**为真实坐标 —— 这些文档描述的就是本仓库未来的样子,留占位符等于让人以为发布前还要再改一遍 |
 | `YOUR_CNB_USER` / `YOUR_SECRET_REPO` | `README.md`、`docs/README.zh-CN.md` 的 CNB 密钥仓库 `imports` 示例 | **保留**,是给读者填自己的值 |
 
 检查命令(`.github/workflows/` 里的 `uses:` 写的是 `./`,不引用本仓库坐标,所以能直接 grep):
@@ -96,11 +96,11 @@ sha256sum upstream-v0.9.3.bundle
 # 运行时/发布面不应再出现占位符,期望输出 clean
 grep -rn 'YOUR_GITHUB' action.yml package.json .github/ || echo 'clean'
 # 全仓只剩 README 密钥仓库示例里的两个 CNB 占位符,期望 2
-grep -rn 'YOUR_CNB_USER\|YOUR_SECRET_REPO' --include='*.md' . | grep -v docs/spec/ | wc -l
+grep -rn 'YOUR_CNB_USER\|YOUR_SECRET_REPO' --include='*.md' . | grep -v docs/roadmap/ | wc -l
 ```
 
 > 早期版本的替换命令写成 `sed 's|YOUR_GITHUB_USER/YOUR_GITHUB_REPO|<user>/<repo>|g'`,
-> 会连带改掉 `docs/spec` 里计划内容的示例,把「计划文档」变成「既成事实」,已废弃。
+> 会连带改掉 `docs/roadmap` 里计划内容的示例,把「计划文档」变成「既成事实」,已废弃。
 > 后续改动请按文件逐个确认,不要用全局 sed。
 
 ---
@@ -351,7 +351,7 @@ git push origin latest --force
 
 - [ ] `git grep -n 'yoshi389111/github-profile-3d-contrib' -- ':!dist'` 的命中项只剩:11 份 README 的来源声明、
       `CHANGELOG.md` 的 `Breaking changes` 与本文档、`src/create-3d-contrib.ts` 的
-      上游 issue 引用;`docs/spec/03` 的验收项见下一行
+      上游 issue 引用;`docs/roadmap/03` 的验收项见下一行
 - [ ] 自查脚本 `git grep -c 'yoshi389111/github-profile-3d-contrib'` 在**指定文件**上返回 0,
       而全仓 grep 只返回上面那批(见 [阶段 2 验收](./03-phase2-architecture.md#十验收标准))
 - [ ] `git diff --stat HEAD~1 -- src/ spec/ sample-settings/ tsconfig.json .eslintrc.js` 输出为空
@@ -360,7 +360,7 @@ git push origin latest --force
 - [ ] `dist/licenses.txt` 随产物保留,未被删除
 - [ ] `dist/` 仍被 git 追踪(`git ls-files dist/` 返回 3 个文件)
 - [ ] `npm ci && npm run build` 后 `git diff --exit-code -- dist/` 通过
-- [x] 面向用户的 `YOUR_GITHUB_*` 占位符已替换;`docs/spec` 计划内容中的占位符**按第一节豁免**
+- [x] 面向用户的 `YOUR_GITHUB_*` 占位符已替换;`docs/roadmap` 计划内容中的占位符**按第一节豁免**
 - [ ] `package-lock.json` 的 `version` 与 `package.json` 一致(由 CI `release.yml` 与 `quality` 检查)
 - [ ] 11 份 README 的来源声明块渲染正常(引用块与后续内容之间有空行)
 - [ ] `.cnb.yml` 与 `ci.yml` 的产物一致性判定逻辑等价

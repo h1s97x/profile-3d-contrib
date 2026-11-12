@@ -1,6 +1,6 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 > [!IMPORTANT]
 > **このリポジトリは CNB 上で独立して保守されています。**
@@ -101,7 +101,7 @@ jobs:
 - `GITHUB_TOKEN` : (必須) アクセストークン
 - `USERNAME` : (必須) 対象のユーザー名. （あるいは引数で指定する）
 - `MAX_REPOS` : (任意) 最大のリポジトリ数。デフォルトは100 - バージョン 0.2.0 で追加
-- `SETTING_JSON` : (任意) 設定JSONファイルパス。詳細は `h1s97x/github-profile-3d-contrib` リポジトリの `sample-settings/*.json` や `src/type.ts` を参照してください - バージョン 0.6.0 で追加
+- `SETTING_JSON` : (任意) 設定JSONファイルパス。詳細は `h1s97x/github-profile-3d-contrib` リポジトリの `examples/pipelines/` や `src/type.ts` を参照してください - バージョン 0.6.0 で追加
 - `GITHUB_ENDPOINT` : (任意) Github GraphQL エンドポイント。たとえば、GitHub.comではなく、会社のGitHub Enterpriseのアクティビティに基づいてコントリビュートカレンダーを作成したい場合は、この環境変数を設定します。例： `https://github.mycompany.com/api/graphql` - バージョン 0.8.0 で追加
 - `YEAR` : (任意) 過去のカレンダーを出力する場合、年を指定。特にコマンドラインからツールを実行するときを想定しています。 - バージョン 0.8.0 で追加
 
@@ -154,16 +154,7 @@ on:
 
 プロフィール画像は以下のパスで生成されます。
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 あるいは、`SETTING_JSON` を指定した場合は、以下のファイルが生成されます。
 
@@ -173,31 +164,31 @@ on:
 
 例：green バージョン
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-green-animate.svg)
 
 例：season バージョン（北半球）
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-season-animate.svg)
 
 例：season バージョン（南半球）
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-south-season-animate.svg)
 
 例：night view バージョン
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-view.svg)
 
 例：night green バージョン
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-green.svg)
 
 例：night rainbow バージョン
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-rainbow.svg)
 
 例：git block バージョン
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 ### 手順 4. README.md を追加
 
@@ -206,7 +197,7 @@ on:
 例：
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## 使い方 (GitHub Actions) - 高度な例
@@ -230,8 +221,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 または
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## License

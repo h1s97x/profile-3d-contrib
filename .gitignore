@@ -84,6 +84,9 @@ out
 .nuxt
 dist0
 
+# ncc 打包产物:镜像/Dockerfile 内现场构建,不再提交仓库
+dist/
+
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js

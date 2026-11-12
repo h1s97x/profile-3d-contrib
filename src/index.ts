@@ -69,7 +69,7 @@ export const main = async (): Promise<void> => {
                     create.createSvg(userInfo, settingInfo, false),
                 );
             }
-        } else {
+        } else if (process.env.ALL_THEMES === 'true') {
             const settings = userInfo.isHalloween
                 ? template.HalloweenSettings
                 : template.NormalSettings;
@@ -121,6 +121,16 @@ export const main = async (): Promise<void> => {
             f.writeFile(
                 'profile-gitblock.svg',
                 create.createSvg(userInfo, template.GitBlockSettings, true),
+            );
+        } else {
+            // Default: a single image. Other themes are one `settings.theme`
+            // away; ALL_THEMES=true (or `theme: all`) restores the legacy set.
+            const settings = userInfo.isHalloween
+                ? template.HalloweenSettings
+                : template.NormalSettings;
+            f.writeFile(
+                'profile-green.svg',
+                create.createSvg(userInfo, settings, false),
             );
         }
     } catch (error) {

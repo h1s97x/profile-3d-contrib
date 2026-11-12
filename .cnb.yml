@@ -1,16 +1,11 @@
 # ============================================================================
 # CNB 主仓云原生构建配置
 # ============================================================================
-# 定位:本仓库(cnb.cool/h1s97x/plugins/profile-3d-contrib)是唯一源(source of truth),
-#   本文件在主仓上直接执行 CI 校验,不存在任何镜像同步链路。
-#   GitHub 侧仓库若仍存在,仅用于兼容存量 uses: 引用,不再向本仓推送。
+# 定位:本仓库(cnb.cool/h1s97x/plugins/profile-3d-contrib)是唯一源(source of truth)。
+#   GitHub 侧仓库仅用于兼容存量 uses: 引用,不再向本仓推送。
 #
-# 原 .github/workflows/sync-cnb.yml(GitHub → CNB 强推全量历史)已删除:
-#   主仓切到 CNB 后,该链路会让 GitHub 侧的一次 push 覆盖本仓 main 分支。
-#
-# 语法参考:
-#   Pipeline/Stage/Job 三层结构 —— https://docs.cnb.cool/zh/build/grammar
-#   环境变量与 imports    —— https://docs.cnb.cool/zh/build/env
+# 分发产物:Dockerfile + src/(GitHub container action 与 CNB 插件镜像共用)。
+#   仓库不再提交 dist/,故不存在产物一致性闸门,改为校验源码质量与镜像契约。
 # ============================================================================
 
 main:
@@ -22,30 +17,26 @@ main:
         - name: install
           jobs:
             - name: Install dependencies
-              # 使用 npm ci 而非 npm install:确保依赖树与 package-lock.json 严格一致
+              # npm ci 确保依赖树与 package-lock.json 严格一致
               script: npm ci
 
-        - name: build
+        - name: quality
           jobs:
-            - name: Build dist
+            - name: Lint and type check
+              script: npm run lint
+            - name: Test
+              script: npm test
+
+        - name: verify-image-contract
+          jobs:
+            - name: Ensure the image sources are intact
+              script: |
+                test -s Dockerfile || { echo "ERROR: Dockerfile 缺失"; exit 1; }
+                test -s entrypoint.js || { echo "ERROR: 镜像入口缺失"; exit 1; }
+                grep -q "using: 'docker'" action.yml || { echo "ERROR: action.yml 不是 container action"; exit 1; }
+                node --check entrypoint.js
+            - name: Verify build chain
               script: npm run build
-
-        - name: verify-dist
-          jobs:
-            - name: Ensure dist matches source
-              # 主仓的 dist/ 若与源码不一致,用户下载到的产物就是错的,必须阻断。
-              # 与 .github/workflows/ci.yml 的 dist-consistency 检查等效。
-              script: |
-                if ! git diff --exit-code -- dist/; then
-                  echo "ERROR: dist/ 与源码不一致。"
-                  echo "ERROR: 请在本地执行 npm ci && npm run build 后重新提交 dist/。"
-                  exit 1
-                fi
-
-            - name: Ensure entry point exists
-              script: |
-                test -s dist/index.js || { echo "ERROR: dist/index.js 缺失或为空。"; exit 1; }
-                echo "dist/index.js size: $(du -h dist/index.js | cut -f1)"
 
   pull_request:
     - name: verify
@@ -57,16 +48,39 @@ main:
             - name: Install dependencies
               script: npm ci
 
-        - name: build
+        - name: quality
           jobs:
-            - name: Build dist
-              script: npm run build
+            - name: Lint and type check
+              script: npm run lint
+            - name: Test
+              script: npm test
 
-        - name: verify-dist
+        - name: verify-image-contract
           jobs:
-            - name: Ensure dist matches source
+            - name: Ensure the image sources are intact
               script: |
-                if ! git diff --exit-code -- dist/; then
-                  echo "ERROR: dist/ 与源码不一致。"
-                  exit 1
-                fi
+                test -s Dockerfile || { echo "ERROR: Dockerfile 缺失"; exit 1; }
+                test -s entrypoint.js || { echo "ERROR: 镜像入口缺失"; exit 1; }
+                grep -q "using: 'docker'" action.yml || { echo "ERROR: action.yml 不是 container action"; exit 1; }
+                node --check entrypoint.js
+
+# ============================================================================
+# 插件镜像发布:打 v* tag 时构建并推送到本仓库自带的 Docker 制品库。
+# GitHub 侧不引用该镜像(制品库需鉴权,runner 无法匿名拉取),而是由
+# action.yml 的 image: 'Dockerfile' 在同一份源码上现场构建。
+# ============================================================================
+v*:
+  tag_push:
+    - name: publish-plugin-image
+      services:
+        - docker
+      stages:
+        - name: build-and-push
+          script: |
+            set -e
+            IMAGE="${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}"
+            TAG="${CNB_BRANCH}"
+            echo "${CNB_TOKEN}" | docker login "${CNB_DOCKER_REGISTRY}" -u cnb --password-stdin
+            docker build -t "${IMAGE}:${TAG}" -t "${IMAGE}:latest" .
+            docker push "${IMAGE}:${TAG}"
+            docker push "${IMAGE}:latest"

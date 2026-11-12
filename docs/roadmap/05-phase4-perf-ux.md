@@ -307,7 +307,7 @@ export const writeFile = (name: string, content: string, outDir: string): void =
 | 文件名笔误 | `CHANGELOG.md` `0.9.0` 条目引用 `sample-settings/green.dual.json` | 实际文件为 `green-dual.json`。修正引用(**不改历史条目的语义描述**) |
 | 10 份 README 同步 | `docs/README.<lang>.md` | 明确英文 `README.md` 为权威源;中文等 10 份为翻译。引入 `docs/README.<lang>.md` 的同步检查清单(新增配置项时须同步全部 11 份) |
 | settings 文档 | `README.md` 当前让用户参考 `src/type.ts` | 改为指向 `schema/settings.schema.json`,并说明 VS Code 自动补全的用法 |
-| 架构文档 | 新增 | 阶段 2 commit 13 产出的「如何新增主题」文档,链接到 `docs/spec/` |
+| 架构文档 | 新增 | 阶段 2 commit 13 产出的「如何新增主题」文档,链接到 `docs/roadmap/` |
 
 ## 九、文件级改动清单
 

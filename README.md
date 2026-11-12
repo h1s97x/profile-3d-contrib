@@ -1,6 +1,6 @@
 # GitHub Profile 3D Contrib
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 > [!IMPORTANT]
 > **This repository is independently maintained on CNB.**
@@ -44,8 +44,9 @@ English (en) |
 This GitHub Action creates a GitHub contribution calendar on a 3D profile image.
 
 The rendering logic is platform-agnostic: it reads only `process.env` and has no dependency on
-`@actions/*` or `@octokit/*`. The very same `dist/index.js` runs on both GitHub Actions and CNB —
-only the invocation contract differs. See [How to use (CNB)](#how-to-use-cnb).
+`@actions/*` or `@octokit/*`. One `Dockerfile` builds the image used by both GitHub Actions
+(container action) and CNB (pipeline plugin) — only the invocation contract differs. The repository
+no longer commits a prebuilt `dist/`. See [How to use (CNB)](#how-to-use-cnb).
 
 
 ## How to use (GitHub Actions) - Basic
@@ -117,7 +118,7 @@ In the sample, only `GITHUB_TOKEN` and `USERNAME` are specified as environment v
 - `GITHUB_TOKEN` : (required for GitHub data) access token
 - `USERNAME` : (required) target username (or specify with an argument).
 - `MAX_REPOS` : (optional, **GitHub data source only**) max repositories, default 100 - since ver. 0.2.0
-- `SETTING_JSON` : (optional) settings json file path. See `sample-settings/*.json` and `src/type.ts` in `h1s97x/github-profile-3d-contrib` repository for details. - since ver. 0.6.0
+- `SETTING_JSON` : (optional) path to a settings JSON file. For ready-to-copy pipeline snippets (flat `settings:` or inline `settings_json`), see [`examples/pipelines/`](./examples/pipelines/). - since ver. 0.6.0
 - `GITHUB_ENDPOINT` : (optional) Github GraphQL endpoint. For example, if you want to create a contribution calendar based on your company's GitHub Enterprise activity instead of GitHub.com, set this environment variable. e.g. `https://github.mycompany.com/api/graphql` - since ver. 0.8.0
 - `YEAR` : (optional) For past calendars, specify the year. This is intended to be specified when running the tool from the command line. - since ver. 0.8.0
 - `PLATFORM` : (optional) `github` (default) or `cnb` — selects the contribution data source. When unset, a present `CNB_TOKEN` or `CNB_ACCESS_TOKEN` means `cnb`, otherwise `github`. Any other value fails with `E_PLATFORM_INVALID`.
@@ -174,50 +175,43 @@ The first time, run this workflow manually.
 
 The profile images are generated at the following paths:
 
-- `profile-3d-contrib/profile-green-animate.svg`
 - `profile-3d-contrib/profile-green.svg`
-- `profile-3d-contrib/profile-season-animate.svg`
-- `profile-3d-contrib/profile-season.svg`
-- `profile-3d-contrib/profile-south-season-animate.svg`
-- `profile-3d-contrib/profile-south-season.svg`
-- `profile-3d-contrib/profile-night-view.svg`
-- `profile-3d-contrib/profile-night-green.svg`
-- `profile-3d-contrib/profile-night-rainbow.svg`
-- `profile-3d-contrib/profile-gitblock.svg`
 
 If you specify the `SETTING_JSON` environment variable without a `fileName` property in the json file, the following image will be generated:
 
 - `profile-3d-contrib/profile-customize.svg`
 
-You can use these images in your README.md as shown below.
+The gallery below shows the optional built-in themes (static previews stored in this repository).
+Pick one with `settings.theme`, or use `theme: all` to generate them all — a default run produces
+only `profile-green.svg`.
 
 Example: green version
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-green-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-green-animate.svg)
 
 Example: season version (Northern Hemisphere.)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-season-animate.svg)
 
 Example: season version (Southern Hemisphere.)
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-south-season-animate.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-south-season-animate.svg)
 
 Example: night view version
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-view.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-view.svg)
 
 Example: night green version
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-green.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-green.svg)
 
 Example: night rainbow version
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-night-rainbow.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-night-rainbow.svg)
 
 Example: git block version
 
-![svg](https://raw.githubusercontent.com/h1s97x/github-profile-3d-contrib/main/docs/demo/profile-gitblock.svg)
+![svg](https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/examples/profile-gitblock.svg)
 
 ### Step 4. Add image to README.md
 
@@ -226,7 +220,7 @@ Add the path to the generated image in your README file.
 Example:
 
 ```md
-![](./profile-3d-contrib/profile-green-animate.svg)
+![](./profile-3d-contrib/profile-green.svg)
 ```
 
 ## How to use (GitHub Actions) - Advanced examples
@@ -235,16 +229,109 @@ Example:
 
 ## How to use (CNB)
 
-The generator itself is platform-agnostic — it reads only environment variables and has no
-dependency on `@actions/*`. The **same** `dist/index.js` runs on both platforms. Only the way you
-invoke it differs.
+The generator is platform-agnostic — it reads only environment variables and has no dependency on
+`@actions/*`. The **same `Dockerfile`** builds the image used by GitHub Actions (container action)
+and CNB (pipeline plugin); only the invocation contract differs. No prebuilt `dist/` is committed.
 
 > [!IMPORTANT]
-> **CNB has no `uses: owner/repo@ref` mechanism.** In CNB, pipeline plugins are Docker images, so a
-> GitHub repository cannot be referenced as an action. The consumption model is inverted: your CNB
-> pipeline downloads `dist/index.js` and runs it with Node.
+> **CNB has no `uses: owner/repo@ref` mechanism.** Pipeline plugins are Docker images, so a GitHub
+> repository cannot be referenced as an action. Use the plugin image below.
 >
 > If you only use GitHub Actions, you do not need this section at all.
+
+### Use the plugin image
+
+The image is published to this repository's Docker artifact registry on every `v*` tag. It is built
+from `src/` at release time, so it always matches the source.
+
+```yaml title=".cnb.yml (in your profile repository)"
+main:
+  "crontab: 0 0 * * *": # 00:00 Asia/Shanghai — CNB crontab uses the system timezone
+    - name: refresh-homepage-assets
+      stages:
+        - name: profile-3d-contrib
+          image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+          settingsFrom:
+            - https://cnb.cool/YOUR_CNB_USER/YOUR_SECRET_REPO/-/blob/main/plugin.yml
+          settings:
+            username: h1s97x
+            platform: cnb
+```
+
+```yaml title="plugin.yml (in your secret repository)"
+access_token: <access token with private-repository access>
+```
+
+> [!NOTE]
+> **Plugin tasks do not receive variables injected by `imports`.** Per the
+> [script vs plugin task documentation](https://docs.cnb.cool/zh/build/script-vs-plugin.md), custom
+> environment variables are only passed to script tasks, so the token must arrive via `settingsFrom`
+> (which loads plugin parameters from a file). Never put the token in `settings` directly. Without
+> `access_token` the built-in `CNB_TOKEN` is used, which only sees public repositories.
+
+### Configure it like `cnb-metrics`
+
+No settings file is needed. Common options go straight into `settings:`, and the image entrypoint
+assembles them into the generator's settings object:
+
+```yaml
+- name: profile-3d-contrib
+  image: docker.cnb.cool/h1s97x/plugins/profile-3d-contrib:latest
+  settings:
+    username: h1s97x
+    platform: cnb
+    theme: gitblock
+    output: my-3d-contrib.svg
+    animation: true
+    background_color: "#0d1117"
+    contrib_colors: "#efefef,#d8e887,#8cc569,#47a042,#1d6a23"
+```
+
+| `settings` key | Purpose | Default |
+|---|---|---|
+| `username` | target account | owner of `CNB_REPO_SLUG` / `GITHUB_REPOSITORY` |
+| `platform` | `cnb` or `github` | auto-detected |
+| `theme` | built-in theme name, or `all` for the full set of 10 | `green` |
+| `output` | output file name | `profile-<theme>.svg` |
+| `background_color` / `foreground_color` / `strong_color` / `weak_color` / `radar_color` | override theme colours | from the theme |
+| `contrib_colors` | 5 comma-separated bar colours (ignored by `season` / `bitmap`) | from the theme |
+| `animation` | bar growing animation | from the theme |
+| `l10n` | JSON object overriding radar labels and "contributions" | English |
+| `settings_json` | a whole inline settings JSON (object or array), advanced | — |
+| `settings_file` | path to a settings JSON, equivalent to the legacy `SETTING_JSON` | — |
+
+Themes: `green` (same as `normal`), `halloween`, `season`, `season-south`, `night-view`,
+`night-green`, `night-rainbow`, `gitblock`.
+
+**With no rendering option at all the generator writes one image**, `profile-green.svg`. Setting
+`theme` / `output` / colours / `animation` / `l10n` produces a single configured image instead.
+Use `theme: all` (or `ALL_THEMES=true`) to get the legacy set of 10 built-in theme images. For multi-theme arrays, single panels or custom `bitmap` patterns, use
+`settings_json` (inline) or `settings_file`; ready-to-copy pipeline snippets live in
+[`examples/pipelines/`](./examples/pipelines/).
+
+Internally the entrypoint writes a temporary JSON and points `SETTING_JSON` at it, so the existing
+`src/settings-validator.ts` still validates the structure (with line numbers) and still blocks
+unsafe `fileName` values. `src/` and the 18 SVG snapshots are untouched.
+
+### Data-source and advanced parameters
+
+CNB turns `settings.foo` into `PLUGIN_FOO`; the entrypoint maps those to the generator's
+environment variables:
+
+| `settings` key | Generator variable | Notes |
+|---|---|---|
+| `username` | `USERNAME` | required (or run in a CNB profile repository) |
+| `platform` | `PLATFORM` | `cnb` (default) or `github` |
+| `access_token` | `CNB_ACCESS_TOKEN` | private CNB repositories; load via `settingsFrom` |
+| `github_token` | `GITHUB_TOKEN` | GitHub data source |
+| `github_endpoint` | `GITHUB_ENDPOINT` | GitHub Enterprise |
+| `cnb_api_endpoint` | `CNB_API_ENDPOINT` | defaults to `https://api.cnb.cool` |
+| `max_repos` | `MAX_REPOS` | GitHub data source only |
+| `year` | `YEAR` | 2008..current year |
+| `setting_json` | `SETTING_JSON` | path to a settings file |
+
+The image writes SVGs to `./profile-3d-contrib/` in the shared build workspace, so it composes
+with your other plugin stages — just add that directory to your commit stage.
 
 ### Choose the data source
 
@@ -253,7 +340,7 @@ Contribution data can come from **GitHub** (the historical behaviour) or from **
 | | GitHub data | CNB data |
 |---|---|---|
 | Set `PLATFORM` | `github` (default) | `cnb` |
-| Token | `GITHUB_TOKEN` | `CNB_TOKEN` (injected automatically in CNB pipelines) |
+| Token | `GITHUB_TOKEN` | `CNB_TOKEN` (auto-injected), or `CNB_ACCESS_TOKEN` / plugin `access_token` for private repositories |
 | `USERNAME` | GitHub username | CNB username |
 | Calendar | GraphQL contribution calendar | `GET /users/{username}/calendar` |
 | Language pie | per-language commit contributions | primary language of each repository (every repository weighs 1) |
@@ -279,7 +366,9 @@ Create a repository named after your CNB account.
 ### Step 2. Prepare a secret repository
 
 CNB does not use `${{ secrets.* }}`. Secrets are stored in a dedicated
-[secret repository](https://docs.cnb.cool/zh/repo/secret) and injected via `imports`.
+[secret repository](https://docs.cnb.cool/zh/repo/secret). The plugin image loads its token from
+`plugin.yml` via `settingsFrom` (see above); the `envs.yml` + `imports` form below is only for the
+script method in Step 3, because plugin tasks do not receive imported environment variables.
 
 With `PLATFORM: cnb` the pipeline injects `CNB_TOKEN` automatically, which is enough for
 **public** repositories. That temporary token is scoped to the current repository, so it
@@ -318,11 +407,10 @@ main:
           jobs:
             - name: Download the generator
               script: |
-                mkdir -p .tool
-                # Pin a release tag in production, e.g. .../-/git/raw/v1.0.0/dist/index.js
-                curl -fsSL -o .tool/dist.js \
-                  https://cnb.cool/h1s97x/plugins/profile-3d-contrib/-/git/raw/main/dist/index.js
-                test -s .tool/dist.js
+                # dist/ 不再提交仓库:在流水线里从源码现场构建
+                npm ci
+                npm run build
+                test -s dist/index.js
 
         - name: generate
           jobs:
@@ -333,7 +421,7 @@ main:
                 # CNB_REPO_SLUG looks like "your-name/your-repo"; for a
                 # profile repository the first segment is your account name.
                 USERNAME="${CNB_REPO_SLUG%%/*}"
-                node .tool/dist.js "$USERNAME"
+                node dist/index.js "$USERNAME"
 
         - name: commit
           jobs:
@@ -350,19 +438,19 @@ main:
                 fi
 ```
 
-The generator also accepts a settings file and a custom output directory:
+The generator also accepts a settings file via `SETTING_JSON` (see [`examples/pipelines/`](./examples/pipelines/)):
 
 ```sh
-node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env var)
+node dist/index.js "$USERNAME"        # target username (or set the USERNAME env var)
 ```
 
 ### Step 4. Differences from GitHub Actions
 
 | Topic | GitHub Actions | CNB |
 |---|---|---|
-| Reference | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` | Download `dist/index.js` in a `script` job |
+| Reference | `uses: h1s97x/github-profile-3d-contrib@v1.0.0` (container action) | Plugin `image:` stage; optionally build from source in a `script` job |
 | Data source | GitHub API | GitHub API, or the CNB API with `PLATFORM: cnb` |
-| Secrets | `${{ secrets.GITHUB_TOKEN }}` | Secret repository + `imports`; optional `CNB_ACCESS_TOKEN` when CNB private repositories should be included |
+| Secrets | `${{ secrets.GITHUB_TOKEN }}` via `env:` | Secret repository + `settingsFrom` (`access_token`); `imports` only for the script method |
 | Repo context | `${{ github.repository_owner }}` | `${CNB_REPO_SLUG%%/*}` |
 | Pipeline config | `.github/workflows/*.yml` | `.cnb.yml` (Pipeline / Stage / Job) |
 | Schedule | `on.schedule.cron` | `"crontab: ..."` trigger key |
@@ -375,8 +463,8 @@ node .tool/dist.js "$USERNAME"        # target username (or set the USERNAME env
 
 ### Build this project on CNB
 
-The `.cnb.yml` in this repository is the project's own CI. It runs on the CNB primary repository and
-verifies that the committed `dist/` still matches the source:
+The `.cnb.yml` in this repository is the project's own CI. It runs lint, type checks and tests on
+the CNB primary repository, validates the image sources, and publishes the plugin image on `v*` tags:
 
 - [CNB pipeline syntax](https://docs.cnb.cool/zh/build/grammar)
 - [Environment variables and secrets](https://docs.cnb.cool/zh/build/env)
@@ -406,8 +494,9 @@ node_modules/.bin/ts-node src/index.ts USER_NAME
 or
 
 ```sh
+npm ci
 npm run build
-node . USER_NAME
+node dist/index.js USER_NAME
 ```
 
 ## License

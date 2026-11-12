@@ -2,12 +2,15 @@ name: GitHub-Profile-3D-Contrib
 description: Generate profile 3D Contributions
 author: h1s97x <Yang1297656998@outlook.com>
 
-# 注意:本仓库在 CNB 独立维护,原作者与版权归属见 LICENSE 与 README 顶部说明。
-# 刻意不添加 inputs —— 配置项改造属长期演进阶段(见 docs/spec/04-phase3-config-api.md)。
-# 刻意不添加 post 钩子 —— 无对应的 dist/cleanup.js,添加会导致 Action 运行失败。
+# 容器 action:GitHub 在该 ref 的检出目录里构建仓库根目录的 Dockerfile。
+# CNB 侧由 .cnb.yml 预构建同一个 Dockerfile 并发布为插件镜像。
+# 两条分发链路共用一份源码与一份 Dockerfile,仓库不再提交 dist/。
+#
+# 刻意不添加 inputs —— 配置继续走 env(见 README)。
+# 刻意不添加 post 钩子 —— 无清理需求,添加会导致运行失败。
 runs:
-  using: 'node24'
-  main: 'dist/index.js'
+  using: 'docker'
+  image: 'Dockerfile'
 
 branding:
   icon: 'box'
